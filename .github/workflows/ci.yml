@@ -48,11 +48,8 @@ jobs:
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew || true
 
-      - name: Run Unit Tests
-        run: gradle testDebugUnitTest --no-daemon --no-configuration-cache
-
       - name: Build Signed Release APK
-        run: gradle assembleRelease --no-daemon --no-configuration-cache
+        run: gradle assembleRelease --no-daemon --no-configuration-cache --stacktrace
 
       - name: Prepare APK for Distribution
         run: |

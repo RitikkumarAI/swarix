@@ -269,8 +269,8 @@ class PlayerManager private constructor(private val context: Context) {
             } else {
                 context.startService(intent)
             }
-        } catch (e: Exception) {
-            Log.e("PlayerManager", "Failed to start MusicPlaybackService", e)
+        } catch (t: Throwable) {
+            Log.e("PlayerManager", "Failed to start MusicPlaybackService", t)
         }
     }
 
