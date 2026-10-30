@@ -50,9 +50,11 @@ jobs:
 
       - name: Build Signed Release APK
         run: |
-          gradle assembleRelease -x lintVitalRelease -x lint -x test --no-daemon --stacktrace || {
-            echo "::error::Build failed, dumping reports:"
-            find app/build/reports -type f -exec echo "=== {} ===" \; -exec cat {} \; || true
+          gradle assembleRelease -x lintVitalRelease -x lint -x test --no-daemon --stacktrace > build.log 2>&1 || {
+            grep -E '(e: |ERROR|FAILURE:|Exception)' -A 5 -B 1 build.log | head -n 40 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            tail -n 30 build.log
             exit 1
           }
 
