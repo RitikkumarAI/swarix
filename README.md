@@ -12,10 +12,28 @@
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack_Compose_M3-purple.svg)](https://developer.android.com/jetpack/compose)
 [![Media3 ExoPlayer](https://img.shields.io/badge/Audio-AndroidX_Media3_1.2.1-red.svg)](https://developer.android.com/media/media3)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Download APK](https://img.shields.io/badge/Download-Latest_APK-blue?logo=android&logoColor=white)](https://github.com/RitikkumarAI/swarix/releases/latest/download/Swarix-Music-Player.apk)
 
-[**📥 Download Latest Release APK**](https://github.com) • [**✨ Features**](#-key-features) • [**🛠️ Tech Stack**](#%EF%B8%8F-architecture--tech-stack) • [**🚀 Building from Source**](#-building-from-source)
+[**📥 Download Latest Release APK**](https://github.com/RitikkumarAI/swarix/releases/latest/download/Swarix-Music-Player.apk) • [**✨ Features**](#-key-features) • [**🛠️ Tech Stack**](#%EF%B8%8F-architecture--tech-stack) • [**🚀 Building from Source**](#-building-from-source)
 
 </div>
+
+---
+
+## 📥 Direct APK Download
+
+Download and install Swarix directly onto your Android device:
+
+| File | Description | Download |
+|---|---|---|
+| **Swarix Release APK** | Optimized, signed production build (recommended) | [**Download APK (v1.0)**](https://github.com/RitikkumarAI/swarix/releases/latest/download/Swarix-Music-Player.apk) |
+| **All Releases** | View changelogs and previous builds | [**Releases Page**](https://github.com/RitikkumarAI/swarix/releases) |
+
+### 📲 Quick Install Guide:
+1. Tap the **[Download APK](https://github.com/RitikkumarAI/swarix/releases/latest/download/Swarix-Music-Player.apk)** link on your Android device.
+2. When the download completes, tap the file in your notification bar or **Downloads** folder.
+3. If prompted with *"Install unknown apps"*, enable permission for your browser or file manager.
+4. Tap **Install** and open **Swarix**!
 
 ---
 
@@ -92,8 +110,8 @@ app/src/main/java/com/example/
 ### Build Steps
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/swarix-music-player.git
-   cd swarix-music-player
+   git clone https://github.com/RitikkumarAI/swarix.git
+   cd swarix
    ```
 
 2. **Build Debug APK**:
