@@ -1,7 +1,9 @@
 package com.example.playback
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -259,6 +261,67 @@ class PlayerManager private constructor(private val context: Context) {
      * When newQueue is provided, the full list of media items is committed to ExoPlayer's
      * timeline so background preloading of subsequent audio streams occurs automatically.
      */
+    private fun startPlaybackService() {
+        try {
+            val intent = Intent(context, com.example.playback.service.MusicPlaybackService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        } catch (e: Exception) {
+            Log.e("PlayerManager", "Failed to start MusicPlaybackService", e)
+        }
+    }
+
+    private fun getSmartNextIndex(queue: List<Song>, currentIndex: Int): Int {
+        if (queue.size <= 1) return 0
+        val current = _currentSong.value ?: queue.getOrNull(currentIndex)
+        val remainingIndices = queue.indices.filter { it != currentIndex }
+        if (remainingIndices.isEmpty()) return 0
+        if (current == null) return remainingIndices.random()
+
+        val punjabiKeywords = listOf("punjabi", "sidhu", "karan", "moose", "aujla", "dosanjh", "diljit", "sharma", "akhtar", "masoom", "bintu", "pabra", "dhillon", "ap dhillon", "amrit", "maan")
+        val isCurrentPunjabi = punjabiKeywords.any {
+            current.title.contains(it, ignoreCase = true) ||
+            current.artist.contains(it, ignoreCase = true) ||
+            current.album.contains(it, ignoreCase = true) ||
+            current.genre.contains(it, ignoreCase = true)
+        }
+
+        val scored = remainingIndices.map { idx ->
+            val candidate = queue[idx]
+            var score = 0
+            if (current.genre.isNotBlank() && candidate.genre.equals(current.genre, ignoreCase = true)) {
+                score += 12
+            }
+            if (current.artist.isNotBlank() && candidate.artist.equals(current.artist, ignoreCase = true)) {
+                score += 10
+            }
+            if (current.mood.isNotBlank() && candidate.mood.equals(current.mood, ignoreCase = true)) {
+                score += 5
+            }
+            val isCandidatePunjabi = punjabiKeywords.any {
+                candidate.title.contains(it, ignoreCase = true) ||
+                candidate.artist.contains(it, ignoreCase = true) ||
+                candidate.album.contains(it, ignoreCase = true) ||
+                candidate.genre.contains(it, ignoreCase = true)
+            }
+            if (isCurrentPunjabi && isCandidatePunjabi) {
+                score += 20
+            }
+            idx to score
+        }
+
+        val maxScore = scored.maxOfOrNull { it.second } ?: 0
+        val bestPool = if (maxScore > 0) {
+            scored.filter { it.second == maxScore }.map { it.first }
+        } else {
+            remainingIndices
+        }
+        return bestPool.random()
+    }
+
     fun playSong(song: Song, newQueue: List<Song>? = null) {
         val effectiveQueue = if (newQueue != null && newQueue.isNotEmpty()) {
             newQueue
@@ -296,6 +359,7 @@ class PlayerManager private constructor(private val context: Context) {
             exoPlayer.volume = 1.0f
         }
         audioFocusManager.requestAudioFocus()
+        startPlaybackService()
         Log.d("PlayerManager", "Playing song: ${song.title}, uri: ${song.contentUri}")
         exoPlayer.play()
         Log.d("PlayerManager", "Play requested, exoPlayer is playing: ${exoPlayer.isPlaying}, playbackState: ${exoPlayer.playbackState}")
@@ -306,6 +370,7 @@ class PlayerManager private constructor(private val context: Context) {
             exoPlayer.pause()
         } else {
             audioFocusManager.requestAudioFocus()
+            startPlaybackService()
             if (exoPlayer.playbackState == Player.STATE_ENDED) {
                 exoPlayer.seekTo(0)
             }
@@ -321,22 +386,24 @@ class PlayerManager private constructor(private val context: Context) {
         val q = _queue.value
         if (q.isEmpty()) return
 
-        if (_gaplessPlayback.value && exoPlayer.mediaItemCount == q.size) {
-            if (_isShuffle.value) {
-                val nextIndex = q.indices.random()
-                _queueIndex.value = nextIndex
-                _currentSong.value = q[nextIndex]
+        if (_isShuffle.value) {
+            val nextIndex = getSmartNextIndex(q, _queueIndex.value)
+            _queueIndex.value = nextIndex
+            _currentSong.value = q[nextIndex]
+            if (_gaplessPlayback.value && exoPlayer.mediaItemCount == q.size) {
                 exoPlayer.seekToDefaultPosition(nextIndex)
-            } else if (exoPlayer.hasNextMediaItem()) {
+            } else {
+                playSong(q[nextIndex], q)
+            }
+        } else if (_gaplessPlayback.value && exoPlayer.mediaItemCount == q.size) {
+            if (exoPlayer.hasNextMediaItem()) {
                 exoPlayer.seekToNextMediaItem()
             } else if (_repeatMode.value == RepeatMode.ALL) {
                 exoPlayer.seekToDefaultPosition(0)
             }
         } else {
             var nextIndex = _queueIndex.value + 1
-            if (_isShuffle.value) {
-                nextIndex = q.indices.random()
-            } else if (nextIndex >= q.size) {
+            if (nextIndex >= q.size) {
                 if (_repeatMode.value == RepeatMode.ALL) {
                     nextIndex = 0
                 } else {

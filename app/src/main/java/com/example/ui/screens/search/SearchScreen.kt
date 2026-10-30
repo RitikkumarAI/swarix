@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -86,7 +87,7 @@ fun SearchScreen(
     recentSearches: List<String> = emptyList(),
     onlineResults: List<Song> = emptyList(),
     isSearchingOnline: Boolean = false,
-    onSongClick: (Song) -> Unit,
+    onSongClick: (Song, List<Song>) -> Unit,
     onArtistClick: (String) -> Unit,
     onFavoriteToggle: (Song) -> Unit,
     onSavePlaylist: ((String, List<Song>) -> Unit)? = null,
@@ -183,6 +184,7 @@ fun SearchScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .statusBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .testTag("search_input_field"),
                 placeholder = {
@@ -272,7 +274,7 @@ fun SearchScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onSongClick(song) }
+                        .clickable { onSongClick(song, recentDisplaySongs) }
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -460,7 +462,7 @@ fun SearchScreen(
                                         shape = RoundedCornerShape(16.dp),
                                         color = colors.primaryAccent,
                                         modifier = Modifier.bouncyClick {
-                                            onSongClick(result.matchedSongs.first())
+                                            onSongClick(result.matchedSongs.first(), result.matchedSongs)
                                         }
                                     ) {
                                         Row(
@@ -645,7 +647,7 @@ fun SearchScreen(
                     SongRowItem(
                         song = song,
                         isPlaying = song.id == currentPlayingSong?.id && isPlaying,
-                        onSongClick = { onSongClick(song) },
+                        onSongClick = { onSongClick(song, displaySongs) },
                         onFavoriteToggle = { onFavoriteToggle(song) }
                     )
                 }
@@ -694,7 +696,7 @@ fun SearchScreen(
                                 .height(130.dp)
                                 .clip(RoundedCornerShape(16.dp))
                                 .clickable {
-                                    allSongs.firstOrNull()?.let(onSongClick)
+                                    allSongs.firstOrNull()?.let { onSongClick(it, allSongs) }
                                 }
                                 .testTag("trending_${title.lowercase()}"),
                             color = colors.elevatedSurface
@@ -848,7 +850,7 @@ fun SearchScreen(
                 SongRowItem(
                     song = song,
                     isPlaying = song.id == currentPlayingSong?.id && isPlaying,
-                    onSongClick = { onSongClick(song) },
+                    onSongClick = { onSongClick(song, allSongs) },
                     onFavoriteToggle = { onFavoriteToggle(song) }
                 )
             }
@@ -864,7 +866,7 @@ fun SearchScreen(
                 voiceSearchResult = result
                 showVoiceDialog = false
                 if (result.autoPlayCandidate != null) {
-                    onSongClick(result.autoPlayCandidate)
+                    onSongClick(result.autoPlayCandidate, result.matchedSongs)
                 }
             }
         )

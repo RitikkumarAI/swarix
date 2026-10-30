@@ -36,21 +36,21 @@ jobs:
 
       - name: Setup Keystores
         run: |
-          if [ ! -f debug.keystore ]; then
-            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          mkdir -p keystore
+          if [ ! -f keystore/my-upload-key.jks ]; then
+            keytool -genkey -v -keystore keystore/my-upload-key.jks -storepass android -alias upload -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Swarix,O=Swarix,C=US"
           fi
-          if [ ! -f my-upload-key.jks ]; then
-            keytool -genkey -v -keystore my-upload-key.jks -storepass android -alias upload -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Swarix,O=Swarix,C=US"
+          if [ ! -f keystore/debug.keystore ]; then
+            cp keystore/my-upload-key.jks keystore/debug.keystore
           fi
+          cp keystore/my-upload-key.jks .
+          cp keystore/debug.keystore .
 
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew || true
 
-      - name: Run Unit Tests
-        run: gradle testDebugUnitTest --no-daemon
-
-      - name: Build Signed Release APK
-        run: gradle assembleRelease --no-daemon
+      - name: Build and Test Release APK
+        run: gradle clean testDebugUnitTest assembleRelease --no-daemon --stacktrace
 
       - name: Prepare APK for Distribution
         run: |
@@ -68,27 +68,24 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.3
-          name: "Swarix Music Player v1.3"
+          tag_name: v1.4
+          name: "Swarix Music Player v1.4"
           body: |
-            ## 🎵 Swarix Music Player v1.3
+            ## 🎵 Swarix Music Player v1.4
 
             ### ✨ What's New:
-            - **Spotify-Inspired Home Screen**:
-              - Spotify signature 2-column quick access grid of 8 recent tracks/artists.
-              - "It's New Music Friday!" and "Jump Back In" horizontal carousels.
-              - Popular artists with circular avatars and genre filters (`All`, `Music`, `Podcasts`).
-            - **Search with Artist Photos**:
-              - Search now displays circular artist photos with dedicated "Artist" tags alongside song results.
-              - Spotify-styled "Recents" search history with artwork and quick-save.
-            - **Spotify-Inspired "Your Library" Management**:
-              - Header matching Spotify with user avatar, search, and playlist creation.
-              - Pinned "Liked Songs" card with signature purple-blue gradient.
-              - Artists with circular avatars and custom playlists.
-            - **Playback Screen Visibility & Dedicated DSP Button**:
-              - High-contrast crisp white typography and controls on dark playback backdrop.
-              - Dedicated **DSP Sound** button on the playback screen for 1-tap DSP / 10-band Equalizer access.
-            - **In-App Auto-Updates (OTA)**: Instant in-app notification and seamless update.
+            - **New Official Luxury Logo**:
+              - Golden luxury acoustic emblem with glowing visualizer as the official app launcher and in-app brand mark.
+            - **Lock Screen & Notification Panel Soundtrack**:
+              - Complete background media session controls: Play, Pause, Next, and Previous directly from lock screen and notification shade.
+            - **Smart Genre & Punjabi Recommendation Shuffle**:
+              - Intelligent transition: Playing a Punjabi track now seamlessly shuffles and queues related Punjabi tracks, keeping the vibe consistent.
+            - **Complete Singer Catalogue on Search**:
+              - Searching an artist now fetches their complete 80+ track library and auto-creates an all-inclusive artist playlist.
+            - **Status Bar & Notch Display Fix**:
+              - Header elements (Swarix branding, sync, notification bell, profile) perfectly clear and never cut off by system status bar.
+            - **Permanent Keystore & Seamless 1-Tap Updates**:
+              - Permanent cryptographic signing key ensures future in-app updates install without any package conflict.
 
             ### 📦 App Details
             - **Package ID**: `com.aistudio.swarix.musply`

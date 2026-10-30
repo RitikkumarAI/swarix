@@ -15,13 +15,11 @@ local.properties
 .env.local
 
 # Keystore files (CRITICAL SECURITY)
-*.keystore
-*.jks
 *.p12
 *.pem
 *.key
-debug.keystore
-my-upload-key.jks
+!keystore/
+!keystore/**
 
 # Google Services / Firebase API Key configs (CRITICAL SECURITY)
 google-services.json

@@ -42,6 +42,11 @@ class MusicPlaybackService : MediaSessionService() {
         Log.d(TAG, "MusicPlaybackService MediaSession initialized successfully.")
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+        return START_STICKY
+    }
+
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }

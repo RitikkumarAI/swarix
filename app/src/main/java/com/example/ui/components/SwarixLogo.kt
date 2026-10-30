@@ -88,86 +88,14 @@ fun SwarixLogoMark(
             )
         }
 
-        Canvas(modifier = Modifier.size(size)) {
-            val w = this.size.width
-            val h = this.size.height
-            val scaleX = w / 108f
-            val scaleY = h / 108f
-
-            // Upper wave ribbon of 'S'
-            val topPath = Path().apply {
-                moveTo(40f * scaleX, 49f * scaleY)
-                cubicTo(37f * scaleX, 42f * scaleY, 42f * scaleX, 32f * scaleY, 52f * scaleX, 28f * scaleY)
-                cubicTo(64f * scaleX, 24f * scaleY, 74f * scaleX, 27f * scaleY, 77f * scaleX, 35f * scaleY)
-                cubicTo(79f * scaleX, 42f * scaleY, 75f * scaleX, 50f * scaleY, 67f * scaleX, 54f * scaleY)
-                cubicTo(61f * scaleX, 57f * scaleY, 54f * scaleX, 60f * scaleY, 48f * scaleX, 63f * scaleY)
-                lineTo(42f * scaleX, 57f * scaleY)
-                cubicTo(49f * scaleX, 53f * scaleY, 58f * scaleX, 49f * scaleY, 63f * scaleX, 46f * scaleY)
-                cubicTo(68f * scaleX, 43f * scaleY, 69f * scaleX, 38f * scaleY, 67f * scaleX, 35f * scaleY)
-                cubicTo(65f * scaleX, 31f * scaleY, 59f * scaleX, 29f * scaleY, 52f * scaleX, 32f * scaleY)
-                cubicTo(46f * scaleX, 35f * scaleY, 44f * scaleX, 40f * scaleY, 46f * scaleX, 45f * scaleY)
-                close()
-            }
-            drawPath(
-                path = topPath,
-                brush = Brush.linearGradient(
-                    colors = listOf(secondaryColor, accentColor, colors.secondaryAccent),
-                    start = Offset(30f * scaleX, 20f * scaleY),
-                    end = Offset(80f * scaleX, 60f * scaleY)
-                ),
-                style = Fill
-            )
-
-            // Lower wave ribbon of 'S'
-            val bottomPath = Path().apply {
-                moveTo(68f * scaleX, 59f * scaleY)
-                cubicTo(71f * scaleX, 66f * scaleY, 66f * scaleX, 76f * scaleY, 56f * scaleX, 80f * scaleY)
-                cubicTo(44f * scaleX, 84f * scaleY, 34f * scaleX, 81f * scaleY, 31f * scaleX, 73f * scaleY)
-                cubicTo(29f * scaleX, 66f * scaleY, 33f * scaleX, 58f * scaleY, 41f * scaleX, 54f * scaleY)
-                cubicTo(47f * scaleX, 51f * scaleY, 54f * scaleX, 48f * scaleY, 60f * scaleX, 45f * scaleY)
-                lineTo(66f * scaleX, 51f * scaleY)
-                cubicTo(59f * scaleX, 55f * scaleY, 50f * scaleX, 59f * scaleY, 45f * scaleX, 62f * scaleY)
-                cubicTo(40f * scaleX, 65f * scaleY, 39f * scaleX, 70f * scaleY, 41f * scaleX, 73f * scaleY)
-                cubicTo(43f * scaleX, 77f * scaleY, 49f * scaleX, 79f * scaleY, 56f * scaleX, 76f * scaleY)
-                cubicTo(62f * scaleX, 73f * scaleY, 64f * scaleX, 68f * scaleY, 62f * scaleX, 63f * scaleY)
-                close()
-            }
-            drawPath(
-                path = bottomPath,
-                brush = Brush.linearGradient(
-                    colors = listOf(accentColor, colors.secondaryAccent, secondaryColor),
-                    start = Offset(70f * scaleX, 50f * scaleY),
-                    end = Offset(30f * scaleX, 85f * scaleY)
-                ),
-                style = Fill
-            )
-
-            // Connecting acoustic pulse line
-            val centerPath = Path().apply {
-                moveTo(46f * scaleX, 51f * scaleY)
-                lineTo(60f * scaleX, 57f * scaleY)
-                lineTo(59f * scaleX, 62f * scaleY)
-                lineTo(48f * scaleX, 53f * scaleY)
-                close()
-            }
-            drawPath(
-                path = centerPath,
-                color = secondaryColor.copy(alpha = 0.9f),
-                style = Fill
-            )
-
-            // Satellite acoustic dots
-            drawCircle(
-                color = accentColor,
-                radius = 2.4f * scaleX,
-                center = Offset(77f * scaleX, 41f * scaleY)
-            )
-            drawCircle(
-                color = colors.secondaryAccent,
-                radius = 2.4f * scaleX,
-                center = Offset(31f * scaleX, 67f * scaleY)
-            )
-        }
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.swarix_logo),
+            contentDescription = "Swarix Logo",
+            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+            modifier = Modifier
+                .size(size)
+                .clip(RoundedCornerShape(size * 0.22f))
+        )
     }
 }
 

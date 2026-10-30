@@ -54,7 +54,7 @@ object JioSaavnService {
             .trim()
     }
 
-    suspend fun searchSongs(query: String, limit: Int = 25): List<SongEntity> = withContext(Dispatchers.IO) {
+    suspend fun searchSongs(query: String, limit: Int = 80): List<SongEntity> = withContext(Dispatchers.IO) {
         if (query.isBlank()) return@withContext emptyList()
         val songs = mutableListOf<SongEntity>()
         try {

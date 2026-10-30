@@ -89,6 +89,17 @@ class MainActivity : ComponentActivity() {
         }
 
         enableEdgeToEdge()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+        }
+        try {
+            startService(Intent(this, com.example.playback.service.MusicPlaybackService::class.java))
+        } catch (e: Exception) {
+            Log.w("MainActivity", "Failed to start MusicPlaybackService in onCreate", e)
+        }
         
         // Request 120Hz refresh rate safely
         try {
@@ -382,12 +393,9 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         recentSearches = mainViewModel.recentSearches.collectAsStateWithLifecycle().value,
                         onlineResults = mainViewModel.onlineSearchResults.collectAsStateWithLifecycle().value,
                         isSearchingOnline = mainViewModel.isSearchingOnline.collectAsStateWithLifecycle().value,
-                        onSongClick = { mainViewModel.playSong(it) },
+                        onSongClick = { song, queue -> mainViewModel.playSong(song, queue) },
                         onArtistClick = { artistName ->
-                            val artistSongs = allSongs.filter { it.artist.contains(artistName, ignoreCase = true) }
-                            if (artistSongs.isNotEmpty()) {
-                                mainViewModel.playSong(artistSongs.first(), artistSongs)
-                            }
+                            mainViewModel.search(artistName)
                         },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
                         onSavePlaylist = { title, songs ->
