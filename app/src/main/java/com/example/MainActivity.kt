@@ -232,6 +232,9 @@ fun SwarixApp(mainViewModel: MainViewModel) {
     val batteryLevel by mainViewModel.batteryLevel.collectAsStateWithLifecycle()
     val isLowBattery by mainViewModel.isLowBattery.collectAsStateWithLifecycle()
     val isBatterySaverEngaged by mainViewModel.isBatterySaverEngaged.collectAsStateWithLifecycle()
+    val availableUpdate by mainViewModel.availableUpdate.collectAsStateWithLifecycle()
+    val isDownloadingUpdate by mainViewModel.isDownloadingUpdate.collectAsStateWithLifecycle()
+    val updateDownloadProgress by mainViewModel.updateDownloadProgress.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     var showVoiceCommandSheet by remember { mutableStateOf(false) }
@@ -550,6 +553,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         onOpenDiagnostics = {
                             mainViewModel.openSubScreen(SubScreen.DIAGNOSTICS)
                         },
+                        onCheckForUpdates = { mainViewModel.checkForAppUpdates() },
                         onBackClick = { mainViewModel.selectTab(NavItem.HOME) }
                     )
                 }
@@ -888,6 +892,16 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                 }
             },
             onDismiss = { showVoiceCommandSheet = false }
+        )
+    }
+
+    if (availableUpdate != null) {
+        com.example.ui.components.AppUpdateDialog(
+            updateInfo = availableUpdate!!,
+            isDownloading = isDownloadingUpdate,
+            downloadProgress = updateDownloadProgress,
+            onConfirmUpdate = { mainViewModel.startUpdate(context) },
+            onDismiss = { mainViewModel.dismissUpdateDialog() }
         )
     }
 }

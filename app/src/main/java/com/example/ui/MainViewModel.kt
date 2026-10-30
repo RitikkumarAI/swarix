@@ -1,6 +1,10 @@
 package com.example.ui
 
 import android.app.Application
+import android.content.Context
+import com.example.BuildConfig
+import com.example.core.updater.AppUpdateInfo
+import com.example.core.updater.AppUpdateManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.model.Artist
@@ -232,6 +236,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
+            checkForAppUpdates()
+        }
+
+        viewModelScope.launch {
             combine(
                 allSongs,
                 recentlyPlayed,
@@ -363,6 +371,48 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             repository.recordPlayback(song.id)
         }
         playerManager.playSong(song, q)
+    }
+
+    private val _availableUpdate = MutableStateFlow<AppUpdateInfo?>(null)
+    val availableUpdate: StateFlow<AppUpdateInfo?> = _availableUpdate.asStateFlow()
+
+    private val _isDownloadingUpdate = MutableStateFlow(false)
+    val isDownloadingUpdate: StateFlow<Boolean> = _isDownloadingUpdate.asStateFlow()
+
+    private val _updateDownloadProgress = MutableStateFlow(0f)
+    val updateDownloadProgress: StateFlow<Float> = _updateDownloadProgress.asStateFlow()
+
+    fun dismissUpdateDialog() {
+        _availableUpdate.value = null
+    }
+
+    fun startUpdate(context: Context) {
+        val info = _availableUpdate.value ?: return
+        viewModelScope.launch {
+            _isDownloadingUpdate.value = true
+            _updateDownloadProgress.value = 0f
+            val apkFile = AppUpdateManager.downloadApk(context, info.apkDownloadUrl) { progress ->
+                _updateDownloadProgress.value = progress
+            }
+            _isDownloadingUpdate.value = false
+            if (apkFile != null && apkFile.exists()) {
+                AppUpdateManager.installApk(context, apkFile)
+                _availableUpdate.value = null
+            }
+        }
+    }
+
+    fun checkForAppUpdates() {
+        viewModelScope.launch {
+            try {
+                val info = AppUpdateManager.checkForUpdate(BuildConfig.VERSION_NAME)
+                if (info != null && info.hasUpdate) {
+                    _availableUpdate.value = info
+                }
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Check updates error", e)
+            }
+        }
     }
 
     fun togglePlayPause() = playerManager.togglePlayPause()

@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -108,6 +109,7 @@ fun SettingsScreen(
     isBatterySaverEngaged: Boolean = false,
     offlineModeEnabled: Boolean,
     onOfflineModeToggle: (Boolean) -> Unit,
+    onCheckForUpdates: () -> Unit = {},
     library: List<Song> = emptyList(),
     voiceCommandHistory: List<com.example.ui.MainViewModel.VoiceCommandHistoryItem> = emptyList(),
     onRetriggerVoiceCommand: (com.example.ui.MainViewModel.VoiceCommandHistoryItem) -> Unit = {},
@@ -1045,9 +1047,18 @@ fun SettingsScreen(
 
             item {
                 SettingsRow(
+                    icon = Icons.Default.SystemUpdate,
+                    title = "Check for Updates",
+                    value = "v1.1",
+                    onClick = onCheckForUpdates
+                )
+            }
+
+            item {
+                SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v1.0.0",
+                    value = "v1.1",
                     onClick = { showAboutDialog = true }
                 )
             }

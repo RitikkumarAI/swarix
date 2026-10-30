@@ -72,12 +72,15 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: "Swarix Music Player - Latest Release"
+          tag_name: v1.1
+          name: "Swarix Music Player v1.1"
           body: |
-            ## 🎵 Swarix Music Player
+            ## 🎵 Swarix Music Player v1.1
 
-            Direct Android APK download for Swarix.
+            ### ✨ What's New:
+            - **Real JioSaavn Streaming Engine**: Unlimited online search & high-fidelity 320kbps audio.
+            - **In-App Auto-Updates (OTA)**: Receive future updates directly within the app without opening GitHub!
+            - **Authentic Seed Tracks**: Replaced all demo audio with genuine studio master tracks.
 
             ### 📦 App Details
             - **Package ID**: `com.aistudio.swarix.musply`
