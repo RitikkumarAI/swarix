@@ -148,6 +148,24 @@ fun SearchScreen(
         }
     }
 
+    val matchingArtists by remember(searchQuery, allSongs) {
+        derivedStateOf {
+            if (searchQuery.isBlank()) emptyList()
+            else {
+                val q = searchQuery.trim().lowercase()
+                allSongs.groupBy { it.artist }
+                    .filter { (artistName, _) -> artistName.lowercase().contains(q) }
+                    .map { (artistName, songs) ->
+                        Artist(
+                            name = artistName,
+                            songCount = songs.size,
+                            artworkUri = songs.firstOrNull { it.artworkUri.isNotBlank() }?.artworkUri ?: ""
+                        )
+                    }
+            }
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -168,7 +186,7 @@ fun SearchScreen(
                     .testTag("search_input_field"),
                 placeholder = {
                     Text(
-                        text = "Search songs, artists, albums...",
+                        text = "What do you want to listen to?",
                         color = colors.mutedText
                     )
                 },
@@ -220,29 +238,84 @@ fun SearchScreen(
                 singleLine = true
             )
         }
-        // Recent Searches
-        if (searchQuery.isBlank() && recentSearches.isNotEmpty()) {
+        // Recent Searches (Spotify Image 2 Style)
+        if (searchQuery.isBlank() && (recentSearches.isNotEmpty() || allSongs.isNotEmpty())) {
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Recent Searches", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    TextButton(onClick = onClearRecentSearches) { Text("Clear") }
-                }
-            }
-            items(recentSearches) { query ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { searchQuery = query; onSearch(query) }
                         .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.TrendingUp, null, tint = colors.mutedText, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(query, style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = "Recents",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.primaryText
+                        )
+                    )
+                    if (recentSearches.isNotEmpty()) {
+                        TextButton(onClick = onClearRecentSearches) {
+                            Text("Clear all", color = colors.secondaryText)
+                        }
+                    }
+                }
+            }
+
+            val recentDisplaySongs = remember(allSongs, recentSearches) {
+                allSongs.take(8)
+            }
+
+            items(recentDisplaySongs) { song ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSongClick(song) }
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(colors.surface)
+                    ) {
+                        AsyncImage(
+                            model = song.artworkUri,
+                            contentDescription = song.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = song.title,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (song.id == currentPlayingSong?.id) Color(0xFF1ED760) else colors.primaryText
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = "Song • ${song.artist}",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = colors.secondaryText
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    IconButton(onClick = { onFavoriteToggle(song) }) {
+                        Icon(
+                            imageVector = if (song.isFavorite) Icons.Default.Favorite else Icons.Default.PlaylistAdd,
+                            contentDescription = "Save",
+                            tint = if (song.isFavorite) Color(0xFF1ED760) else colors.mutedText,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -473,9 +546,70 @@ fun SearchScreen(
                 }
             }
 
+            // Matching Artists Section with Circular Photos (Spotify Inspired)
+            if (matchingArtists.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Artists",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.primaryText
+                        ),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+
+                items(matchingArtists.take(4)) { artist ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onArtistClick(artist.name) }
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        color = Color.Transparent
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(colors.surface)
+                                    .border(1.dp, colors.divider, CircleShape)
+                            ) {
+                                AsyncImage(
+                                    model = artist.artworkUri.ifBlank { "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+                                    contentDescription = artist.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = artist.name,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.primaryText
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "Artist",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = colors.secondaryText
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 Text(
-                    text = "Results (${displaySongs.size})",
+                    text = "Songs (${displaySongs.size})",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = colors.primaryText

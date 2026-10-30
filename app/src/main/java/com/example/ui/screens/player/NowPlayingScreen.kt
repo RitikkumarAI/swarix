@@ -352,7 +352,7 @@ fun NowPlayingScreen(
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Collapse",
-                        tint = colors.primaryText,
+                        tint = Color.White,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -361,7 +361,7 @@ fun NowPlayingScreen(
                     Text(
                         text = "PLAYING FROM",
                         style = MaterialTheme.typography.labelSmall.copy(
-                            color = colors.mutedText,
+                            color = Color.White.copy(alpha = 0.70f),
                             letterSpacing = 1.sp
                         )
                     )
@@ -369,7 +369,7 @@ fun NowPlayingScreen(
                         text = if (song.isFavorite) "Liked Songs" else (song.album.ifEmpty { "Swarix Music" }),
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = colors.primaryText
+                            color = Color.White
                         )
                     )
                 }
@@ -379,7 +379,7 @@ fun NowPlayingScreen(
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Options",
-                            tint = colors.primaryText
+                            tint = Color.White
                         )
                     }
                     DropdownMenu(
@@ -620,7 +620,7 @@ fun NowPlayingScreen(
                                 text = song.title,
                                 style = MaterialTheme.typography.headlineMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = colors.primaryText
+                                    color = Color.White
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -633,7 +633,8 @@ fun NowPlayingScreen(
                                 Text(
                                     text = song.artist,
                                     style = MaterialTheme.typography.titleMedium.copy(
-                                        color = colors.secondaryText
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontWeight = FontWeight.Medium
                                     ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -648,7 +649,7 @@ fun NowPlayingScreen(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            // 4K Ultra Quality and Tactile Bass Haptics Pills
+                            // 8K Ultra Quality, DSP Master Sound, and Tactile Bass Haptics Pills
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -658,7 +659,8 @@ fun NowPlayingScreen(
                                         .clip(RoundedCornerShape(6.dp))
                                         .clickable { showQualitySpecs = true }
                                         .testTag("4k_quality_badge"),
-                                    color = colors.primaryAccent.copy(alpha = 0.16f)
+                                    color = colors.primaryAccent.copy(alpha = 0.20f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.primaryAccent.copy(alpha = 0.40f))
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
@@ -672,7 +674,7 @@ fun NowPlayingScreen(
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
-                                            text = "8K ULTRA MASTER",
+                                            text = "8K ULTRA",
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
@@ -686,9 +688,41 @@ fun NowPlayingScreen(
                                 Surface(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
+                                        .clickable { onOpenEqualizer() }
+                                        .testTag("dsp_sound_pill"),
+                                    color = Color(0xFF4A8B87).copy(alpha = 0.25f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A8B87).copy(alpha = 0.60f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.GraphicEq,
+                                            contentDescription = "DSP Equalizer",
+                                            tint = Color(0xFF6ED0C9),
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Text(
+                                            text = "DSP SOUND",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFF6ED0C9),
+                                                letterSpacing = 0.5.sp
+                                            )
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
                                         .clickable { onToggleBassHaptics?.invoke() }
                                         .testTag("tactile_bass_badge"),
-                                    color = if (bassHapticsEnabled) colors.primaryAccent.copy(alpha = 0.20f) else colors.elevatedSurface.copy(alpha = 0.6f)
+                                    color = if (bassHapticsEnabled) colors.primaryAccent.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.08f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (bassHapticsEnabled) colors.primaryAccent.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.15f))
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
@@ -698,15 +732,15 @@ fun NowPlayingScreen(
                                         Icon(
                                             imageVector = Icons.Default.Vibration,
                                             contentDescription = "Bass Haptics",
-                                            tint = if (bassHapticsEnabled) colors.primaryAccent else colors.mutedText,
+                                            tint = if (bassHapticsEnabled) colors.primaryAccent else Color.White.copy(alpha = 0.65f),
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
-                                            text = if (bassHapticsEnabled) "BASS HAPTICS ON" else "BASS HAPTICS OFF",
+                                            text = if (bassHapticsEnabled) "BASS ON" else "BASS OFF",
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = if (bassHapticsEnabled) colors.primaryAccent else colors.mutedText,
+                                                color = if (bassHapticsEnabled) colors.primaryAccent else Color.White.copy(alpha = 0.65f),
                                                 letterSpacing = 0.5.sp
                                             )
                                         )
@@ -722,7 +756,7 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = if (song.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Favorite",
-                                tint = if (song.isFavorite) colors.primaryAccent else colors.mutedText,
+                                tint = if (song.isFavorite) colors.primaryAccent else Color.White.copy(alpha = 0.75f),
                                 modifier = Modifier.size(28.dp)
                             )
                         }
@@ -754,7 +788,7 @@ fun NowPlayingScreen(
                             colors = SliderDefaults.colors(
                                 thumbColor = colors.primaryAccent,
                                 activeTrackColor = colors.primaryAccent,
-                                inactiveTrackColor = colors.divider
+                                inactiveTrackColor = Color.White.copy(alpha = 0.22f)
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -767,11 +801,17 @@ fun NowPlayingScreen(
                         ) {
                             Text(
                                 text = formatTime(currentMs),
-                                style = MaterialTheme.typography.labelSmall.copy(color = colors.mutedText)
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color.White.copy(alpha = 0.75f),
+                                    fontWeight = FontWeight.Medium
+                                )
                             )
                             Text(
                                 text = formatTime(totalMs),
-                                style = MaterialTheme.typography.labelSmall.copy(color = colors.mutedText)
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color.White.copy(alpha = 0.75f),
+                                    fontWeight = FontWeight.Medium
+                                )
                             )
                         }
                     }
@@ -790,7 +830,7 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = Icons.Default.Shuffle,
                                 contentDescription = "Shuffle",
-                                tint = if (isShuffle) colors.primaryAccent else colors.mutedText,
+                                tint = if (isShuffle) colors.primaryAccent else Color.White.copy(alpha = 0.55f),
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -805,7 +845,7 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = Icons.Default.SkipPrevious,
                                 contentDescription = "Previous",
-                                tint = colors.primaryText,
+                                tint = Color.White,
                                 modifier = Modifier.size(34.dp)
                             )
                         }
@@ -823,7 +863,7 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                 contentDescription = if (isPlaying) "Pause" else "Play",
-                                tint = colors.mainBackground,
+                                tint = Color(0xFF121513),
                                 modifier = Modifier.size(38.dp)
                             )
                         }
@@ -838,7 +878,7 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = Icons.Default.SkipNext,
                                 contentDescription = "Next",
-                                tint = colors.primaryText,
+                                tint = Color.White,
                                 modifier = Modifier.size(34.dp)
                             )
                         }
@@ -855,14 +895,14 @@ fun NowPlayingScreen(
                                     RepeatMode.OFF -> Icons.Default.Repeat
                                 },
                                 contentDescription = "Repeat",
-                                tint = if (repeatMode != RepeatMode.OFF) colors.primaryAccent else colors.mutedText,
+                                tint = if (repeatMode != RepeatMode.OFF) colors.primaryAccent else Color.White.copy(alpha = 0.55f),
                                 modifier = Modifier.size(24.dp)
                             )
                         }
                     }
 
                     // Bottom Action Bar:
-                    // [Device Connect icon] [Lyrics pill] [Share icon] [Queue icon]
+                    // [Device Connect icon] [DSP button] [Lyrics pill] [Share icon] [Queue icon]
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -876,8 +916,35 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = Icons.Default.Devices,
                                 contentDescription = "Connect to a device",
-                                tint = if (currentDeviceId != "phone") colors.primaryAccent else colors.secondaryText,
-                                modifier = Modifier.size(24.dp)
+                                tint = if (currentDeviceId != "phone") colors.primaryAccent else Color.White.copy(alpha = 0.70f),
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+
+                        // Dedicated DSP Sound & Equalizer Button
+                        ElevatedButton(
+                            onClick = onOpenEqualizer,
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = Color(0xFF4A8B87).copy(alpha = 0.28f),
+                                contentColor = Color(0xFF6ED0C9)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A8B87).copy(alpha = 0.55f)),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.testTag("btn_dsp")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.GraphicEq,
+                                contentDescription = "DSP Equalizer",
+                                tint = Color(0xFF6ED0C9),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = "DSP",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF6ED0C9)
+                                )
                             )
                         }
 
@@ -885,21 +952,26 @@ fun NowPlayingScreen(
                         ElevatedButton(
                             onClick = onOpenLyrics,
                             colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = colors.elevatedSurface,
-                                contentColor = colors.primaryAccent
+                                containerColor = Color.White.copy(alpha = 0.16f),
+                                contentColor = Color.White
                             ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
                             shape = RoundedCornerShape(20.dp),
                             modifier = Modifier.testTag("btn_lyrics")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Subtitles,
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = "Lyrics",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
                             )
                         }
 
@@ -912,21 +984,8 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = Icons.Default.Share,
                                 contentDescription = "Share",
-                                tint = colors.secondaryText,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        // Listen Together Button
-                        IconButton(
-                            onClick = { showListenTogetherDialog = true },
-                            modifier = Modifier.testTag("btn_listen_together")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Group,
-                                contentDescription = "Listen Together",
-                                tint = if (activeListenSessionId != null) colors.primaryAccent else colors.secondaryText,
-                                modifier = Modifier.size(22.dp)
+                                tint = Color.White.copy(alpha = 0.70f),
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
@@ -935,9 +994,10 @@ fun NowPlayingScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.QueueMusic,
                                 contentDescription = "Queue",
-                                tint = colors.secondaryText,
-                                modifier = Modifier.size(24.dp)
+                                tint = Color.White.copy(alpha = 0.70f),
+                                modifier = Modifier.size(22.dp)
                             )
+                        }
                         }
                     }
 

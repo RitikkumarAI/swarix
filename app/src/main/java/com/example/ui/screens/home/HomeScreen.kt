@@ -255,35 +255,37 @@ fun HomeScreen(
         }
 
 
-        // Category Filter Chips (Music, Podcasts, Radio, Mood)
+        // Spotify-style Filter Chips (All, Music, Podcasts)
         item {
-            val allGenres = remember(allSongs) { 
-                listOf("All") + allSongs.map { it.genre }.distinct().sorted() 
-            }
-            
+            val spotifyFilters = listOf("All", "Music", "Podcasts")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                allGenres.forEach { genre ->
-                    val isSelected = genre == selectedCategoryTab
+                spotifyFilters.forEach { tab ->
+                    val isSelected = tab == selectedCategoryTab || (selectedCategoryTab !in spotifyFilters && tab == "All")
                     FilterChip(
                         selected = isSelected,
-                        onClick = { selectedCategoryTab = genre },
-                        label = { Text(genre) },
+                        onClick = { selectedCategoryTab = tab },
+                        label = {
+                            Text(
+                                text = tab,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                            )
+                        },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = colors.primaryAccent,
-                            selectedLabelColor = colors.mainBackground,
+                            selectedContainerColor = Color(0xFF1ED760), // Spotify Signature Green
+                            selectedLabelColor = Color.Black,
                             containerColor = colors.surface,
-                            labelColor = colors.secondaryText
+                            labelColor = colors.primaryText
                         ),
                         border = FilterChipDefaults.filterChipBorder(
                             enabled = true,
                             selected = isSelected,
-                            borderColor = colors.divider
+                            borderColor = if (isSelected) Color(0xFF1ED760) else colors.divider
                         ),
                         shape = RoundedCornerShape(20.dp)
                     )
@@ -291,112 +293,202 @@ fun HomeScreen(
             }
         }
 
-        // Hero Greeting Card (from Image 1 Screen 4 & Image 2 Screen 2)
+        // Spotify Signature 2-Column Quick Access Grid (8 items matching Spotify Home)
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-                    .height(185.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .testTag("hero_greeting_card")
-                    .bouncyClick {
-                        allSongs.firstOrNull()?.let(onSongClick)
-                    }
-            ) {
-                AsyncImage(
-                    model = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80",
-                    contentDescription = "Hero Greeting",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(
-                                    Color.Black.copy(alpha = 0.88f),
-                                    Color.Black.copy(alpha = 0.35f)
-                                )
-                            )
-                        )
-                )
+            val quickItems = remember(recentlyPlayed, allSongs) {
+                val pool = if (recentlyPlayed.isNotEmpty()) recentlyPlayed else allSongs
+                pool.take(8)
+            }
 
+            if (quickItems.isNotEmpty()) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column {
-                        Text(
-                            text = "Good Evening",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                color = colors.primaryAccent,
-                                letterSpacing = 0.5.sp
-                            )
-                        )
-                        Text(
-                            text = "Ritik",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Let the music set the mood.",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color.White.copy(alpha = 0.85f)
-                            )
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.Black.copy(alpha = 0.5f)
+                    val rows = quickItems.chunked(2)
+                    rows.forEach { pair ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            pair.forEach { itemSong ->
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(56.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .clickable { onSongClick(itemSong) }
+                                        .testTag("quick_item_${itemSong.id}"),
+                                    color = colors.surface,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        AsyncImage(
+                                            model = itemSong.artworkUri.ifBlank { "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&auto=format&fit=crop&q=80" },
+                                            contentDescription = itemSong.title,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(56.dp)
+                                                .clip(RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp))
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = itemSong.title,
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.primaryText,
+                                                fontSize = 12.sp
+                                            ),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 6.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            if (pair.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Section: It's New Music Friday! (Horizontal Scroll Cards like Spotify Image 1)
+        item {
+            Spacer(modifier = Modifier.height(14.dp))
+            SectionTitle(title = "It's New Music Friday!", onSeeAllClick = {})
+        }
+
+        item {
+            val newMusicList = remember(allSongs) {
+                if (allSongs.isNotEmpty()) allSongs.shuffled().take(6) else emptyList()
+            }
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                items(newMusicList) { song ->
+                    Column(
+                        modifier = Modifier
+                            .width(148.dp)
+                            .bouncyClick { onSongClick(song) }
+                            .testTag("new_friday_${song.id}")
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(148.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(colors.surface)
+                        ) {
+                            AsyncImage(
+                                model = song.artworkUri,
+                                contentDescription = song.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            // Spotify logo badge top-left
+                            Box(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(20.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Black.copy(alpha = 0.6f)),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Equalizer,
                                     contentDescription = null,
-                                    tint = colors.primaryAccent,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "4K Hi-Res Studio Audio",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
+                                    tint = Color(0xFF1ED760),
+                                    modifier = Modifier.size(12.dp)
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = song.title,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = colors.primaryText
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = song.artist,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = colors.secondaryText
+                            ),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        }
 
+        // Section: Jump Back In / Recently Played
+        item {
+            Spacer(modifier = Modifier.height(18.dp))
+            SectionTitle(title = "Jump Back In", onSeeAllClick = {})
+        }
+
+        item {
+            val jumpBackList = remember(recentlyPlayed, allSongs) {
+                val list = if (recentlyPlayed.isNotEmpty()) recentlyPlayed else allSongs
+                list.take(10)
+            }
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                items(jumpBackList) { song ->
+                    Column(
+                        modifier = Modifier
+                            .width(136.dp)
+                            .bouncyClick { onSongClick(song) }
+                            .testTag("jump_back_${song.id}")
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(colors.primaryAccent),
-                            contentAlignment = Alignment.Center
+                                .size(136.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(colors.surface)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Play Mix",
-                                tint = colors.mainBackground,
-                                modifier = Modifier.size(30.dp)
+                            AsyncImage(
+                                model = song.artworkUri,
+                                contentDescription = song.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = song.title,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.primaryText
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = "Song • ${song.artist}",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = colors.secondaryText,
+                                fontSize = 11.sp
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -608,11 +700,18 @@ fun HomeScreen(
                         Text(
                             text = artist.name,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.primaryText
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = "Artist",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = colors.secondaryText,
+                                fontSize = 11.sp
+                            )
                         )
                     }
                 }

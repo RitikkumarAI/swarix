@@ -68,20 +68,27 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.2
-          name: "Swarix Music Player v1.2"
+          tag_name: v1.3
+          name: "Swarix Music Player v1.3"
           body: |
-            ## 🎵 Swarix Music Player v1.2
+            ## 🎵 Swarix Music Player v1.3
 
             ### ✨ What's New:
-            - **Developer & Maintainer**: Ritik Kumar ([Portfolio](https://ritikkumarai.vercel.app/)) integrated into the About section with clickable links.
-            - **World-Class 8K Ultra Studio Master Sound Engine**:
-              - 8K Ultra Studio Lossless DSP pipeline with 3D Spatial Virtualizer.
-              - 10-band audiophile graphic equalizer with sub-bass dynamic punch.
-              - Persistent DSP session states across track transitions.
-              - Direct bit-perfect DAC hardware passthrough & -14 LUFS studio loudness normalization.
-            - **In-App Auto-Updates (OTA)**: Receive future updates seamlessly inside the app.
-            - **Real JioSaavn 320kbps Streaming**: Unlimited search and instant playback of genuine high-fidelity tracks.
+            - **Spotify-Inspired Home Screen**:
+              - Spotify signature 2-column quick access grid of 8 recent tracks/artists.
+              - "It's New Music Friday!" and "Jump Back In" horizontal carousels.
+              - Popular artists with circular avatars and genre filters (`All`, `Music`, `Podcasts`).
+            - **Search with Artist Photos**:
+              - Search now displays circular artist photos with dedicated "Artist" tags alongside song results.
+              - Spotify-styled "Recents" search history with artwork and quick-save.
+            - **Spotify-Inspired "Your Library" Management**:
+              - Header matching Spotify with user avatar, search, and playlist creation.
+              - Pinned "Liked Songs" card with signature purple-blue gradient.
+              - Artists with circular avatars and custom playlists.
+            - **Playback Screen Visibility & Dedicated DSP Button**:
+              - High-contrast crisp white typography and controls on dark playback backdrop.
+              - Dedicated **DSP Sound** button on the playback screen for 1-tap DSP / 10-band Equalizer access.
+            - **In-App Auto-Updates (OTA)**: Instant in-app notification and seamless update.
 
             ### 📦 App Details
             - **Package ID**: `com.aistudio.swarix.musply`

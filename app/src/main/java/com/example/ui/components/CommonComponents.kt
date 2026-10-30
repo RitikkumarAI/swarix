@@ -172,7 +172,7 @@ enum class NavItem(val label: String, val icon: ImageVector) {
     HOME("Home", Icons.Default.Home),
     SEARCH("Search", Icons.Default.Search),
     AI("Swarix AI", Icons.Default.AutoAwesome),
-    LIBRARY("Library", Icons.Default.LibraryMusic),
+    LIBRARY("Your Library", Icons.Default.LibraryMusic),
     SETTINGS("Settings", Icons.Default.Person)
 }
 

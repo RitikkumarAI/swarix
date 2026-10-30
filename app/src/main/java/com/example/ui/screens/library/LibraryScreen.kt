@@ -24,10 +24,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -183,7 +186,7 @@ fun LibraryScreen(
             .background(colors.mainBackground),
         contentPadding = PaddingValues(bottom = 120.dp)
     ) {
-        // Title & Rescan
+        // Spotify Signature Library Header (Matching Image 3)
         item {
             Row(
                 modifier = Modifier
@@ -192,98 +195,62 @@ fun LibraryScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Your Library",
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = colors.primaryText,
-                        fontSize = 26.sp
-                    )
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Profile Avatar (Ritik) with Online Dot
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(colors.elevatedSurface)
+                            .border(1.dp, colors.primaryAccent.copy(alpha = 0.5f), CircleShape)
+                    ) {
+                        AsyncImage(
+                            model = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+                            contentDescription = "Profile",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
 
-                IconButton(
-                    onClick = onRescanLibrary,
-                    modifier = Modifier.testTag("btn_rescan_library")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Rescan",
-                        tint = colors.primaryAccent
-                    )
-                }
-                
-                // Add File Import Button
-                IconButton(
-                    onClick = { /* TODO: Trigger File Picker */ },
-                    modifier = Modifier.testTag("btn_import_file")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Import",
-                        tint = colors.primaryAccent
-                    )
-                }
-            }
-        }
-
-        // Recent Searches & Trends
-        if (recentSearches.isNotEmpty()) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                ) {
                     Text(
-                        text = "RECENT SEARCHES & TRENDS",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = colors.primaryAccent,
+                        text = "Your Library",
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
+                            color = colors.primaryText,
+                            fontSize = 24.sp
                         )
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { onSearchQueryClick?.invoke("") },
+                        modifier = Modifier.testTag("btn_library_search")
                     ) {
-                        recentSearches.forEach { query ->
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = colors.elevatedSurface,
-                                modifier = Modifier
-                                    .clickable { onSearchQueryClick?.invoke(query) }
-                                    .testTag("recent_search_chip_$query")
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.History,
-                                        contentDescription = null,
-                                        tint = colors.secondaryText,
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Text(
-                                        text = query,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            color = colors.primaryText,
-                                            fontSize = 11.sp
-                                        )
-                                    )
-                                }
-                            }
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Library",
+                            tint = colors.primaryText
+                        )
+                    }
+                    IconButton(
+                        onClick = { showCreateDialog = true },
+                        modifier = Modifier.testTag("btn_library_add")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Playlist",
+                            tint = colors.primaryText
+                        )
                     }
                 }
             }
         }
 
-        // Tabs: Playlists, Songs, Artists, Albums
+        // Tabs: Playlists, Artists, Albums
         item {
             Row(
                 modifier = Modifier
@@ -299,19 +266,56 @@ fun LibraryScreen(
                         onClick = { selectedTab = tab },
                         label = { Text(tab) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = colors.primaryAccent,
-                            selectedLabelColor = colors.mainBackground,
+                            selectedContainerColor = Color(0xFF1ED760),
+                            selectedLabelColor = Color.Black,
                             containerColor = colors.surface,
-                            labelColor = colors.secondaryText
+                            labelColor = colors.primaryText
                         ),
                         border = FilterChipDefaults.filterChipBorder(
                             enabled = true,
                             selected = isSelected,
-                            borderColor = colors.divider
+                            borderColor = if (isSelected) Color(0xFF1ED760) else colors.divider
                         ),
                         shape = RoundedCornerShape(20.dp)
                     )
                 }
+            }
+        }
+
+        // Spotify Sort Row: ⇅ Recents
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SwapVert,
+                        contentDescription = "Sort",
+                        tint = colors.secondaryText,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Recents",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.primaryText
+                        )
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.GridView,
+                    contentDescription = "View grid",
+                    tint = colors.secondaryText,
+                    modifier = Modifier.size(18.dp)
+                )
             }
         }
 
@@ -360,30 +364,33 @@ fun LibraryScreen(
                     }
                 }
 
-                // Liked Songs Card (Purple Gradient Icon as in Image 1 Screen 10)
+                // Liked Songs Card (Spotify Purple Gradient matching Image 3)
                 item {
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
                             .clickable(onClick = onLikedSongsClick)
                             .testTag("liked_songs_card"),
-                        color = colors.surface
+                        color = Color.Transparent
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(RoundedCornerShape(14.dp))
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(6.dp))
                                     .background(
                                         Brush.linearGradient(
-                                            listOf(AccentPurple, Color(0xFF5A4488))
+                                            listOf(
+                                                Color(0xFF450AF5),
+                                                Color(0xFF8E8EE5),
+                                                Color(0xFFB4C8EC)
+                                            )
                                         )
                                     ),
                                 contentAlignment = Alignment.Center
@@ -404,50 +411,135 @@ fun LibraryScreen(
                                         color = colors.primaryText
                                     )
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "${favoriteSongs.size} songs",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                    text = "📌 Playlist • ${favoriteSongs.size} songs",
+                                    style = MaterialTheme.typography.bodySmall.copy(
                                         color = colors.secondaryText
                                     )
-                                )
-                            }
-                            IconButton(onClick = {}) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More",
-                                    tint = colors.mutedText
                                 )
                             }
                         }
                     }
                 }
 
-                // Custom Playlists List
+                // Custom Playlists List (Spotify Image 3 Style)
                 items(playlists) { playlist ->
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .clip(RoundedCornerShape(14.dp))
                             .clickable { onPlaylistClick(playlist) }
                             .testTag("playlist_item_${playlist.id}"),
-                        color = colors.surface
+                        color = Color.Transparent
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(10.dp),
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(52.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(colors.elevatedSurface)
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(colors.surface)
                             ) {
                                 if (playlist.coverUri.isNotEmpty()) {
                                     AsyncImage(
                                         model = playlist.coverUri,
+                                        contentDescription = playlist.name,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(colors.elevatedSurface),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.MusicNote,
+                                            contentDescription = null,
+                                            tint = colors.primaryAccent
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = playlist.name,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.primaryText
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Playlist • Ritik",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = colors.secondaryText
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Followed Artists in Main Library (Image 3)
+                items(artists.take(6)) { artist ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clickable { },
+                        color = Color.Transparent
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(colors.surface)
+                            ) {
+                                AsyncImage(
+                                    model = artist.artworkUri.ifBlank { "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+                                    contentDescription = artist.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = artist.name,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.primaryText
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Artist",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = colors.secondaryText
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
                                         contentDescription = playlist.name,
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier.fillMaxSize()
@@ -638,17 +730,17 @@ fun LibraryScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {}
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(64.dp)
                                 .clip(CircleShape)
-                                .background(colors.elevatedSurface)
+                                .background(colors.surface)
                         ) {
                             AsyncImage(
-                                model = artist.artworkUri,
+                                model = artist.artworkUri.ifBlank { "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
                                 contentDescription = artist.name,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
@@ -659,13 +751,16 @@ fun LibraryScreen(
                             Text(
                                 text = artist.name,
                                 style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
+                                    fontWeight = FontWeight.Bold,
                                     color = colors.primaryText
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "${artist.songCount} songs",
-                                style = MaterialTheme.typography.bodyMedium.copy(
+                                text = "Artist",
+                                style = MaterialTheme.typography.bodySmall.copy(
                                     color = colors.secondaryText
                                 )
                             )
