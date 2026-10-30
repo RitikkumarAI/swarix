@@ -377,7 +377,9 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         isPlaying = isPlaying,
                         playlists = playlists,
                         recentSearches = mainViewModel.recentSearches.collectAsStateWithLifecycle().value,
-                        onSongClick = { mainViewModel.playSong(it, allSongs) },
+                        onlineResults = mainViewModel.onlineSearchResults.collectAsStateWithLifecycle().value,
+                        isSearchingOnline = mainViewModel.isSearchingOnline.collectAsStateWithLifecycle().value,
+                        onSongClick = { mainViewModel.playSong(it) },
                         onArtistClick = { artistName ->
                             val artistSongs = allSongs.filter { it.artist.contains(artistName, ignoreCase = true) }
                             if (artistSongs.isNotEmpty()) {

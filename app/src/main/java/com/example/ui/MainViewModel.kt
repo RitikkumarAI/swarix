@@ -37,6 +37,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import android.util.Log
 import org.json.JSONArray
 
 enum class SubScreen {
@@ -290,11 +293,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         .map { it.map { q -> q.query } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private val _onlineSearchResults = MutableStateFlow<List<Song>>(emptyList())
+    val onlineSearchResults: StateFlow<List<Song>> = _onlineSearchResults.asStateFlow()
+
+    private val _isSearchingOnline = MutableStateFlow(false)
+    val isSearchingOnline: StateFlow<Boolean> = _isSearchingOnline.asStateFlow()
+
+    private var onlineSearchJob: Job? = null
+
     fun search(query: String) {
         if (query.isNotBlank()) {
             viewModelScope.launch {
                 repository.insertSearchQuery(SearchQueryEntity(query))
             }
+        }
+        onlineSearchJob?.cancel()
+        val trimmed = query.trim()
+        if (trimmed.length >= 2) {
+            onlineSearchJob = viewModelScope.launch {
+                _isSearchingOnline.value = true
+                delay(300)
+                try {
+                    val results = repository.searchOnline(trimmed)
+                    _onlineSearchResults.value = results
+                } catch (e: Exception) {
+                    Log.e("MainViewModel", "Online search failed", e)
+                } finally {
+                    _isSearchingOnline.value = false
+                }
+            }
+        } else {
+            _onlineSearchResults.value = emptyList()
+            _isSearchingOnline.value = false
         }
     }
 
@@ -323,11 +353,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun playSong(song: Song, customQueue: List<Song>? = null) {
-        val q = customQueue ?: allSongs.value
-        playerManager.playSong(song, q)
+        val q = customQueue ?: if (_onlineSearchResults.value.any { it.id == song.id }) {
+            _onlineSearchResults.value
+        } else {
+            allSongs.value
+        }
         viewModelScope.launch {
+            repository.insertSong(song)
             repository.recordPlayback(song.id)
         }
+        playerManager.playSong(song, q)
     }
 
     fun togglePlayPause() = playerManager.togglePlayPause()

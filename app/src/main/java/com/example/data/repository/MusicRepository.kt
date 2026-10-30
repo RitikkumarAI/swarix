@@ -132,10 +132,30 @@ class MusicRepository(
         }
     }
 
+    suspend fun searchOnline(query: String): List<Song> {
+        return withContext(Dispatchers.IO) {
+            val entities = com.example.data.remote.JioSaavnService.searchSongs(query)
+            if (entities.isNotEmpty()) {
+                musicDao.insertSongs(entities)
+            }
+            entities.map { it.toDomain() }
+        }
+    }
+
+    suspend fun insertSong(song: Song) {
+        withContext(Dispatchers.IO) {
+            musicDao.insertSong(song.toEntity())
+        }
+    }
+
     suspend fun initializeCatalogIfEmpty() {
         withContext(Dispatchers.IO) {
             val existing = musicDao.getAllSongs().first()
-            if (existing.isEmpty()) {
+            val hasDummySongs = existing.any { it.contentUri.contains("codeskulptor") || it.id.startsWith("swarix_") }
+            if (hasDummySongs) {
+                musicDao.deleteDummySongs()
+            }
+            if (existing.isEmpty() || hasDummySongs) {
                 val seedSongs = getSeedSongs()
                 musicDao.insertSongs(seedSongs)
 
@@ -401,111 +421,107 @@ class MusicRepository(
     }
 
     private fun getSeedSongs(): List<SongEntity> {
-        // High quality legal royalty-free audio streams for seamless immediate playback
-        // Featuring the titles, artists and albums from the user's reference mockup!
-        val audioStream1 = "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverending_Story.mp3"
-        val audioStream2 = "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3"
-        val audioStream3 = "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.mp3"
-        val audioStream4 = "https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/soundtrack.mp3"
-
         return listOf(
             SongEntity(
-                id = "swarix_1",
+                id = "online_apna_bana_le",
                 title = "Apna Bana Le",
-                artist = "Arijit Singh",
+                artist = "Arijit Singh, Sachin-Jigar",
                 album = "Bhediya",
                 durationMs = 261000,
-                contentUri = audioStream1,
-                artworkUri = "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/815/483a6e118e8108cbb3e5cd8701674f32_320.mp4",
+                artworkUri = "https://c.saavncdn.com/815/Bhediya-Hindi-2023-20230927155213-500x500.webp",
                 genre = "Bollywood Romance",
                 mood = "Romance",
-                lyrics = """Mujhe apna bana le piya
+                lyrics = """Tu mera koi na hoke bhi kuch laage
+Kiya re jo bhi tune kiya re
 Apna bana le piya
-Dil ke nagar mein
-Shehar tu basa le piya
-Piya o...
-Mujhe apna bana le piya
-Apna bana le...
-Tujhko hi maana hai dil ne
-Tujhko hi apna jaana hai
-Haar ke bhi main jeet gaya hoon
-Tujhko paake khud ko paaya""".trimIndent(),
+Dil ke nagar mein shehar tu basa le piya""".trimIndent(),
                 isFavorite = true,
                 playCount = 14,
                 dateAdded = System.currentTimeMillis() - 100000,
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_2",
+                id = "online_heeriye",
                 title = "Heeriye",
                 artist = "Jasleen Royal & Arijit Singh",
                 album = "Heeriye Single",
-                durationMs = 205000,
-                contentUri = audioStream2,
-                artworkUri = "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fit=crop&q=80",
+                durationMs = 194000,
+                contentUri = "https://aac.saavncdn.com/022/a192e8d320ea5630db314d04fedf0aa5_320.mp4",
+                artworkUri = "https://c.saavncdn.com/022/Heeriye-feat-Arijit-Singh-Hindi-2023-20230928050405-500x500.webp",
                 genre = "Acoustic Pop",
                 mood = "Chill",
                 lyrics = """Heeriye heeriye aa...
-Heeriye heeriye aa...
-Teri hoke marjavan
-Kujh aisa kar javan
-Ni heeriye aa...
-Hathan te likh leya ve
-Dil da main haal sunavan
-Kinve tainu samjhavan""".trimIndent(),
+Teri hoke marjavan kujh aisa kar javan
+Hathan te likh leya ve dil da main haal sunavan""".trimIndent(),
                 isFavorite = true,
                 playCount = 10,
                 dateAdded = System.currentTimeMillis() - 200000,
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_3",
+                id = "online_kesariya",
                 title = "Kesariya",
-                artist = "Arijit Singh",
+                artist = "Arijit Singh & Pritam",
                 album = "Brahmastra",
                 durationMs = 268000,
-                contentUri = audioStream3,
-                artworkUri = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/871/c2febd353f3a076a406fa37510f31f9f_320.mp4",
+                artworkUri = "https://c.saavncdn.com/871/Brahmastra-Original-Motion-Picture-Soundtrack-Hindi-2022-20221006155213-500x500.webp",
                 genre = "Romantic",
                 mood = "Romance",
                 lyrics = """Kesariya tera ishq hai piya
 Rang jaaun jo main haath lagaun
 Din beete saara teri fikr mein
-Rain saari teri khair manaun
-Patjhad ke mausam mein bhi
-Rangin bahaarein aayi hain""".trimIndent(),
+Rain saari teri khair manaun""".trimIndent(),
                 isFavorite = false,
                 playCount = 8,
                 dateAdded = System.currentTimeMillis() - 300000,
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_4",
+                id = "online_tum_kya_mile",
                 title = "Tum Kya Mile",
                 artist = "Arijit Singh & Shreya Ghoshal",
-                album = "Rocky Aur Rani",
+                album = "Rocky Aur Rani Kii Prem Kahaani",
                 durationMs = 217000,
-                contentUri = audioStream4,
-                artworkUri = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/001/c5f5a30fa60d1340dde31e4bd2184934_320.mp4",
+                artworkUri = "https://c.saavncdn.com/001/Rocky-Aur-Rani-Kii-Prem-Kahaani-Hindi-2023-20250130073112-500x500.webp",
                 genre = "Duet Romance",
                 mood = "Romance",
                 lyrics = """Tum kya mile hum na rahe hum
 Bikhre the jo milke bane hum
-Jeene ko ab to tayyar hain hum
-Duniya se ladke keh denge sab se""".trimIndent(),
+Jeene ko ab to tayyar hain hum""".trimIndent(),
                 isFavorite = true,
                 playCount = 6,
                 dateAdded = System.currentTimeMillis() - 400000,
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_5",
+                id = "online_chaleya",
+                title = "Chaleya",
+                artist = "Arijit Singh & Shilpa Rao",
+                album = "Jawan",
+                durationMs = 200000,
+                contentUri = "https://aac.saavncdn.com/047/d1366530468931703ac909e82a3ee788_320.mp4",
+                artworkUri = "https://c.saavncdn.com/047/Jawan-Hindi-2023-20230921190854-500x500.webp",
+                genre = "Bollywood Dance",
+                mood = "Joy",
+                lyrics = """Ishq mein dil bana hai
+Bada be-imaan re
+Chaleya te chaleya""".trimIndent(),
+                isFavorite = true,
+                playCount = 15,
+                dateAdded = System.currentTimeMillis() - 450000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_pehle_bhi_main",
                 title = "Pehle Bhi Main",
                 artist = "Vishal Mishra",
-                album = "Animal",
+                album = "ANIMAL",
                 durationMs = 250000,
-                contentUri = audioStream1,
-                artworkUri = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/092/81b52beea90f186f27cf5c5eead972c8_320.mp4",
+                artworkUri = "https://c.saavncdn.com/092/ANIMAL-Hindi-2023-20260724191152-500x500.webp",
                 genre = "Soulful",
                 mood = "Sad",
                 lyrics = """Pehle bhi main tumse mila hoon
@@ -518,51 +534,31 @@ Marham sa kyun lagne laga""".trimIndent(),
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_6",
-                title = "Tera Fitoor",
-                artist = "Arijit Singh",
-                album = "Genius",
-                durationMs = 311000,
-                contentUri = audioStream2,
-                artworkUri = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80",
-                genre = "Romantic",
-                mood = "Romance",
-                lyrics = """Tera fitoor jab se chadh gaya re
-Hawa mein baatein karne laga hai dil mera
-Ishq ki galiyon mein bhatke
-Aisa hua nasha tera""".trimIndent(),
-                isFavorite = false,
-                playCount = 4,
-                dateAdded = System.currentTimeMillis() - 600000,
-                isLocal = false
-            ),
-            SongEntity(
-                id = "swarix_7",
+                id = "online_raataan_lambiyan",
                 title = "Raataan Lambiyan",
                 artist = "Jubin Nautiyal & Asees Kaur",
                 album = "Shershaah",
                 durationMs = 230000,
-                contentUri = audioStream3,
-                artworkUri = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/238/35726d4394604604e961bf5b846870d0_320.mp4",
+                artworkUri = "https://c.saavncdn.com/238/Shershaah-Original-Motion-Picture-Soundtrack--Hindi-2021-20210815181610-500x500.webp",
                 genre = "Romantic",
                 mood = "Chill",
                 lyrics = """Kaate kate na re raina
 Tere bina beswaad lagdi hai
-Raataan lambiyan lambiyan re
-Katte tere sang sang saare sapne""".trimIndent(),
+Raataan lambiyan lambiyan re""".trimIndent(),
                 isFavorite = true,
                 playCount = 12,
                 dateAdded = System.currentTimeMillis() - 700000,
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_8",
-                title = "Hasi",
+                id = "online_hasi",
+                title = "Hasi Ban Gaye",
                 artist = "Ami Mishra",
                 album = "Hamari Adhuri Kahani",
                 durationMs = 212000,
-                contentUri = audioStream4,
-                artworkUri = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/945/b5067a1a8f2c0f7fc098fbb9277615a2_320.mp4",
+                artworkUri = "https://c.saavncdn.com/945/Hasi-Ban-Gaye-Hindi-2023-20230608172234-500x500.webp",
                 genre = "Melody",
                 mood = "Sad",
                 lyrics = """Haan hasi ban gaye
@@ -575,13 +571,13 @@ Meri zameen ban gaye""".trimIndent(),
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_9",
+                id = "online_iktara",
                 title = "Iktara",
                 artist = "Amit Trivedi & Kavita Seth",
                 album = "Wake Up Sid",
                 durationMs = 254000,
-                contentUri = audioStream1,
-                artworkUri = "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&auto=format&fit=crop&q=80",
+                contentUri = "https://aac.saavncdn.com/910/00bad068211036ad7a4c06d705c52bd4_320.mp4",
+                artworkUri = "https://c.saavncdn.com/910/Wake-Up-Sid-Hindi-2009-20190617160255-500x500.webp",
                 genre = "Sufi Pop",
                 mood = "Chill",
                 lyrics = """O re manwa tu to bawra hai
@@ -594,56 +590,77 @@ Iktara goonje har gali""".trimIndent(),
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_10",
-                title = "Safar",
-                artist = "Jubin Nautiyal",
-                album = "Single",
-                durationMs = 278000,
-                contentUri = audioStream2,
-                artworkUri = "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&auto=format&fit=crop&q=80",
-                genre = "Acoustic",
-                mood = "Focus",
-                lyrics = """Safar khoobsurat hai manzil se bhi
-Chalte chalo raste naye
-Subah ki dhoop aur shaam ki chhaon
-Har mod pe naye fasane""".trimIndent(),
-                isFavorite = false,
-                playCount = 2,
+                id = "online_starboy",
+                title = "Starboy",
+                artist = "The Weeknd ft. Daft Punk",
+                album = "The Highlights",
+                durationMs = 230000,
+                contentUri = "https://aac.saavncdn.com/396/b4e570050007b056c662f2a98c9f28ec_320.mp4",
+                artworkUri = "https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.webp",
+                genre = "Pop / R&B",
+                mood = "Workout",
+                lyrics = """I'm tryna put you in the worst mood, ah
+P1 cleaner than your church shoes, ah
+Look what you've done
+I'm a motherfuckin' starboy""".trimIndent(),
+                isFavorite = true,
+                playCount = 18,
+                dateAdded = System.currentTimeMillis() - 950000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_softly",
+                title = "Softly",
+                artist = "Karan Aujla & Ikky",
+                album = "Making Memories",
+                durationMs = 155000,
+                contentUri = "https://aac.saavncdn.com/538/727114725cd7ec508b1df0a7e4515e5e_320.mp4",
+                artworkUri = "https://c.saavncdn.com/538/Making-Memories-English-2023-20230818075015-500x500.webp",
+                genre = "Punjabi Pop",
+                mood = "Party",
+                lyrics = """Ni softly softly chal kude
+Paunde asle de vich khal kude""".trimIndent(),
+                isFavorite = true,
+                playCount = 14,
                 dateAdded = System.currentTimeMillis() - 1000000,
                 isLocal = false
             ),
             SongEntity(
-                id = "swarix_11",
-                title = "Energy Pulse",
-                artist = "Workout Beat Crew",
-                album = "Cardio Peak",
-                durationMs = 195000,
-                contentUri = audioStream3,
-                artworkUri = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&auto=format&fit=crop&q=80",
-                genre = "EDM",
-                mood = "Workout",
-                lyrics = "Feel the rhythm, push the boundary, never stop the pump!",
-                isFavorite = false,
-                playCount = 9,
+                id = "online_lover",
+                title = "Lover",
+                artist = "Diljit Dosanjh",
+                album = "MoonChild Era",
+                durationMs = 190000,
+                contentUri = "https://aac.saavncdn.com/209/88cd9a1cc0af8768d67272876bb09851_320.mp4",
+                artworkUri = "https://c.saavncdn.com/209/MoonChild-Era-Punjabi-2021-20240715073449-500x500.webp",
+                genre = "Punjabi Pop",
+                mood = "Joy",
+                lyrics = """Tera ni tera ni lover
+Diljit dosanjh baby!""".trimIndent(),
+                isFavorite = true,
+                playCount = 16,
                 dateAdded = System.currentTimeMillis() - 1100000,
                 isLocal = false
-            ),
-            SongEntity(
-                id = "swarix_12",
-                title = "Devotion & Peace",
-                artist = "Spiritual Sanctuary",
-                album = "Divine Waves",
-                durationMs = 320000,
-                contentUri = audioStream4,
-                artworkUri = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80",
-                genre = "Devotional",
-                mood = "Devotional",
-                lyrics = "Om Shanti Shanti Shanti. Eternal peace and light fills every soul.",
-                isFavorite = true,
-                playCount = 11,
-                dateAdded = System.currentTimeMillis() - 1200000,
-                isLocal = false
             )
+        )
+    }
+
+    fun Song.toEntity(): SongEntity {
+        return SongEntity(
+            id = id,
+            title = title,
+            artist = artist,
+            album = album,
+            durationMs = durationMs,
+            contentUri = contentUri,
+            artworkUri = artworkUri,
+            genre = genre,
+            mood = mood,
+            lyrics = lyrics,
+            isFavorite = isFavorite,
+            playCount = playCount,
+            dateAdded = dateAdded,
+            isLocal = isLocal
         )
     }
 

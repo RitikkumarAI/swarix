@@ -53,6 +53,12 @@ interface MusicDao {
     @Query("UPDATE songs SET playCount = playCount + 1 WHERE id = :songId")
     suspend fun incrementPlayCount(songId: String)
 
+    @Query("DELETE FROM songs WHERE contentUri LIKE '%codeskulptor%' OR id LIKE 'swarix_%'")
+    suspend fun deleteDummySongs()
+
+    @Query("DELETE FROM songs WHERE id = :songId")
+    suspend fun deleteSongById(songId: String)
+
     // Playlists
     @Query("SELECT * FROM playlists ORDER BY createdAt DESC")
     fun getAllPlaylists(): Flow<List<PlaylistEntity>>

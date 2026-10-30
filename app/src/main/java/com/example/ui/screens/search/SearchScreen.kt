@@ -82,6 +82,8 @@ fun SearchScreen(
     isPlaying: Boolean,
     playlists: List<Playlist> = emptyList(),
     recentSearches: List<String> = emptyList(),
+    onlineResults: List<Song> = emptyList(),
+    isSearchingOnline: Boolean = false,
     onSongClick: (Song) -> Unit,
     onArtistClick: (String) -> Unit,
     onFavoriteToggle: (Song) -> Unit,
@@ -440,11 +442,36 @@ fun SearchScreen(
 
         val displaySongs = if (voiceSearchResult != null && selectedFilter == "All" && voiceSearchResult!!.matchedSongs.isNotEmpty()) {
             voiceSearchResult!!.matchedSongs
+        } else if (onlineResults.isNotEmpty()) {
+            (onlineResults + filteredSongs).distinctBy { it.id }
         } else {
             filteredSongs
         }
 
         if (searchQuery.isNotBlank()) {
+            if (isSearchingOnline) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            color = colors.primaryAccent,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Searching online music library...",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = colors.secondaryText)
+                        )
+                    }
+                }
+            }
+
             item {
                 Text(
                     text = "Results (${displaySongs.size})",
