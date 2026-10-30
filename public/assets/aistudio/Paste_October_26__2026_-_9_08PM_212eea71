@@ -1,0 +1,1082 @@
+SWARIX — COMPLETE ANDROID MUSIC PLAYER
+
+MASTER DEVELOPMENT PROMPT — UI, UX, FEATURES, ARCHITECTURE AND APK
+
+Act as a senior Android engineer, Kotlin developer, music streaming architect, and premium mobile UI/UX designer. Build a complete, functional Android music player application named Swarix using Android Studio.
+
+I am providing TWO UI REFERENCE IMAGES. These images represent the visual direction and design language that I want for my application.
+
+Your task is to analyze BOTH attached reference images carefully and implement an original, polished Android application that closely follows their visual style, layout patterns, typography, spacing, navigation, colors, album artwork presentation, player controls, and premium aesthetic.
+
+Do not merely describe the design, generate a prototype, or provide sample code. Build the actual Android application inside the current Android Studio project.
+
+The final deliverable must be a working Android application that can be compiled into an installable APK.
+
+⸻
+
+1. PRODUCT IDENTITY
+
+Application Name: Swarix
+
+Tagline: Sound for Every Story.
+
+Platform: Android
+
+Primary Language: Kotlin
+
+UI Framework: Jetpack Compose with Material 3
+
+Audio Playback Engine: AndroidX Media3 ExoPlayer
+
+Background Playback: MediaSessionService
+
+Local Database: Room
+
+Preferences: DataStore
+
+Image Loading: Coil
+
+Background Tasks: WorkManager, where appropriate
+
+Architecture: Clean, modular, maintainable Android architecture
+
+Minimum Android Version: Android 8.0 (API 26), unless an implementation constraint requires a documented adjustment.
+
+Use a current stable Android SDK and compatible stable dependency versions.
+
+The app must be designed primarily for smartphones, with responsive layouts that adapt to different screen sizes.
+
+The main objective is to create a premium-feeling music application with an extensive set of features available without a mandatory user subscription.
+
+Do not lock the application’s own features behind an artificial premium paywall.
+
+⸻
+
+2. CRITICAL UI REFERENCE REQUIREMENTS
+
+Two reference images are attached. Treat them as the primary visual references.
+
+Analyze both images before implementation.
+
+The first reference emphasizes a cinematic, sophisticated, dark music-player experience.
+
+The second reference emphasizes a bright, elegant, light music-player experience.
+
+Use the strongest visual elements from both references to create one coherent design system.
+
+Do not randomly combine incompatible visual styles.
+
+The resulting application should feel like a professionally designed music product, not a generic AI-generated interface.
+
+Design principles
+
+1. Premium visual hierarchy.
+2. Clean typography.
+3. Consistent spacing.
+4. Carefully aligned elements.
+5. High-quality album artwork.
+6. Natural, subtle transitions.
+7. Minimal visual clutter.
+8. Proper contrast and readable text.
+9. Consistent icons and component styling.
+10. Realistic mobile layouts.
+11. Functional controls rather than decorative buttons.
+12. Native Android behavior.
+13. No unnecessary gradients or glowing effects.
+14. No excessive rounded cards everywhere.
+15. No random colors or inconsistent component styles.
+16. No placeholder-heavy screens.
+17. No duplicate sections added just to fill space.
+
+Do not reproduce another music application’s branding, logo, or proprietary artwork. Create an original Swarix identity inspired by the general quality of premium music applications.
+
+⸻
+
+3. PREMIUM COLOR SYSTEM
+
+Create a complete design token system.
+
+Primary Dark Theme
+
+* Main Background: #0B0D0C
+* Secondary Background: #121513
+* Surface: #191D19
+* Elevated Surface: #222720
+* Primary Text: #F5F1E8
+* Secondary Text: #B9B9AD
+* Muted Text: #85887E
+* Primary Accent: #D7BC83
+* Secondary Accent: #A7B49A
+* Divider: #30352F
+* Error: #CF6D68
+* Success: #8DAA86
+
+Primary Light Theme
+
+* Main Background: #F6F3EC
+* Secondary Background: #EEE9DF
+* Surface: #FFFCF5
+* Elevated Surface: #FFFFFF
+* Primary Text: #20231F
+* Secondary Text: #65685F
+* Muted Text: #8C8C81
+* Primary Accent: #B69A62
+* Secondary Accent: #73836C
+* Divider: #E1DBCF
+* Error: #B94E49
+* Success: #557E57
+
+These colors are starting design tokens. Refine their contrast and usage consistently during implementation.
+
+Avoid dominant purple, neon pink, excessive gradients, and oversaturated backgrounds.
+
+The visual identity should use charcoal, warm ivory, muted olive, natural beige, and restrained gold accents.
+
+Use album artwork to provide most of the visual color.
+
+Theme Support
+
+Implement:
+
+* Light Theme
+* Dark Theme
+* Follow System Theme
+* Persisted Theme Preference
+* Correct system bar colors
+* Correct status bar icon contrast
+* Correct navigation bar appearance
+* Consistent theme switching across every screen
+
+The app must not become visually inconsistent when the user switches themes.
+
+⸻
+
+4. APPLICATION ARCHITECTURE
+
+Organize the application into maintainable layers.
+
+Presentation:
+
+* Compose Screens
+* Reusable Components
+* Navigation
+* ViewModels
+* UI State
+* Theme and Design Tokens
+
+Domain:
+
+* Playback Use Cases
+* Queue Management
+* Playlist Management
+* Search
+* Favorites
+* Library Operations
+* Audio Settings
+
+Data:
+
+* Room Database
+* Repositories
+* Data Sources
+* Media Metadata
+* DataStore Preferences
+* Optional Network APIs
+
+Playback:
+
+* Media3 ExoPlayer
+* MediaSessionService
+* Playback Queue
+* Audio Focus
+* Notification Controls
+* Media Session State
+
+Optional Online Services:
+
+* Catalog API
+* Authentication
+* Streaming
+* Download Management
+* Cloud Synchronization
+
+Optional AI Services:
+
+* AI Playlist Generation
+* Natural-Language Search
+* Recommendation Engine
+* AI Music Assistant
+
+Use dependency injection where it improves maintainability.
+
+Separate UI code from playback and database logic.
+
+Avoid placing the entire application inside MainActivity.
+
+⸻
+
+5. COMPLETE SCREEN LIST
+
+Implement the following screens and connect them through working navigation.
+
+A. Onboarding
+
+1. Splash Screen
+2. Welcome Screen
+3. Music Discovery Introduction
+4. Mood Selection
+5. Favorite Genre Selection
+6. Favorite Artist Selection, where catalog data exists
+7. Permission Explanation
+8. Continue Without Account
+9. Optional Account Setup
+
+Onboarding must be skippable.
+
+Do not request unnecessary permissions.
+
+Do not ask for notification, media, or storage permissions until the relevant feature requires them.
+
+Explain why a permission is needed before requesting it.
+
+B. Main Application
+
+10. Home
+11. Search
+12. Search Results
+13. Explore Music
+14. Genre Details
+15. Mood-Based Discovery
+16. Artist Details
+17. Album Details
+18. Playlist Details
+19. Now Playing
+20. Full-Screen Player
+21. Lyrics
+22. Playback Queue
+23. Your Library
+24. All Songs
+25. All Albums
+26. All Artists
+27. Local Folders
+28. Liked Songs
+29. Recently Played
+30. Most Played
+31. Downloads
+32. Equalizer
+33. Audio Settings
+34. Appearance Settings
+35. Playback Settings
+36. Storage Management
+37. Listening Statistics
+38. AI Music Assistant
+39. Create Playlist
+40. Edit Playlist
+41. App Settings
+42. About Swarix
+
+Build the screens as part of a coherent application rather than isolated UI demonstrations.
+
+⸻
+
+6. HOME SCREEN
+
+Create a premium, personalized home screen based on the references.
+
+Include:
+
+* Swarix branding
+* Personalized greeting
+* Profile or account access
+* Search shortcut
+* Notification access, if implemented
+* Recently Played
+* Continue Listening
+* Made for You
+* Trending Music, if catalog data exists
+* Recently Added Local Music
+* Favorite Artists
+* Mood-Based Playlists
+* Recommended Albums
+* Daily Mixes
+* Workout Music
+* Romantic Music
+* Chill Music
+* Focus Music
+* Devotional Music
+* Hindi Music
+* English Music
+* Punjabi Music
+* New Releases, if available
+* A persistent mini-player
+* Bottom Navigation
+
+Do not display fake trending statistics or pretend to have a live music catalog.
+
+When online data is unavailable, use actual local music or clearly identified demo content.
+
+The Home screen must have meaningful empty states when the user has no music.
+
+⸻
+
+7. SEARCH AND DISCOVERY
+
+Implement:
+
+* Search Songs
+* Search Artists
+* Search Albums
+* Search Playlists
+* Search Local Files
+* Search History
+* Clear Search History
+* Recent Searches
+* Search Suggestions
+* Genre Filters
+* Language Filters
+* Sort Results
+* Empty Search State
+* No Results State
+* Loading State
+* Search Error State
+
+Use debounced search for online requests.
+
+Local search must work without an internet connection.
+
+If an online catalog is connected, search its actual API rather than fabricated results.
+
+Provide a clear distinction between local tracks and online catalog tracks.
+
+⸻
+
+8. COMPLETE MUSIC PLAYER
+
+Implement a functional Now Playing screen.
+
+Include:
+
+* Album Artwork
+* Song Title
+* Artist Name
+* Album Name
+* Play
+* Pause
+* Previous
+* Next
+* Seek Bar
+* Current Time
+* Total Duration
+* Shuffle
+* Repeat Off
+* Repeat One
+* Repeat All
+* Like / Unlike
+* Add to Playlist
+* Playback Queue
+* Lyrics Access
+* Audio Output Information
+* More Options
+* Download Action, only where supported
+* Share Track Information
+* Background Playback
+
+Provide a compact mini-player that remains available across main screens.
+
+The player must update from the actual Media3 playback state.
+
+Do not use fake timers or independent UI playback states.
+
+Playback Queue
+
+Implement:
+
+* Add to Queue
+* Play Next
+* Remove from Queue
+* Reorder Tracks
+* Clear Queue
+* Display Upcoming Tracks
+* Display Currently Playing Track
+* Save Queue as Playlist
+* Queue Persistence Where Appropriate
+
+Queue changes must update the actual playback engine.
+
+Additional Playback Controls
+
+Implement where supported:
+
+* Crossfade
+* Gapless Playback
+* Playback Speed
+* Sleep Timer
+* Fade Out
+* Resume Last Session
+* Automatic Pause on Headphone Disconnect
+* Audio Focus Handling
+* Bluetooth Controls
+* Wired Headphone Controls
+* Volume Normalization, if implemented correctly
+
+Do not expose controls that do nothing.
+
+If a feature requires unsupported hardware or additional processing, explain its availability in the UI.
+
+⸻
+
+9. LOCAL MUSIC PLAYER
+
+This is a core requirement and must work even when the user has no online music account.
+
+Use Android MediaStore to discover locally available audio.
+
+Implement:
+
+* Local Audio Scanning
+* Songs
+* Albums
+* Artists
+* Genres
+* Folders
+* Recently Added
+* Recently Played
+* Most Played
+* Favorites
+* Track Duration
+* Album Artwork
+* Metadata
+* File Size, where accessible
+* Search
+* Sorting
+* Filtering
+* Multi-Select
+* Add to Queue
+* Add to Playlist
+* Hide Tracks
+* Rescan Library
+* Empty Library State
+* Permission Denied State
+* Library Refresh
+
+Support common audio formats when compatible with the device and selected playback implementation.
+
+Handle Android media permissions correctly for each supported OS version.
+
+Do not attempt to bypass Android storage restrictions.
+
+Do not require unrestricted file-system access for ordinary music playback.
+
+Where appropriate, use the Storage Access Framework for user-selected files and folders.
+
+⸻
+
+10. PLAYLIST MANAGEMENT
+
+Implement:
+
+* Create Playlist
+* Rename Playlist
+* Delete Playlist
+* Add Track
+* Remove Track
+* Reorder Tracks
+* Change Playlist Cover
+* Playlist Description
+* Playlist Favorites
+* Playlist Search
+* Duplicate Playlist
+* Smart Playlists
+* Recently Played Playlist
+* Most Played Playlist
+* Recently Added Playlist
+* Save Current Queue as Playlist
+* Playlist Metadata Export
+* Supported Playlist Import
+* Playlist Persistence
+
+Use Room to persist playlists and their track references.
+
+Support local playlists without requiring an account.
+
+Where possible, preserve track identity across library rescans.
+
+Handle missing files gracefully.
+
+⸻
+
+11. ADVANCED AUDIO FEATURES
+
+Build an Equalizer screen consistent with the reference images.
+
+Include:
+
+* Enable / Disable Equalizer
+* Preset Selection
+* Custom Preset
+* Bass Controls
+* Frequency Bands
+* Save Custom Preset
+* Rename Preset
+* Delete Custom Preset
+* Reset Settings
+* Device Capability Information
+
+Use Android-supported audio effects where appropriate.
+
+Do not assume every device supports the same effects.
+
+Avoid creating multiple competing audio-effect sessions.
+
+Ensure that enabling or disabling the equalizer affects actual playback.
+
+Implement the following where technically supported:
+
+* Bass Boost
+* Virtualizer
+* Audio Balance
+* Mono Audio
+* Volume Normalization
+* Playback Speed
+
+If an audio effect is unavailable, show an informative state instead of a fake control.
+
+⸻
+
+12. LYRICS
+
+Implement a dedicated Lyrics screen.
+
+Include:
+
+* Track Information
+* Lyrics Display
+* Scrollable Lyrics
+* Font Size Controls
+* Current Line Highlighting, if synchronized lyrics are available
+* Lyrics Search or Refresh, if a legitimate provider exists
+* Error and Unavailable States
+
+Do not invent copyrighted lyrics or display unrelated lyrics as real content.
+
+Local lyric files may be supported when the user has the appropriate files.
+
+Online lyrics must come from a permitted provider.
+
+⸻
+
+13. DOWNLOADS AND OFFLINE PLAYBACK
+
+Implement a complete local download manager for content that the application is authorized to download.
+
+Include:
+
+* Download Queue
+* Download Progress
+* Pause
+* Resume
+* Retry
+* Cancel
+* Delete Download
+* Storage Usage
+* Download Quality
+* Wi-Fi-Only Option
+* Downloaded Songs
+* Downloaded Albums
+* Downloaded Playlists
+* Failed Downloads
+* Storage Warnings
+
+Local music files must remain playable offline.
+
+If licensed streaming is added, implement offline downloads according to the applicable rights and DRM requirements.
+
+Do not download protected third-party streaming content through unauthorized methods.
+
+Do not pretend that the application already has commercial music licensing.
+
+⸻
+
+14. AI MUSIC ASSISTANT
+
+Create a dedicated Swarix AI screen with a premium, understated design.
+
+Support the following planned capabilities:
+
+* AI Playlist Generator
+* Mood-Based Music Suggestions
+* Similar Song Suggestions
+* Similar Artist Discovery
+* Natural-Language Music Search
+* Personalized Recommendation Explanations
+* Playlist Refinement
+* Music Discovery Assistance
+
+Example prompts:
+
+* Create a relaxing Hindi playlist.
+* Find music for a late-night drive.
+* Suggest energetic workout songs.
+* Recommend artists similar to my favorites.
+* Create a focus playlist from my local library.
+* Suggest songs based on my listening preferences.
+
+The AI must use available catalog or local-library metadata to produce actionable results.
+
+Do not fabricate playable songs.
+
+If no AI API is configured, provide a graceful unavailable state and allow supported local playlist operations to continue working.
+
+Do not embed API secrets inside the Android APK.
+
+Use a secure backend for paid or private AI API credentials.
+
+Do not send a user’s entire local music library to an external service without clear disclosure and appropriate consent.
+
+⸻
+
+15. MUSIC RECOMMENDATION ENGINE
+
+Create a modular recommendation system.
+
+For the initial local version, recommendations may use:
+
+* Favorite Tracks
+* Listening History
+* Play Counts
+* Favorite Artists
+* Genres
+* Track Metadata
+* Recently Played Tracks
+* User-Selected Moods
+
+Implement simple, explainable recommendation rules before introducing complex AI models.
+
+Provide a way to clear listening history and reset personalized recommendations.
+
+Online recommendations require a legitimate catalog API or backend.
+
+Do not invent streaming statistics, popularity numbers, or real-time rankings.
+
+⸻
+
+16. LISTENING HISTORY AND STATISTICS
+
+Implement:
+
+* Recently Played
+* Most Played
+* Total Listening Time
+* Track Play Counts
+* Favorite Artists
+* Favorite Albums
+* Favorite Genres, where metadata exists
+* Monthly Summary, where sufficient data exists
+* Listening History Search
+* Clear History
+* Delete Individual History Entries
+* Reset Personalization
+
+Store only the data required for these features.
+
+Ensure statistics reflect actual playback events.
+
+⸻
+
+17. SETTINGS
+
+Build a complete settings area.
+
+Include:
+
+ACCOUNT
+
+* Local Profile
+* Optional Sign-In
+* Account Settings, if accounts are implemented
+
+APPEARANCE
+
+* Light Theme
+* Dark Theme
+* Follow System
+* Accent Preferences
+* Animation Preferences
+
+PLAYBACK
+
+* Audio Quality Preferences
+* Crossfade
+* Gapless Playback, if supported
+* Playback Speed
+* Resume Playback
+* Headphone Disconnect Behavior
+
+AUDIO
+
+* Equalizer
+* Bass Boost, if supported
+* Virtualizer, if supported
+* Audio Balance, if supported
+
+LIBRARY
+
+* Rescan Library
+* Excluded Folders
+* Hidden Tracks
+* Sorting Preferences
+
+DOWNLOADS
+
+* Download Quality
+* Wi-Fi Only
+* Storage Usage
+* Clear Downloaded Content
+
+PRIVACY
+
+* Listening History
+* Reset Recommendations
+* Clear Search History
+* Optional Analytics Controls
+* Account Data Deletion, if applicable
+
+SUPPORT
+
+* Help
+* About Swarix
+* App Version
+* Privacy Policy
+* Open-Source Licenses
+
+Persist user preferences using DataStore or appropriate persistent storage.
+
+Every setting must actually affect the corresponding behavior.
+
+⸻
+
+18. NAVIGATION
+
+Use a consistent navigation structure.
+
+Primary destinations:
+
+1. Home
+2. Search
+3. Library
+4. AI Assistant
+5. Profile / Settings
+
+Use the exact navigation layout that best fits the attached references while keeping the interface simple.
+
+A persistent mini-player should appear above the bottom navigation when a track is loaded.
+
+Selecting the mini-player must open the full player.
+
+Back navigation must behave correctly.
+
+Avoid duplicate screen instances and navigation loops.
+
+Support Android system back gestures.
+
+⸻
+
+19. DATABASE DESIGN
+
+Use Room for local persistence.
+
+Create appropriate entities for:
+
+* TrackEntity
+* ArtistEntity, where metadata is available
+* AlbumEntity, where metadata is available
+* PlaylistEntity
+* PlaylistTrackEntity
+* FavoriteEntity
+* PlaybackHistoryEntity
+* ListeningStatisticsEntity
+* DownloadEntity, if downloads are implemented
+* EqualizerPresetEntity
+* SearchHistoryEntity
+* UserPreferencesEntity, only where appropriate
+
+Use foreign keys and indexes where useful.
+
+Implement database migrations when the schema changes.
+
+Do not delete user playlists or preferences during normal application updates.
+
+Use repositories to abstract database access.
+
+Keep UI state separate from database entities.
+
+⸻
+
+20. PERFORMANCE AND STABILITY
+
+The application must be designed for real Android devices.
+
+Requirements:
+
+* No blocking disk operations on the main thread.
+* Efficient MediaStore queries.
+* LazyColumn and LazyRow for large collections.
+* Proper image loading and caching.
+* Efficient album artwork handling.
+* Stable list keys.
+* Coroutine-based asynchronous operations.
+* Lifecycle-aware state collection.
+* Playback state restoration.
+* Graceful error handling.
+* Correct permission handling.
+* No duplicate playback services.
+* No unnecessary background polling.
+* Reasonable battery usage.
+* No unbounded memory growth.
+* Proper cleanup of audio effects.
+* Reliable queue updates.
+* Correct audio focus handling.
+
+Test on multiple screen sizes and Android versions.
+
+Do not sacrifice playback reliability for animations.
+
+⸻
+
+21. ACCESSIBILITY
+
+Implement:
+
+* Meaningful Content Descriptions
+* Screen Reader Support
+* Adequate Touch Targets
+* Readable Typography
+* Sufficient Contrast
+* Scalable Text
+* Reduced Motion Preferences
+* Clear Focus Behavior
+* Accessible Player Controls
+
+Ensure the player remains usable when the user increases the system font size.
+
+⸻
+
+22. REQUIRED PROJECT STRUCTURE
+
+Create a maintainable package structure similar to:
+
+com.swarix.music
+
+* app
+* core
+* core.theme
+* core.ui
+* core.util
+* data.local
+* data.repository
+* data.preferences
+* domain.model
+* domain.repository
+* domain.usecase
+* playback
+* playback.service
+* playback.queue
+* feature.home
+* feature.search
+* feature.library
+* feature.player
+* feature.playlist
+* feature.lyrics
+* feature.downloads
+* feature.equalizer
+* feature.ai
+* feature.settings
+* navigation
+
+Adjust the structure when necessary, but maintain clear separation of responsibilities.
+
+Create reusable components such as:
+
+* SwarixTopBar
+* SwarixBottomNavigation
+* MiniPlayer
+* TrackRow
+* AlbumCard
+* ArtistCard
+* PlaylistCard
+* SectionHeader
+* SearchBar
+* PlaybackControls
+* SeekBar
+* EmptyState
+* LoadingState
+* ErrorState
+* ThemeSelector
+* EqualizerBand
+* DownloadProgressItem
+* MoodCard
+
+Do not duplicate the same component implementation across multiple screens.
+
+⸻
+
+23. IMPLEMENTATION RULES
+
+Follow these rules strictly.
+
+1. Inspect the existing Android Studio project before making changes.
+2. Reuse the existing project structure where appropriate.
+3. Analyze both attached UI reference images before designing screens.
+4. Build a real Android application, not just a mockup.
+5. Use Kotlin and Jetpack Compose.
+6. Use Media3 for playback.
+7. Implement local music playback first.
+8. Make every implemented button perform its intended action.
+9. Do not leave navigation destinations disconnected.
+10. Do not use fake playback state.
+11. Do not fabricate an online catalog.
+12. Do not add API keys directly to source code.
+13. Do not use unauthorized music download techniques.
+14. Do not bypass Android security or storage permissions.
+15. Do not add unnecessary dependencies.
+16. Do not downgrade dependencies arbitrarily.
+17. Do not replace working code without understanding it.
+18. Preserve existing user data during migrations.
+19. Use current stable, mutually compatible dependencies.
+20. Resolve compilation errors rather than hiding them.
+21. Handle loading, error, permission-denied, and empty states.
+22. Keep the interface visually consistent across themes.
+23. Use genuine local audio metadata whenever available.
+24. Add sample content only when clearly identified as sample content.
+25. Keep all core local music features functional without a backend.
+
+If a requested feature requires an external API, backend, subscription to a provider, licensing, or unsupported hardware, implement the appropriate integration boundary and clearly identify the missing requirement.
+
+Do not claim that an unavailable service is fully operational.
+
+⸻
+
+24. DEVELOPMENT WORKFLOW
+
+Execute the following workflow in order.
+
+PHASE 1 — PROJECT INSPECTION
+
+* Inspect the existing project.
+* Review the Gradle configuration.
+* Check the current SDK and dependency versions.
+* Analyze both UI references.
+* Identify any build errors.
+
+PHASE 2 — FOUNDATION
+
+* Establish the design system.
+* Configure navigation.
+* Set up Room and DataStore.
+* Implement the playback service.
+* Configure Media3.
+* Implement permission handling.
+
+PHASE 3 — CORE PLAYER
+
+* Scan local music.
+* Implement the library.
+* Implement playback controls.
+* Implement queue management.
+* Implement playlists.
+* Implement background playback.
+* Implement notifications and lock-screen controls.
+
+PHASE 4 — PREMIUM EXPERIENCE
+
+* Implement both themes.
+* Add equalizer integration.
+* Add lyrics support.
+* Add history and statistics.
+* Add downloads management for authorized content.
+* Add accessibility and personalization.
+
+PHASE 5 — ADVANCED FEATURES
+
+* Implement optional AI integration.
+* Implement recommendation rules.
+* Add online catalog integration points.
+* Add optional authentication and synchronization when configured.
+
+PHASE 6 — TESTING
+
+* Run Gradle sync.
+* Build the debug APK.
+* Resolve compilation errors.
+* Run available unit tests.
+* Run instrumented tests where possible.
+* Verify navigation.
+* Verify local playback.
+* Verify background playback.
+* Verify queue management.
+* Verify playlist persistence.
+* Verify theme switching.
+* Verify permission-denied states.
+* Check for crashes and obvious performance problems.
+
+PHASE 7 — APK DELIVERY
+
+* Generate an installable debug APK.
+* Confirm the build succeeds.
+* Provide the exact APK output path.
+* Explain how to install and test the APK.
+* Identify any unfinished features and external dependencies.
+
+⸻
+
+25. DEFINITION OF DONE
+
+The application is not complete merely because the UI looks attractive.
+
+The initial release must satisfy these acceptance criteria:
+
+* The app launches successfully.
+* The home screen follows the supplied visual references.
+* Both light and dark themes work.
+* Local music can be scanned and displayed.
+* Songs can be played, paused, skipped, and sought.
+* Playback continues when the app is in the background.
+* Lock-screen and notification controls work.
+* The queue works correctly.
+* Playlists persist after restarting the app.
+* Favorites persist after restarting the app.
+* Search works for local tracks.
+* The equalizer works where supported.
+* The sleep timer works.
+* Settings persist.
+* Empty and permission-denied states are handled.
+* The app works without an online backend.
+* No mandatory subscription is required.
+* The project compiles into an installable APK.
+* Unavailable online and AI features are clearly identified rather than simulated as real services.
+
+Online streaming, licensed offline downloads, synchronized lyrics, and cloud AI services may require additional implementation and configuration beyond the local-player release.
+
+⸻
+
+26. FINAL INSTRUCTION
+
+Begin by inspecting the current Android Studio project and analyzing both attached reference images.
+
+Then implement the application directly in the project.
+
+Prioritize visual fidelity, functional playback, stability, and maintainable architecture.
+
+Do not stop after generating a plan or displaying a few screens.
+
+Do not return only example code or pseudocode.
+
+Implement as much of the specified application as the available environment permits, build the APK, test the result, and clearly report what works and what still requires external services.
+
+The final result should be a polished, premium Android music player branded as:
+
+SWARIX
+
+Sound for Every Story.
+
+A refined, modern, original music experience with powerful playback controls, local offline listening, customizable audio, personalized discovery, and optional AI-powered music features.

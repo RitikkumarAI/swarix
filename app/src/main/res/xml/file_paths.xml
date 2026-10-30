@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="cached_playlists" path="playlists/" />
+    <cache-path name="all_cache" path="." />
+    <external-files-path name="music_exports" path="Music/" />
+</paths>

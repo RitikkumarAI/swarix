@@ -1,0 +1,6 @@
+{
+  "name": "Swarix",
+  "description": "Sound for Every Story. A premium Android music player with offline playback, smart queue, equalizer, mood discovery, and AI companion.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

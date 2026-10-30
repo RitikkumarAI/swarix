@@ -1,0 +1,39 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the Android Studio project
+.gradle/
+build/
+app/build/
+
+# Local configuration file (sdk path, secrets, keys)
+local.properties
+.env
+.env.local
+
+# Keystore files (CRITICAL SECURITY)
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+debug.keystore
+my-upload-key.jks
+
+# Google Services / Firebase API Key configs (CRITICAL SECURITY)
+google-services.json
+firebase_applet_config.xml
+
+# IDE & OS Specific
+.aistudio/
+.idea/
+.kotlin/
+*.iml
+.DS_Store
+Thumbs.db
+/captures
+.externalNativeBuild
+.cxx
