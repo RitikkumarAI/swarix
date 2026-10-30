@@ -15,6 +15,13 @@ class EqualizerHelper(private val context: Context) {
     private var loudnessEnhancer: LoudnessEnhancer? = null
     private var currentSessionId: Int = 0
 
+    // Cached audio engine state to persist across track changes and session recreations
+    private var isEngineEnabled: Boolean = true
+    private var cachedLevels: List<Int> = listOf(6, 5, 3, 2, 1, 2, 4, 6, 8, 9)
+    private var cachedBassBoost: Int = 80
+    private var cachedVirtualizer: Int = 60
+    private var isNormalizationEnabled: Boolean = true
+
     fun initSession(audioSessionId: Int) {
         if (audioSessionId == 0 || audioSessionId == currentSessionId) return
         release()
@@ -22,32 +29,35 @@ class EqualizerHelper(private val context: Context) {
 
         try {
             equalizer = Equalizer(0, audioSessionId).apply {
-                enabled = true
+                enabled = isEngineEnabled
             }
+            set10BandLevels(cachedLevels)
         } catch (e: Exception) {
             Log.e("EqualizerHelper", "Failed to init Equalizer: ${e.message}")
         }
 
         try {
             bassBoost = BassBoost(0, audioSessionId).apply {
-                enabled = true
+                enabled = isEngineEnabled
             }
+            setBassBoost(cachedBassBoost)
         } catch (e: Exception) {
             Log.e("EqualizerHelper", "Failed to init BassBoost: ${e.message}")
         }
 
         try {
             virtualizer = Virtualizer(0, audioSessionId).apply {
-                enabled = true
+                enabled = isEngineEnabled
             }
+            setVirtualizer(cachedVirtualizer)
         } catch (e: Exception) {
             Log.e("EqualizerHelper", "Failed to init Virtualizer: ${e.message}")
         }
 
         try {
             loudnessEnhancer = LoudnessEnhancer(audioSessionId).apply {
-                setTargetGain(800)
-                enabled = true
+                setTargetGain(if (isNormalizationEnabled) 1000 else 0)
+                enabled = isEngineEnabled
             }
         } catch (e: Exception) {
             Log.e("EqualizerHelper", "Failed to init LoudnessEnhancer: ${e.message}")
@@ -55,6 +65,7 @@ class EqualizerHelper(private val context: Context) {
     }
 
     fun setEnabled(enabled: Boolean) {
+        isEngineEnabled = enabled
         try {
             equalizer?.enabled = enabled
             bassBoost?.enabled = enabled
@@ -66,10 +77,11 @@ class EqualizerHelper(private val context: Context) {
     }
 
     fun setAudioNormalizationEnabled(enabled: Boolean) {
+        isNormalizationEnabled = enabled
         try {
             loudnessEnhancer?.enabled = enabled
             if (enabled) {
-                loudnessEnhancer?.setTargetGain(800)
+                loudnessEnhancer?.setTargetGain(1000)
             } else {
                 loudnessEnhancer?.setTargetGain(0)
             }
@@ -95,6 +107,7 @@ class EqualizerHelper(private val context: Context) {
     }
 
     fun set10BandLevels(levels: List<Int>) {
+        cachedLevels = levels
         try {
             val eq = equalizer ?: return
             val numBands = eq.numberOfBands.toInt()
@@ -126,6 +139,7 @@ class EqualizerHelper(private val context: Context) {
     }
 
     fun setBassBoost(levelPercent: Int) {
+        cachedBassBoost = levelPercent
         try {
             // levelPercent 0..100, strength 0..1000
             val strength = (levelPercent * 10).coerceIn(0, 1000).toShort()
@@ -136,6 +150,7 @@ class EqualizerHelper(private val context: Context) {
     }
 
     fun setVirtualizer(levelPercent: Int) {
+        cachedVirtualizer = levelPercent
         try {
             // levelPercent 0..100, strength 0..1000
             val strength = (levelPercent * 10).coerceIn(0, 1000).toShort()

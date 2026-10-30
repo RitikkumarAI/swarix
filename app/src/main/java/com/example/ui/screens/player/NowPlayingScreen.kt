@@ -672,7 +672,7 @@ fun NowPlayingScreen(
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
-                                            text = "4K ULTRA",
+                                            text = "8K ULTRA MASTER",
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,

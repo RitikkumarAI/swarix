@@ -12,11 +12,17 @@
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack_Compose_M3-purple.svg)](https://developer.android.com/jetpack/compose)
 [![Media3 ExoPlayer](https://img.shields.io/badge/Audio-AndroidX_Media3_1.2.1-red.svg)](https://developer.android.com/media/media3)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Download APK](https://img.shields.io/badge/Download-Latest_APK-blue?logo=android&logoColor=white)](https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk)
+[![Download APK](https://img.shields.io/badge/Download-Latest_APK-blue?logo=android&logoColor=white)](https://github.com/RitikkumarAI/swarix/releases/download/v1.2/Swarix.apk)
 
-[**📥 Download Latest Release APK**](https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk) • [**✨ Features**](#-key-features) • [**🛠️ Tech Stack**](#%EF%B8%8F-architecture--tech-stack) • [**🚀 Building from Source**](#-building-from-source)
+[**📥 Download Latest Release APK**](https://github.com/RitikkumarAI/swarix/releases/download/v1.2/Swarix.apk) • [**👨‍💻 Developer Portfolio**](https://ritikkumarai.vercel.app/) • [**✨ Features**](#-key-features) • [**🛠️ Tech Stack**](#%EF%B8%8F-architecture--tech-stack) • [**🚀 Building from Source**](#-building-from-source)
 
 </div>
+
+---
+
+## 👨‍💻 Maintained & Developed By
+**Ritik Kumar**  
+🌐 Portfolio: [https://ritikkumarai.vercel.app/](https://ritikkumarai.vercel.app/)
 
 ---
 
@@ -26,11 +32,11 @@ Download and install Swarix directly onto your Android device:
 
 | File | Description | Download |
 |---|---|---|
-| **Swarix Release APK** | Official production build (No ads, 320kbps streaming) | [**Download Swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk) |
+| **Swarix Release APK** | Official production build (8K Master Sound, 320kbps streaming) | [**Download Swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v1.2/Swarix.apk) |
 | **All Releases** | View changelogs and previous builds | [**Releases Page**](https://github.com/RitikkumarAI/swarix/releases) |
 
 ### 📲 Quick Install Guide:
-1. Tap the **[Download Swarix.apk](https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk)** link on your Android device.
+1. Tap the **[Download Swarix.apk](https://github.com/RitikkumarAI/swarix/releases/download/v1.2/Swarix.apk)** link on your Android device.
 2. When the download completes, tap the file in your notification bar or **Downloads** folder.
 3. If prompted with *"Install unknown apps"*, enable permission for your browser or file manager.
 4. Tap **Install** and open **Swarix**!

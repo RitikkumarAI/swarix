@@ -68,16 +68,20 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1
-          name: "Swarix Music Player v1.1"
+          tag_name: v1.2
+          name: "Swarix Music Player v1.2"
           body: |
-            ## 🎵 Swarix Music Player v1.1
+            ## 🎵 Swarix Music Player v1.2
 
             ### ✨ What's New:
-            - **Clean Music Home Screen**: Removed all AI graphs and radar analytics from the main Home screen for a clean, professional Spotify-style music experience.
-            - **Real JioSaavn Streaming Engine**: Unlimited online search & genuine high-fidelity 320kbps audio.
-            - **In-App Auto-Updates (OTA)**: Receive future updates directly within the app without opening GitHub!
-            - **Authentic Studio Master Tracks**: Replaced all demo audio with genuine official tracks.
+            - **Developer & Maintainer**: Ritik Kumar ([Portfolio](https://ritikkumarai.vercel.app/)) integrated into the About section with clickable links.
+            - **World-Class 8K Ultra Studio Master Sound Engine**:
+              - 8K Ultra Studio Lossless DSP pipeline with 3D Spatial Virtualizer.
+              - 10-band audiophile graphic equalizer with sub-bass dynamic punch.
+              - Persistent DSP session states across track transitions.
+              - Direct bit-perfect DAC hardware passthrough & -14 LUFS studio loudness normalization.
+            - **In-App Auto-Updates (OTA)**: Receive future updates seamlessly inside the app.
+            - **Real JioSaavn 320kbps Streaming**: Unlimited search and instant playback of genuine high-fidelity tracks.
 
             ### 📦 App Details
             - **Package ID**: `com.aistudio.swarix.musply`

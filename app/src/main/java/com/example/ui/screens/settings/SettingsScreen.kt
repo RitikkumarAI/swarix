@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
@@ -60,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -122,6 +124,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
+    val uriHandler = LocalUriHandler.current
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showQualityDialog by remember { mutableStateOf(false) }
@@ -338,7 +341,13 @@ fun SettingsScreen(
 
     // Audio Quality Dialog
     if (showQualityDialog) {
-        val qualities = listOf("Standard (128 kbps)", "High (256 kbps)", "Very High (320 kbps)", "Lossless FLAC")
+        val qualities = listOf(
+            "8K Ultra Studio Master (Lossless Hi-Res)",
+            "4K Premium Master (320 kbps)",
+            "Very High (320 kbps)",
+            "High (256 kbps)",
+            "Standard (128 kbps)"
+        )
         AlertDialog(
             onDismissRequest = { showQualityDialog = false },
             title = { Text("Audio Streaming Quality", color = colors.primaryText) },
@@ -437,20 +446,68 @@ fun SettingsScreen(
                 }
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Version 1.0.0 (Release)",
+                        text = "Version 1.2 (Release)",
                         style = MaterialTheme.typography.labelLarge.copy(color = colors.primaryAccent)
                     )
                     Text(
                         text = "Tagline: Sound for Every Story.",
                         style = MaterialTheme.typography.bodyMedium.copy(color = colors.primaryText)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Built with Kotlin, Jetpack Compose, Material 3, AndroidX Media3 ExoPlayer, and Room Database. Designed for high fidelity offline and personalized listening without paywalls.",
+                        text = "Built with Kotlin, Jetpack Compose, Material 3, AndroidX Media3 ExoPlayer, and Room Database. Designed for 8K ultra high fidelity audio and personalized listening without paywalls.",
                         style = MaterialTheme.typography.bodyMedium.copy(color = colors.secondaryText)
                     )
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    // Developer & Maintainer Clickable Card
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                uriHandler.openUri("https://ritikkumarai.vercel.app/")
+                            },
+                        color = colors.primaryAccent.copy(alpha = 0.12f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.primaryAccent.copy(alpha = 0.35f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Maintained & Developed by",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = colors.mutedText,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                                Text(
+                                    text = "Ritik Kumar",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        color = colors.primaryAccent,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                                Text(
+                                    text = "ritikkumarai.vercel.app ↗",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = colors.secondaryText
+                                    )
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.OpenInNew,
+                                contentDescription = "Open Portfolio",
+                                tint = colors.primaryAccent,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -1047,9 +1104,20 @@ fun SettingsScreen(
 
             item {
                 SettingsRow(
+                    icon = Icons.Default.Person,
+                    title = "Maintainer & Developer",
+                    value = "Ritik Kumar ↗",
+                    onClick = {
+                        uriHandler.openUri("https://ritikkumarai.vercel.app/")
+                    }
+                )
+            }
+
+            item {
+                SettingsRow(
                     icon = Icons.Default.SystemUpdate,
                     title = "Check for Updates",
-                    value = "v1.1",
+                    value = "v1.2",
                     onClick = onCheckForUpdates
                 )
             }
@@ -1058,7 +1126,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v1.1",
+                    value = "v1.2",
                     onClick = { showAboutDialog = true }
                 )
             }

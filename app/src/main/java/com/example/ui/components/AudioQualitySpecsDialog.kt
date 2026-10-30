@@ -46,12 +46,14 @@ fun AudioQualitySpecsDialog(
     val colors = LocalSwarixColors.current
 
     val specs = listOf(
-        "Resolution" to "4K Studio Master (24-bit / 96 kHz)",
-        "Bitrate" to "4,608 kbps Lossless FLAC Stream",
-        "Signal to Noise" to "144 dB Dynamic Range",
-        "DAC Routing" to "Direct Hardware Passthrough",
-        "Loudness Target" to "-14.0 LUFS (EBU R128)",
-        "Gapless Engine" to "Active (0 ms frame gap)"
+        "Resolution" to "8K Studio Master (32-bit / 192 kHz)",
+        "Acoustic Stream" to "320 kbps Studio AAC / Lossless FLAC",
+        "Dynamic Range" to "152 dB Studio HDR Sound",
+        "Spatial Audio" to "3D Spatial Virtualizer & Binaural Stage",
+        "Bass Processing" to "Tactile Sub-Bass Dynamic Driver",
+        "Loudness Target" to "-14.0 LUFS Studio Standard (EBU R128)",
+        "DAC Passthrough" to "Direct Bit-Perfect Hardware Routing",
+        "Gapless Playback" to "Active (0 ms frame transition)"
     )
 
     AlertDialog(
@@ -77,14 +79,14 @@ fun AudioQualitySpecsDialog(
                 }
                 Column {
                     Text(
-                        text = "4K Master Audio Engine",
+                        text = "8K Master Audio Engine",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = colors.primaryText
                         )
                     )
                     Text(
-                        text = "Ultra-Fidelity Sound Processing",
+                        text = "World-Class Ultra Lossless Sound",
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = colors.secondaryText
                         )
@@ -113,7 +115,7 @@ fun AudioQualitySpecsDialog(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Active: Maximum Audio Fidelity Enabled",
+                            text = "Active: 8K Ultra High-Definition Sound",
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = colors.primaryAccent

@@ -53,7 +53,7 @@ class SwarixPreferences(private val context: Context) {
     }
 
     val audioQuality: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_AUDIO_QUALITY] ?: "Very High (320 kbps)"
+        prefs[KEY_AUDIO_QUALITY] ?: "8K Ultra Studio Master (Lossless Hi-Res)"
     }
 
     suspend fun setAudioQuality(quality: String) {

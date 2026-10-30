@@ -50,12 +50,12 @@ data class Album(
 
 data class EqualizerState(
     val isEnabled: Boolean = true,
-    val presetName: String = "Custom",
-    val bandLevels: List<Int> = listOf(3, 2, 1, 0, 1, 2, 4, 3, 2, 2), // 10 bands: 31Hz, 62Hz, 125Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz
-    val bassBoost: Int = 45, // 0 to 100
-    val virtualizer: Int = 30, // 0 to 100
+    val presetName: String = "8K Ultra Studio Master",
+    val bandLevels: List<Int> = listOf(6, 5, 3, 2, 1, 2, 4, 6, 8, 9), // 10 bands: 31Hz, 62Hz, 125Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz
+    val bassBoost: Int = 80, // 0 to 100
+    val virtualizer: Int = 60, // 0 to 100
     val isAutoGenreEnabled: Boolean = true,
-    val detectedGenre: String = "Bollywood Romance"
+    val detectedGenre: String = "8K Master Dynamic"
 )
 
 data class FriendActivity(

@@ -33,12 +33,12 @@ object MusicPlayerInitializer {
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
                 /* minBufferMs = */ 60_000,
-                /* maxBufferMs = */ 120_000,
+                /* maxBufferMs = */ 180_000,
                 /* bufferForPlaybackMs = */ 1_000,
                 /* bufferForPlaybackAfterRebufferMs = */ 2_500
             )
             .setBackBuffer(
-                /* backBufferDurationMs = */ 30_000,
+                /* backBufferDurationMs = */ 60_000,
                 /* retainBackBufferFromKeyframe = */ true
             )
             .setPrioritizeTimeOverSizeThresholds(true)
@@ -47,6 +47,8 @@ object MusicPlayerInitializer {
         val audioAttributes = AudioAttributes.Builder()
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .setUsage(C.USAGE_MEDIA)
+            .setAllowedCapturePolicy(C.ALLOW_CAPTURE_BY_ALL)
+            .setSpatializationBehavior(C.SPATIALIZATION_BEHAVIOR_AUTO)
             .build()
 
         val player = ExoPlayer.Builder(context.applicationContext, renderersFactory)

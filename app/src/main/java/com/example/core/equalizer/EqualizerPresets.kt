@@ -25,6 +25,15 @@ object EqualizerPresets {
     )
 
     val PRESETS = linkedMapOf(
+        "8K Ultra Studio Master" to PresetDefinition(
+            name = "8K Ultra Studio Master",
+            bandLevels = listOf(6, 5, 3, 2, 1, 2, 4, 6, 8, 9),
+            bassBoost = 80,
+            virtualizer = 60,
+            recommendedGenres = listOf("All Genres", "Master", "Hi-Res", "Audiophile"),
+            description = "Pristine 8K Ultra studio acoustic mastering with crystal highs, punchy sub-bass, and wide 3D binaural soundstage.",
+            iconEmoji = "💎"
+        ),
         "Bass Boost" to PresetDefinition(
             name = "Bass Boost",
             bandLevels = listOf(8, 7, 5, 2, 0, -1, 0, 1, 2, 3),
