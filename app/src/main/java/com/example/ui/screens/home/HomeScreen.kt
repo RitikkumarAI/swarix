@@ -254,14 +254,6 @@ fun HomeScreen(
             }
         }
 
-        // Trend Insights & Genre Distribution Radar Cards
-        item {
-            TrendInsightsCard()
-        }
-
-        item {
-            com.example.ui.components.GenreRadarChartCard()
-        }
 
         // Category Filter Chips (Music, Podcasts, Radio, Mood)
         item {

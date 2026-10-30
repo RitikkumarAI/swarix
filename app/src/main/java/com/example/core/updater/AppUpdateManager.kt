@@ -26,7 +26,7 @@ data class AppUpdateInfo(
 object AppUpdateManager {
     private const val TAG = "AppUpdateManager"
     private const val RELEASES_API_URL = "https://api.github.com/repos/RitikkumarAI/swarix/releases/latest"
-    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/latest/Swarix-Music-Player.apk"
+    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk"
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -155,3 +155,4 @@ object AppUpdateManager {
         }
     }
 }
+

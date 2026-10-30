@@ -52,20 +52,16 @@ jobs:
       - name: Build Signed Release APK
         run: gradle assembleRelease --no-daemon
 
-      - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon
-
-      - name: Prepare APKs for Distribution
+      - name: Prepare APK for Distribution
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/*.apk dist/Swarix-Music-Player.apk || true
-          cp app/build/outputs/apk/debug/*.apk dist/Swarix-Music-Player-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk dist/Swarix.apk || true
 
-      - name: Upload Build Artifacts
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Swarix-APKs
-          path: dist/*.apk
+          name: Swarix-APK
+          path: dist/Swarix.apk
           retention-days: 14
 
       - name: Publish GitHub Release
@@ -78,9 +74,10 @@ jobs:
             ## 🎵 Swarix Music Player v1.1
 
             ### ✨ What's New:
-            - **Real JioSaavn Streaming Engine**: Unlimited online search & high-fidelity 320kbps audio.
+            - **Clean Music Home Screen**: Removed all AI graphs and radar analytics from the main Home screen for a clean, professional Spotify-style music experience.
+            - **Real JioSaavn Streaming Engine**: Unlimited online search & genuine high-fidelity 320kbps audio.
             - **In-App Auto-Updates (OTA)**: Receive future updates directly within the app without opening GitHub!
-            - **Authentic Seed Tracks**: Replaced all demo audio with genuine studio master tracks.
+            - **Authentic Studio Master Tracks**: Replaced all demo audio with genuine official tracks.
 
             ### 📦 App Details
             - **Package ID**: `com.aistudio.swarix.musply`
@@ -88,11 +85,10 @@ jobs:
             - **Commit**: `${{ github.sha }}`
 
             ### 📲 Installation Instructions
-            1. Download **Swarix-Music-Player.apk** below directly on your Android phone.
+            1. Download **Swarix.apk** below directly on your Android phone.
             2. Tap the downloaded file to install (enable *"Install unknown apps"* if prompted).
             3. Enjoy high-fidelity, ad-free music listening!
           draft: false
           prerelease: false
           files: |
-            dist/Swarix-Music-Player.apk
-            dist/Swarix-Music-Player-debug.apk
+            dist/Swarix.apk

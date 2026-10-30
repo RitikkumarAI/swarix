@@ -45,7 +45,7 @@ fun AppUpdateDialog(
     Dialog(onDismissRequest = { if (!isDownloading) onDismiss() }) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = colors.cardBackground,
+            color = colors.surface,
             shadowElevation = 8.dp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,7 +120,7 @@ fun AppUpdateDialog(
                                 .height(8.dp)
                                 .clip(RoundedCornerShape(4.dp)),
                             color = colors.primaryAccent,
-                            trackColor = colors.surfaceElevated
+                            trackColor = colors.elevatedSurface
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -158,3 +158,4 @@ fun AppUpdateDialog(
         }
     }
 }
+
