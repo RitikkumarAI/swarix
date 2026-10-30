@@ -999,7 +999,6 @@ fun NowPlayingScreen(
                                 modifier = Modifier.size(22.dp)
                             )
                         }
-                        }
                     }
 
                     // AI Recommendations Section (Gemini Sonic & Mood Match)

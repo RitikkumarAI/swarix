@@ -540,56 +540,6 @@ fun LibraryScreen(
                         }
                     }
                 }
-                                        contentDescription = playlist.name,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(colors.primaryAccent),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = playlist.name.take(1),
-                                            fontWeight = FontWeight.Bold,
-                                            color = colors.mainBackground,
-                                            fontSize = 20.sp
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = playlist.name,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = colors.primaryText
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = playlist.description.ifEmpty { "Playlist" },
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = colors.secondaryText
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            IconButton(onClick = {}) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Options",
-                                    tint = colors.mutedText
-                                )
-                            }
-                        }
-                    }
-                }
             }
 
             "Smart Folders" -> {
