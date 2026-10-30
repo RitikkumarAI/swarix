@@ -32,7 +32,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Setup Keystores
         run: |
@@ -49,8 +48,11 @@ jobs:
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew || true
 
-      - name: Build and Test Release APK
-        run: gradle clean testDebugUnitTest assembleRelease --no-daemon --stacktrace
+      - name: Run Unit Tests
+        run: gradle testDebugUnitTest --no-daemon --no-configuration-cache
+
+      - name: Build Signed Release APK
+        run: gradle assembleRelease --no-daemon --no-configuration-cache
 
       - name: Prepare APK for Distribution
         run: |
