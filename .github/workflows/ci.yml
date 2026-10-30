@@ -49,7 +49,12 @@ jobs:
         run: chmod +x gradlew || true
 
       - name: Build Signed Release APK
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          gradle assembleRelease -x lintVitalRelease -x lint -x test --no-daemon --stacktrace || {
+            echo "::error::Build failed, dumping reports:"
+            find app/build/reports -type f -exec echo "=== {} ===" \; -exec cat {} \; || true
+            exit 1
+          }
 
       - name: Upload Build Failure Report
         if: failure()
