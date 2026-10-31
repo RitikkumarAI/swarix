@@ -94,47 +94,26 @@ jobs:
             dist/Swarix-for-Windows.zip
           retention-days: 14
 
-      - name: Publish GitHub Release
+      - name: Generate Release Notes
+        run: python3 scripts/create_release_notes.py
+
+      - name: Publish Official GitHub Release
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.6
-          name: "Swarix Music Player v1.6 (Official Multi-Platform)"
-          body: |
-            ## 🎵 Swarix Music Player v1.6 (Official Multi-Platform)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for rel_tag in $(gh release list --json tagName -q '.[].tagName' 2>/dev/null || true); do
+            echo "Pruning older release: $rel_tag"
+            gh release delete "$rel_tag" -y --cleanup-tag || true
+          done
 
-            Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
-
-            ---
-
-            ### 📥 Direct Device Downloads:
-            - 📱 **Android**: [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix.apk)
-            - 💻 **Mac (macOS)**: [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix.dmg) *(macOS Disk Image)*
-            - 🖥️ **Windows**: [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix.exe) *(Self-extracting Windows installer)*
-            - 🍏 **iOS (iPhone / iPad)**: [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix-ios.mobileconfig) or open [Swarix Web Player](https://ritikkumarai.vercel.app/)
-            - 📦 **Mac Bundle**: [Swarix-for-Mac.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/Swarix-for-Mac.zip)
-            - 📦 **Windows Bundle**: [Swarix-for-Windows.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/Swarix-for-Windows.zip)
-
-            ---
-
-            ### ✨ What's New in v1.6:
-            1. **Official Luxury App Icon**:
-               - Embedded official luxury golden S-emblem with acoustic visualizer across all launcher density targets and adaptive icons.
-            2. **Direct Device Naming**:
-               - Direct download files formatted specifically for each OS: `swarix.apk`, `swarix.dmg`, `swarix.exe`, and `swarix-ios.mobileconfig`.
-            3. **Consolidated Single Release**:
-               - All obsolete and confusing previous releases completely pruned.
-            4. **Scrollable Playback Screen**:
-               - AI Sonic match tracks, manual DAC & audio pipeline verification, and Spotify-style blue lyrics card.
-            5. **DSP Default Off & Crash Prevention**:
-               - Safe foreground service and low-noise default audio path.
-          draft: false
-          prerelease: false
-          files: |
-            dist/swarix.apk
-            dist/swarix.dmg
-            dist/swarix.exe
-            dist/swarix-ios.mobileconfig
-            dist/Swarix.apk
-            dist/Swarix-for-Mac.zip
-            dist/Swarix-for-Windows.zip
+          gh release create v1.6 \
+            dist/swarix.apk \
+            dist/swarix.dmg \
+            dist/swarix.exe \
+            dist/swarix-ios.mobileconfig \
+            dist/Swarix.apk \
+            dist/Swarix-for-Mac.zip \
+            dist/Swarix-for-Windows.zip \
+            --title "Swarix Music Player v1.6 (Official Multi-Platform)" \
+            --notes-file dist/RELEASE_NOTES.md
