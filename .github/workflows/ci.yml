@@ -66,15 +66,29 @@ jobs:
           path: |
             app/build/reports/
 
+      - name: Install Packaging Utilities
+        run: |
+          sudo apt-get update -qq || true
+          sudo apt-get install -y genisoimage p7zip-full || true
+
       - name: Prepare Multi-Platform Packages for Distribution
         run: python3 scripts/package_multiplatform.py
+
+      - name: Clean Old GitHub Releases & Tags
+        run: python3 scripts/delete_old_releases.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_RELEASE_TAG: v1.6
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Swarix-MultiPlatform-Packages
           path: |
-            dist/Swarix-for-Android.apk
+            dist/swarix.apk
+            dist/swarix.dmg
+            dist/swarix.exe
+            dist/swarix-ios.mobileconfig
             dist/Swarix.apk
             dist/Swarix-for-Mac.zip
             dist/Swarix-for-Windows.zip
@@ -84,47 +98,43 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.5
-          name: "Swarix Music Player v1.5 (Multi-Platform)"
+          tag_name: v1.6
+          name: "Swarix Music Player v1.6 (Official Multi-Platform)"
           body: |
-            ## 🎵 Swarix Music Player v1.5 (Multi-Platform)
+            ## 🎵 Swarix Music Player v1.6 (Official Multi-Platform)
 
             Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
             ---
 
-            ### 📥 Download Links by Platform:
-            - 📱 **Swarix for Android**: [Download Swarix-for-Android.apk](https://github.com/RitikkumarAI/swarix/releases/download/v1.5/Swarix-for-Android.apk) *(also available as Swarix.apk)*
-            - 💻 **Swarix for Mac**: [Download Swarix-for-Mac.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.5/Swarix-for-Mac.zip) *(macOS bundle with 1-click launcher)*
-            - 🖥️ **Swarix for Windows**: [Download Swarix-for-Windows.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.5/Swarix-for-Windows.zip) *(Windows bundle with WSA/Emulator launcher)*
-            - 🍏 **Swarix for iOS & Web**: [Open Swarix Web Player](https://ritikkumarai.vercel.app/) *(Safari -> "Add to Home Screen" to install)*
+            ### 📥 Direct Device Downloads:
+            - 📱 **Android**: [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix.apk)
+            - 💻 **Mac (macOS)**: [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix.dmg) *(macOS Disk Image)*
+            - 🖥️ **Windows**: [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix.exe) *(Self-extracting Windows installer)*
+            - 🍏 **iOS (iPhone / iPad)**: [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/swarix-ios.mobileconfig) or open [Swarix Web Player](https://ritikkumarai.vercel.app/)
+            - 📦 **Mac Bundle**: [Swarix-for-Mac.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/Swarix-for-Mac.zip)
+            - 📦 **Windows Bundle**: [Swarix-for-Windows.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.6/Swarix-for-Windows.zip)
 
             ---
 
-            ### ✨ What's New in v1.5:
-            1. **Settings Screen Fix**:
-               - Completely resolved vertical text wrapping bug on "Audio Quality"; now displays horizontally with clean studio badges.
-            2. **Playback Screen Scroll Down - 3 New Sections**:
-               - **Section 1 - AI Sonic Recommendations**: Live Gemini mood & sonic matching with 1-tap playback.
-               - **Section 2 - Audio Quality Manual Test & Fidelity**: Direct DAC diagnostics, 320kbps / 24-bit 96kHz Lossless / 8K Ultra DSP mode selection.
-               - **Section 3 - Spotify-Inspired Blue Lyrics**: Beautiful deep blue & cyan gradient lyrics card with full-screen karaoke access.
-            3. **DSP Default State**:
-               - DSP is now **OFF by default** and only activates when explicitly turned on by the user.
-            4. **Persistent Mini-Player**:
-               - Bottom player restores the last played track instantly when reopening or returning from background.
-            5. **Crash Prevention**:
-               - Fixed "Swarix keeps stopping" background service exception on Xiaomi/MIUI and Android devices.
-            6. **Multi-Platform Availability**:
-               - Official builds for Android, Mac, Windows, and iOS.
-
-            ### 📦 Build Details
-            - **Package ID**: `com.aistudio.swarix.musply`
-            - **Requires**: Android 8.0+ / macOS / Windows 10+
-            - **Commit**: `${{ github.sha }}`
+            ### ✨ What's New in v1.6:
+            1. **Official Luxury App Icon**:
+               - Embedded official luxury golden S-emblem with acoustic visualizer across all launcher density targets and adaptive icons.
+            2. **Direct Device Naming**:
+               - Direct download files formatted specifically for each OS: `swarix.apk`, `swarix.dmg`, `swarix.exe`, and `swarix-ios.mobileconfig`.
+            3. **Consolidated Single Release**:
+               - All obsolete and confusing previous releases completely pruned.
+            4. **Scrollable Playback Screen**:
+               - AI Sonic match tracks, manual DAC & audio pipeline verification, and Spotify-style blue lyrics card.
+            5. **DSP Default Off & Crash Prevention**:
+               - Safe foreground service and low-noise default audio path.
           draft: false
           prerelease: false
           files: |
-            dist/Swarix-for-Android.apk
+            dist/swarix.apk
+            dist/swarix.dmg
+            dist/swarix.exe
+            dist/swarix-ios.mobileconfig
             dist/Swarix.apk
             dist/Swarix-for-Mac.zip
             dist/Swarix-for-Windows.zip

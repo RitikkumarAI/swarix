@@ -3,6 +3,10 @@
 *.aar
 *.ap_
 *.aab
+*.dmg
+*.exe
+*.mobileconfig
+dist/
 
 # Files for the Android Studio project
 .gradle/
