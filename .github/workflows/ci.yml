@@ -74,17 +74,21 @@ jobs:
       - name: Prepare Multi-Platform Packages for Distribution
         run: python3 scripts/package_multiplatform.py
 
-      - name: Clean Old GitHub Releases & Tags
-        run: python3 scripts/delete_old_releases.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CURRENT_RELEASE_TAG: v1.6
+      - name: Generate Release Notes
+        run: python3 scripts/create_release_notes.py
 
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Publish Official GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
         with:
-          name: Swarix-MultiPlatform-Packages
-          path: |
+          tag_name: v1.6
+          name: "Swarix Music Player v1.6 (Official Multi-Platform)"
+          body_path: dist/RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          make_latest: "true"
+          overwrite: true
+          files: |
             dist/swarix.apk
             dist/swarix.dmg
             dist/swarix.exe
@@ -92,30 +96,10 @@ jobs:
             dist/Swarix.apk
             dist/Swarix-for-Mac.zip
             dist/Swarix-for-Windows.zip
-          retention-days: 14
 
-      - name: Generate Release Notes
-        run: python3 scripts/create_release_notes.py
-
-      - name: Publish Official GitHub Release
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+      - name: Clean Old GitHub Releases & Tags
+        if: always()
+        run: python3 scripts/delete_old_releases.py
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          for rel_tag in $(gh release list --json tagName -q '.[].tagName' 2>/dev/null || true); do
-            echo "Pruning older release: $rel_tag"
-            gh release delete "$rel_tag" -y --cleanup-tag || true
-          done
-
-          gh release create v1.6 \
-            dist/swarix.apk \
-            dist/swarix.dmg \
-            dist/swarix.exe \
-            dist/swarix-ios.mobileconfig \
-            dist/Swarix.apk \
-            dist/Swarix-for-Mac.zip \
-            dist/Swarix-for-Windows.zip \
-            --target "$GITHUB_SHA" \
-            --title "Swarix Music Player v1.6 (Official Multi-Platform)" \
-            --notes-file dist/RELEASE_NOTES.md
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_RELEASE_TAG: v1.6

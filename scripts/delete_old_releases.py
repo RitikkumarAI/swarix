@@ -34,12 +34,15 @@ def main():
     for rel in releases:
         rel_id = rel.get("id")
         tag_name = rel.get("tag_name")
-        print(f"Found release ID {rel_id} (tag: {tag_name}). Deleting to keep only latest clean release...")
+        if tag_name == current_tag:
+            print(f"Keeping current active release: {tag_name}")
+            continue
+        print(f"Found obsolete release ID {rel_id} (tag: {tag_name}). Deleting...")
         del_url = f"https://api.github.com/repos/{repo}/releases/{rel_id}"
         del_req = urllib.request.Request(del_url, headers=headers, method="DELETE")
         try:
             with urllib.request.urlopen(del_req) as del_resp:
-                print(f"Deleted release {rel_id} ({tag_name}): HTTP {del_resp.status}")
+                print(f"Deleted obsolete release {rel_id} ({tag_name}): HTTP {del_resp.status}")
         except Exception as e:
             print(f"Error deleting release {rel_id}: {e}")
 
