@@ -169,6 +169,10 @@ fun SearchScreen(
         }
     }
 
+    val recentDisplaySongs = remember(allSongs, recentSearches) {
+        allSongs.take(8)
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -265,10 +269,6 @@ fun SearchScreen(
                         }
                     }
                 }
-            }
-
-            val recentDisplaySongs = remember(allSongs, recentSearches) {
-                allSongs.take(8)
             }
 
             items(recentDisplaySongs) { song ->
