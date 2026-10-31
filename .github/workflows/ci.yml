@@ -79,23 +79,10 @@ jobs:
 
       - name: Publish Official GitHub Release
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.6
-          name: "Swarix Music Player v1.6 (Official Multi-Platform)"
-          body_path: dist/RELEASE_NOTES.md
-          draft: false
-          prerelease: false
-          make_latest: "true"
-          overwrite: true
-          files: |
-            dist/swarix.apk
-            dist/swarix.dmg
-            dist/swarix.exe
-            dist/swarix-ios.mobileconfig
-            dist/Swarix.apk
-            dist/Swarix-for-Mac.zip
-            dist/Swarix-for-Windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: v1.6
+        run: python3 scripts/publish_release.py
 
       - name: Clean Old GitHub Releases & Tags
         if: always()
