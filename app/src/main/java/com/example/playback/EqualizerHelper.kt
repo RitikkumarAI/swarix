@@ -16,7 +16,7 @@ class EqualizerHelper(private val context: Context) {
     private var currentSessionId: Int = 0
 
     // Cached audio engine state to persist across track changes and session recreations
-    private var isEngineEnabled: Boolean = true
+    private var isEngineEnabled: Boolean = false
     private var cachedLevels: List<Int> = listOf(6, 5, 3, 2, 1, 2, 4, 6, 8, 9)
     private var cachedBassBoost: Int = 80
     private var cachedVirtualizer: Int = 60

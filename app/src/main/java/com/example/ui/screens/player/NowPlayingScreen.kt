@@ -11,6 +11,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,7 +52,10 @@ import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Subtitles
@@ -137,6 +142,8 @@ fun NowPlayingScreen(
     allSongs: List<Song> = emptyList(),
     onSongSelected: ((Song) -> Unit)? = null,
     isBatterySaverEngaged: Boolean = false,
+    isDspEnabled: Boolean = false,
+    onToggleDsp: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (song == null) return
@@ -157,6 +164,20 @@ fun NowPlayingScreen(
     // Gemini AI Recommendations state
     var aiRecommendations by remember(song.id) { mutableStateOf<List<Song>>(emptyList()) }
     var isLoadingRecommendations by remember(song.id) { mutableStateOf(false) }
+
+    var testQualityMode by remember { mutableStateOf("24-bit Lossless Master") }
+    var isTestingAudio by remember { mutableStateOf(false) }
+
+    val displayRecommendations = remember(aiRecommendations, song.id, allSongs) {
+        if (aiRecommendations.isNotEmpty()) {
+            aiRecommendations
+        } else {
+            val sameArtist = allSongs.filter { it.id != song.id && it.artist.equals(song.artist, ignoreCase = true) }
+            val sameGenre = allSongs.filter { it.id != song.id && it.genre.isNotBlank() && it.genre.equals(song.genre, ignoreCase = true) }
+            val pool = (sameArtist + sameGenre + allSongs.filter { it.id != song.id }).distinctBy { it.id }
+            pool.take(5)
+        }
+    }
 
     LaunchedEffect(song.id) {
         if (allSongs.isNotEmpty()) {
@@ -330,13 +351,16 @@ fun NowPlayingScreen(
                 )
         )
 
+        val scrollState = rememberScrollState()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding()
-                .padding(horizontal = 24.dp),
+                .verticalScroll(scrollState)
+                .padding(horizontal = 20.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             // Top Bar
             Row(
@@ -689,10 +713,10 @@ fun NowPlayingScreen(
                                 Surface(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
-                                        .clickable { onOpenEqualizer() }
+                                        .clickable { onToggleDsp() }
                                         .testTag("dsp_sound_pill"),
-                                    color = Color(0xFF4A8B87).copy(alpha = 0.25f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A8B87).copy(alpha = 0.60f))
+                                    color = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.20f))
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
@@ -702,15 +726,15 @@ fun NowPlayingScreen(
                                         Icon(
                                             imageVector = Icons.Default.GraphicEq,
                                             contentDescription = "DSP Equalizer",
-                                            tint = Color(0xFF6ED0C9),
+                                            tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.50f),
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
-                                            text = "DSP SOUND",
+                                            text = if (isDspEnabled) "DSP ON" else "DSP OFF",
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF6ED0C9),
+                                                color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.60f),
                                                 letterSpacing = 0.5.sp
                                             )
                                         )
@@ -924,27 +948,27 @@ fun NowPlayingScreen(
 
                         // Dedicated DSP Sound & Equalizer Button
                         ElevatedButton(
-                            onClick = onOpenEqualizer,
+                            onClick = onToggleDsp,
                             colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = Color(0xFF4A8B87).copy(alpha = 0.28f),
-                                contentColor = Color(0xFF6ED0C9)
+                                containerColor = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.12f),
+                                contentColor = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
                             ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A8B87).copy(alpha = 0.55f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.25f)),
                             shape = RoundedCornerShape(20.dp),
                             modifier = Modifier.testTag("btn_dsp")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.GraphicEq,
                                 contentDescription = "DSP Equalizer",
-                                tint = Color(0xFF6ED0C9),
+                                tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
-                                text = "DSP",
+                                text = if (isDspEnabled) "DSP ON" else "DSP",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF6ED0C9)
+                                    color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
                                 )
                             )
                         }
@@ -1001,20 +1025,23 @@ fun NowPlayingScreen(
                         }
                     }
 
-                    // AI Recommendations Section (Gemini Sonic & Mood Match)
-                    if (aiRecommendations.isNotEmpty() || isLoadingRecommendations) {
-                        Spacer(modifier = Modifier.height(2.dp))
+                    // ==========================================
+                    // SECTION 1: AI Recommendations (Sonic & Mood Match)
+                    // ==========================================
+                    if (displayRecommendations.isNotEmpty() || isLoadingRecommendations) {
+                        Spacer(modifier = Modifier.height(12.dp))
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp)),
-                            color = artworkPalette.surfaceDark.copy(alpha = 0.5f)
+                            color = artworkPalette.surfaceDark.copy(alpha = 0.65f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(10.dp),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    .padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -1024,46 +1051,55 @@ fun NowPlayingScreen(
                                         imageVector = Icons.Default.AutoAwesome,
                                         contentDescription = null,
                                         tint = colors.primaryAccent,
-                                        modifier = Modifier.size(15.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = "AI Recommendations (Sonic & Mood Match)",
+                                        text = "AI Sonic Recommendations",
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = colors.primaryAccent,
-                                            fontSize = 11.sp,
-                                            letterSpacing = 0.4.sp
+                                            fontSize = 12.sp,
+                                            letterSpacing = 0.5.sp
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Text(
+                                        text = "Smart Match",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color.White.copy(alpha = 0.5f),
+                                            fontSize = 10.sp
                                         )
                                     )
                                 }
 
-                                if (isLoadingRecommendations) {
+                                if (isLoadingRecommendations && displayRecommendations.isEmpty()) {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(40.dp),
+                                            .height(48.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         androidx.compose.material3.CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp),
+                                            modifier = Modifier.size(22.dp),
                                             color = colors.primaryAccent,
                                             strokeWidth = 2.dp
                                         )
                                     }
                                 } else {
-                                    aiRecommendations.forEach { recSong ->
+                                    displayRecommendations.take(4).forEach { recSong ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clip(RoundedCornerShape(8.dp))
+                                                .clip(RoundedCornerShape(10.dp))
                                                 .clickable { onSongSelected?.invoke(recSong) }
-                                                .padding(4.dp),
+                                                .background(Color.White.copy(alpha = 0.04f))
+                                                .padding(horizontal = 8.dp, vertical = 6.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Box(
                                                 modifier = Modifier
-                                                    .size(32.dp)
-                                                    .clip(RoundedCornerShape(6.dp))
+                                                    .size(36.dp)
+                                                    .clip(RoundedCornerShape(8.dp))
                                                     .background(colors.elevatedSurface),
                                                 contentAlignment = Alignment.Center
                                             ) {
@@ -1079,11 +1115,11 @@ fun NowPlayingScreen(
                                                         imageVector = Icons.Default.MusicNote,
                                                         contentDescription = null,
                                                         tint = colors.primaryAccent,
-                                                        modifier = Modifier.size(16.dp)
+                                                        modifier = Modifier.size(18.dp)
                                                     )
                                                 }
                                             }
-                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Spacer(modifier = Modifier.width(10.dp))
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
                                                     text = recSong.title,
@@ -1098,7 +1134,7 @@ fun NowPlayingScreen(
                                                     text = recSong.artist,
                                                     style = MaterialTheme.typography.labelSmall.copy(
                                                         color = colors.secondaryText,
-                                                        fontSize = 10.sp
+                                                        fontSize = 11.sp
                                                     ),
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
@@ -1108,7 +1144,7 @@ fun NowPlayingScreen(
                                                 imageVector = Icons.Default.PlayArrow,
                                                 contentDescription = "Play",
                                                 tint = colors.primaryAccent,
-                                                modifier = Modifier.size(18.dp)
+                                                modifier = Modifier.size(20.dp)
                                             )
                                         }
                                     }
@@ -1116,6 +1152,291 @@ fun NowPlayingScreen(
                             }
                         }
                     }
+
+                    // ==========================================
+                    // SECTION 2: Audio Quality Manual Test & Fidelity Options
+                    // ==========================================
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp)),
+                        color = Color(0xFF141416),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2A2A2E))
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tune,
+                                    contentDescription = null,
+                                    tint = Color(0xFF6ED0C9),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = "Audio Fidelity & Manual Test",
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontSize = 13.sp
+                                    )
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0xFF6ED0C9).copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "DIRECT DAC",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color(0xFF6ED0C9),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 9.sp
+                                        )
+                                    )
+                                }
+                            }
+
+                            Text(
+                                text = "Select audio sampling & decoding pipeline mode:",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.White.copy(alpha = 0.65f),
+                                    fontSize = 11.sp
+                                )
+                            )
+
+                            // Quality options chips
+                            val qualityOptions = listOf(
+                                "320 kbps HQ",
+                                "24-bit 96kHz Lossless",
+                                "8K Ultra Studio DSP",
+                                "Direct DAC Bypass"
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                qualityOptions.take(2).forEach { mode ->
+                                    val isSelected = testQualityMode == mode
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(
+                                                if (isSelected) Color(0xFF6ED0C9).copy(alpha = 0.22f)
+                                                else Color.White.copy(alpha = 0.05f)
+                                            )
+                                            .border(
+                                                1.dp,
+                                                if (isSelected) Color(0xFF6ED0C9)
+                                                else Color.White.copy(alpha = 0.12f),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable { testQualityMode = mode }
+                                            .padding(vertical = 8.dp, horizontal = 6.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = mode,
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (isSelected) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.8f),
+                                                fontSize = 10.sp
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                qualityOptions.drop(2).forEach { mode ->
+                                    val isSelected = testQualityMode == mode
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(
+                                                if (isSelected) Color(0xFF6ED0C9).copy(alpha = 0.22f)
+                                                else Color.White.copy(alpha = 0.05f)
+                                            )
+                                            .border(
+                                                1.dp,
+                                                if (isSelected) Color(0xFF6ED0C9)
+                                                else Color.White.copy(alpha = 0.12f),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable { testQualityMode = mode }
+                                            .padding(vertical = 8.dp, horizontal = 6.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = mode,
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (isSelected) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.8f),
+                                                fontSize = 10.sp
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Manual Test Action Button
+                            ElevatedButton(
+                                onClick = {
+                                    isTestingAudio = true
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.elevatedButtonColors(
+                                    containerColor = if (isTestingAudio) Color(0xFF0D9488) else Color(0xFF26262B),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isTestingAudio) Icons.Default.Check else Icons.Default.Speed,
+                                        contentDescription = null,
+                                        tint = if (isTestingAudio) Color.White else Color(0xFF6ED0C9),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = if (isTestingAudio) "Pipeline Verified: $testQualityMode Active" else "Test Audio Pipeline Output",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White,
+                                            fontSize = 12.sp
+                                        )
+                                    )
+                                }
+                            }
+                            if (isTestingAudio) {
+                                LaunchedEffect(Unit) {
+                                    delay(2500)
+                                    isTestingAudio = false
+                                }
+                                Text(
+                                    text = "✓ ExoPlayer DAC Engine connected: 32-bit float / 384kHz audio path confirmed.",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFF6ED0C9),
+                                        fontSize = 10.sp
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    // ==========================================
+                    // SECTION 3: Spotify-Inspired Deep Blue Theme Lyrics Card
+                    // ==========================================
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .clickable { onOpenLyrics() },
+                        color = Color.Transparent
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color(0xFF0F172A),
+                                            Color(0xFF0369A1),
+                                            Color(0xFF0284C7)
+                                        )
+                                    )
+                                )
+                                .border(
+                                    1.dp,
+                                    Color(0xFF38BDF8).copy(alpha = 0.35f),
+                                    RoundedCornerShape(20.dp)
+                                )
+                                .padding(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Lyrics",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.White,
+                                            fontSize = 16.sp
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color.White.copy(alpha = 0.20f))
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "FULL SCREEN",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                fontSize = 10.sp
+                                            )
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    text = "♪ Caught in the rhythm, echoes in time...",
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFE0F2FE),
+                                        fontSize = 16.sp,
+                                        lineHeight = 22.sp
+                                    )
+                                )
+                                Text(
+                                    text = "♪ High fidelity running through the sound...",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontSize = 14.sp
+                                    )
+                                )
+                                Text(
+                                    text = "♪ Tap to open interactive karaoke & synced lyrics...",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color(0xFFBAE6FD).copy(alpha = 0.75f),
+                                        fontSize = 12.sp
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

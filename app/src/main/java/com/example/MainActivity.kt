@@ -239,6 +239,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
     val bassHapticsEnabled by mainViewModel.bassHapticsEnabled.collectAsStateWithLifecycle()
     val bassHapticsIntensity by mainViewModel.bassHapticsIntensity.collectAsStateWithLifecycle()
     val isSmartShuffling by mainViewModel.isSmartShuffling.collectAsStateWithLifecycle()
+    val isDspEnabled by mainViewModel.isDspEnabled.collectAsStateWithLifecycle()
 
     val batteryLevel by mainViewModel.batteryLevel.collectAsStateWithLifecycle()
     val isLowBattery by mainViewModel.isLowBattery.collectAsStateWithLifecycle()
@@ -630,7 +631,14 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                     },
                     allSongs = allSongs,
                     onSongSelected = { mainViewModel.playSong(it, allSongs) },
-                    isBatterySaverEngaged = mainViewModel.isBatterySaverEngaged.collectAsStateWithLifecycle().value
+                    isBatterySaverEngaged = mainViewModel.isBatterySaverEngaged.collectAsStateWithLifecycle().value,
+                    isDspEnabled = isDspEnabled,
+                    onToggleDsp = {
+                        val active = mainViewModel.toggleDsp()
+                        scope.launch {
+                            snackbarHostState.showSnackbar(if (active) "8K DSP Sound Engine: Active" else "8K DSP Sound Engine: Bypassed")
+                        }
+                    }
                 )
             }
 

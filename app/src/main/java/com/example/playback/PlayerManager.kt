@@ -151,6 +151,21 @@ class PlayerManager private constructor(private val context: Context) {
         equalizerHelper.setAudioNormalizationEnabled(enabled)
     }
 
+    private val _isDspEnabled = MutableStateFlow(false)
+    val isDspEnabled: StateFlow<Boolean> = _isDspEnabled.asStateFlow()
+
+    fun toggleDsp(): Boolean {
+        val newState = !_isDspEnabled.value
+        _isDspEnabled.value = newState
+        equalizerHelper.setEnabled(newState)
+        return newState
+    }
+
+    fun setDspEnabled(enabled: Boolean) {
+        _isDspEnabled.value = enabled
+        equalizerHelper.setEnabled(enabled)
+    }
+
     // Callbacks for statistics and DB history
     var onSongPlaybackCompleted: ((Song) -> Unit)? = null
 
@@ -264,11 +279,7 @@ class PlayerManager private constructor(private val context: Context) {
     private fun startPlaybackService() {
         try {
             val intent = Intent(context, com.example.playback.service.MusicPlaybackService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            context.startService(intent)
         } catch (t: Throwable) {
             Log.e("PlayerManager", "Failed to start MusicPlaybackService", t)
         }
@@ -320,6 +331,37 @@ class PlayerManager private constructor(private val context: Context) {
             remainingIndices
         }
         return bestPool.random()
+    }
+
+    fun restoreLastPlayedSong(song: Song, newQueue: List<Song>? = null) {
+        if (_currentSong.value != null) return // Already loaded or playing
+        val effectiveQueue = if (newQueue != null && newQueue.isNotEmpty()) {
+            newQueue
+        } else {
+            listOf(song)
+        }
+
+        _queue.value = effectiveQueue
+        val targetIndex = effectiveQueue.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+        _queueIndex.value = targetIndex
+        _currentSong.value = song
+        _currentPositionMs.value = 0L
+        _durationMs.value = song.durationMs
+        _isPlaying.value = false
+
+        try {
+            if (_gaplessPlayback.value) {
+                val mediaItems = effectiveQueue.map { toMediaItem(it) }
+                exoPlayer.setMediaItems(mediaItems, targetIndex, 0L)
+            } else {
+                exoPlayer.setMediaItem(toMediaItem(song))
+            }
+            exoPlayer.prepare()
+            exoPlayer.pause()
+            Log.d("PlayerManager", "Restored last played song into player: ${song.title}")
+        } catch (e: Exception) {
+            Log.e("PlayerManager", "Failed to restore last song into ExoPlayer: ${e.message}")
+        }
     }
 
     fun playSong(song: Song, newQueue: List<Song>? = null) {

@@ -131,6 +131,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val currentSong: StateFlow<Song?> = playerManager.currentSong
     val isPlaying: StateFlow<Boolean> = playerManager.isPlaying
+    val isDspEnabled: StateFlow<Boolean> = playerManager.isDspEnabled
     val currentPositionMs: StateFlow<Long> = playerManager.currentPositionMs
     val durationMs: StateFlow<Long> = playerManager.durationMs
     val queue: StateFlow<List<Song>> = playerManager.queue
@@ -226,6 +227,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             crossfadeSeconds.collect { seconds ->
                 playerManager.setCrossfade(crossfadeEnabled.value, seconds)
+            }
+        }
+
+        viewModelScope.launch {
+            recentlyPlayed.collect { recentList ->
+                if (recentList.isNotEmpty() && playerManager.currentSong.value == null) {
+                    playerManager.restoreLastPlayedSong(recentList.first(), recentList)
+                }
             }
         }
 
@@ -371,6 +380,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             repository.recordPlayback(song.id)
         }
         playerManager.playSong(song, q)
+    }
+
+    fun toggleDsp(): Boolean {
+        return playerManager.toggleDsp()
     }
 
     private val _availableUpdate = MutableStateFlow<AppUpdateInfo?>(null)

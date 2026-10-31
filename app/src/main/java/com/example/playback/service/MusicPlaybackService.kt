@@ -19,32 +19,37 @@ class MusicPlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Creating MusicPlaybackService and initializing Media3 MediaSession...")
-        val playerManager = PlayerManager.getInstance(this)
+        try {
+            Log.d(TAG, "Creating MusicPlaybackService and initializing Media3 MediaSession...")
+            val playerManager = PlayerManager.getInstance(this)
 
-        // Verify ExoPlayer configuration complies with USAGE_MEDIA & AudioFocus
-        MusicPlayerInitializer.verifyConfiguration(playerManager.exoPlayer)
+            // Verify ExoPlayer configuration complies with USAGE_MEDIA & AudioFocus
+            MusicPlayerInitializer.verifyConfiguration(playerManager.exoPlayer)
 
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            mediaSession = MediaSession.Builder(this, playerManager.exoPlayer)
+                .setSessionActivity(pendingIntent)
+                .setId("SwarixMediaSession")
+                .build()
+
+            Log.d(TAG, "MusicPlaybackService MediaSession initialized successfully.")
+        } catch (t: Throwable) {
+            Log.e(TAG, "Error initializing MusicPlaybackService: ${t.message}", t)
         }
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        mediaSession = MediaSession.Builder(this, playerManager.exoPlayer)
-            .setSessionActivity(pendingIntent)
-            .build()
-
-        Log.d(TAG, "MusicPlaybackService MediaSession initialized successfully.")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {

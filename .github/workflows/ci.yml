@@ -66,51 +66,158 @@ jobs:
           path: |
             app/build/reports/
 
-      - name: Prepare APK for Distribution
+      - name: Prepare Multi-Platform Packages for Distribution
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/*.apk dist/Swarix.apk || true
+          cp app/build/outputs/apk/release/*.apk dist/Swarix.apk
+          cp dist/Swarix.apk dist/Swarix-for-Android.apk
 
-      - name: Upload Build Artifact
+          # 🍏 Package Swarix for Mac
+          mkdir -p dist/mac-bundle
+          cat << 'EOF' > dist/mac-bundle/Swarix-Launcher.command
+#!/bin/bash
+echo "============================================="
+echo "🎵 Launching Swarix Music Player for macOS"
+echo "============================================="
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APK_PATH="$DIR/Swarix-for-Android.apk"
+
+# Check if running Apple Silicon or emulator is present
+if command -v scrcpy &> /dev/null; then
+    echo "Starting Swarix via scrcpy..."
+    scrcpy --stay-awake &
+elif command -v adb &> /dev/null; then
+    echo "Installing and launching on connected device/emulator..."
+    adb install -r "$APK_PATH"
+    adb shell monkey -p com.aistudio.swarix.musply -c android.intent.category.LAUNCHER 1
+else
+    echo "Opening Web Player / Setup Guide in Browser..."
+    open "https://ritikkumarai.vercel.app/"
+fi
+EOF
+          chmod +x dist/mac-bundle/Swarix-Launcher.command
+          cp dist/Swarix-for-Android.apk dist/mac-bundle/
+          cat << 'EOF' > dist/mac-bundle/README-MAC.txt
+===========================================================
+🍏 SWARIX FOR MAC (macOS Installation & Usage Guide)
+===========================================================
+
+Option 1 (Apple Silicon M1/M2/M3/M4 with PlayCover or Sideloadly):
+1. Download Swarix-for-Android.apk included in this folder.
+2. Open with PlayCover or Android Studio Emulator.
+3. Enjoy bit-perfect audio streaming directly on your Mac!
+
+Option 2 (Android Studio / BlueStacks / Nox on Mac):
+1. Open BlueStacks or Nox Player for Mac.
+2. Drag & drop Swarix-for-Android.apk into the window.
+3. Swarix will install and launch instantly.
+
+Option 3 (Web Player & Portfolio):
+Visit: https://ritikkumarai.vercel.app/
+Developed & Maintained by Ritik Kumar
+===========================================================
+EOF
+          cd dist/mac-bundle && zip -r ../Swarix-for-Mac.zip . && cd ../..
+
+          # 🖥️ Package Swarix for Windows
+          mkdir -p dist/win-bundle
+          cat << 'EOF' > dist/win-bundle/Swarix-Launcher.bat
+@echo off
+title Swarix Music Player for Windows
+echo =============================================
+echo 🎵 Swarix Music Player for Windows
+echo =============================================
+set "DIR=%~dp0"
+set "APK=%DIR%Swarix-for-Android.apk"
+echo Checking Windows Subsystem for Android (WSA) or ADB...
+where adb >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    echo Installing Swarix to WSA/Emulator...
+    adb install -r "%APK%"
+    adb shell monkey -p com.aistudio.swarix.musply -c android.intent.category.LAUNCHER 1
+) else (
+    echo Opening Swarix Web Player...
+    start https://ritikkumarai.vercel.app/
+)
+EOF
+          cp dist/Swarix-for-Android.apk dist/win-bundle/
+          cat << 'EOF' > dist/win-bundle/README-WINDOWS.txt
+===========================================================
+🖥️ SWARIX FOR WINDOWS (Installation & Usage Guide)
+===========================================================
+
+Option 1 (Windows Subsystem for Android - WSA):
+1. Double-click Swarix-Launcher.bat or run:
+   adb install -r Swarix-for-Android.apk
+2. Swarix will appear in your Windows Start Menu as a native app!
+
+Option 2 (BlueStacks / LDPlayer):
+1. Drag and drop Swarix-for-Android.apk into BlueStacks/LDPlayer.
+2. Play 8K Ultra Studio sound directly from your PC.
+
+Option 3 (Direct Web Player):
+Visit: https://ritikkumarai.vercel.app/
+Developed & Maintained by Ritik Kumar
+===========================================================
+EOF
+          cd dist/win-bundle && zip -r ../Swarix-for-Windows.zip . && cd ../..
+
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Swarix-APK
-          path: dist/Swarix.apk
+          name: Swarix-MultiPlatform-Packages
+          path: |
+            dist/Swarix-for-Android.apk
+            dist/Swarix.apk
+            dist/Swarix-for-Mac.zip
+            dist/Swarix-for-Windows.zip
           retention-days: 14
 
       - name: Publish GitHub Release
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.4
-          name: "Swarix Music Player v1.4"
+          tag_name: v1.5
+          name: "Swarix Music Player v1.5 (Multi-Platform)"
           body: |
-            ## 🎵 Swarix Music Player v1.4
+            ## 🎵 Swarix Music Player v1.5 (Multi-Platform)
 
-            ### ✨ What's New:
-            - **New Official Luxury Logo**:
-              - Golden luxury acoustic emblem with glowing visualizer as the official app launcher and in-app brand mark.
-            - **Lock Screen & Notification Panel Soundtrack**:
-              - Complete background media session controls: Play, Pause, Next, and Previous directly from lock screen and notification shade.
-            - **Smart Genre & Punjabi Recommendation Shuffle**:
-              - Intelligent transition: Playing a Punjabi track now seamlessly shuffles and queues related Punjabi tracks, keeping the vibe consistent.
-            - **Complete Singer Catalogue on Search**:
-              - Searching an artist now fetches their complete 80+ track library and auto-creates an all-inclusive artist playlist.
-            - **Status Bar & Notch Display Fix**:
-              - Header elements (Swarix branding, sync, notification bell, profile) perfectly clear and never cut off by system status bar.
-            - **Permanent Keystore & Seamless 1-Tap Updates**:
-              - Permanent cryptographic signing key ensures future in-app updates install without any package conflict.
+            Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
-            ### 📦 App Details
+            ---
+
+            ### 📥 Download Links by Platform:
+            - 📱 **Swarix for Android**: [Download Swarix-for-Android.apk](https://github.com/RitikkumarAI/swarix/releases/download/v1.5/Swarix-for-Android.apk) *(also available as Swarix.apk)*
+            - 💻 **Swarix for Mac**: [Download Swarix-for-Mac.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.5/Swarix-for-Mac.zip) *(macOS bundle with 1-click launcher)*
+            - 🖥️ **Swarix for Windows**: [Download Swarix-for-Windows.zip](https://github.com/RitikkumarAI/swarix/releases/download/v1.5/Swarix-for-Windows.zip) *(Windows bundle with WSA/Emulator launcher)*
+            - 🍏 **Swarix for iOS & Web**: [Open Swarix Web Player](https://ritikkumarai.vercel.app/) *(Safari -> "Add to Home Screen" to install)*
+
+            ---
+
+            ### ✨ What's New in v1.5:
+            1. **Settings Screen Fix**:
+               - Completely resolved vertical text wrapping bug on "Audio Quality"; now displays horizontally with clean studio badges.
+            2. **Playback Screen Scroll Down - 3 New Sections**:
+               - **Section 1 - AI Sonic Recommendations**: Live Gemini mood & sonic matching with 1-tap playback.
+               - **Section 2 - Audio Quality Manual Test & Fidelity**: Direct DAC diagnostics, 320kbps / 24-bit 96kHz Lossless / 8K Ultra DSP mode selection.
+               - **Section 3 - Spotify-Inspired Blue Lyrics**: Beautiful deep blue & cyan gradient lyrics card with full-screen karaoke access.
+            3. **DSP Default State**:
+               - DSP is now **OFF by default** and only activates when explicitly turned on by the user.
+            4. **Persistent Mini-Player**:
+               - Bottom player restores the last played track instantly when reopening or returning from background.
+            5. **Crash Prevention**:
+               - Fixed "Swarix keeps stopping" background service exception on Xiaomi/MIUI and Android devices.
+            6. **Multi-Platform Availability**:
+               - Official builds for Android, Mac, Windows, and iOS.
+
+            ### 📦 Build Details
             - **Package ID**: `com.aistudio.swarix.musply`
-            - **Requires**: Android 8.0 (Oreo) and above
+            - **Requires**: Android 8.0+ / macOS / Windows 10+
             - **Commit**: `${{ github.sha }}`
-
-            ### 📲 Installation Instructions
-            1. Download **Swarix.apk** below directly on your Android phone.
-            2. Tap the downloaded file to install (enable *"Install unknown apps"* if prompted).
-            3. Enjoy high-fidelity, ad-free music listening!
           draft: false
           prerelease: false
           files: |
+            dist/Swarix-for-Android.apk
             dist/Swarix.apk
+            dist/Swarix-for-Mac.zip
+            dist/Swarix-for-Windows.zip
