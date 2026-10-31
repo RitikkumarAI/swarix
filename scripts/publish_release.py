@@ -88,7 +88,6 @@ def main():
         "dist/swarix.dmg",
         "dist/swarix.exe",
         "dist/swarix-ios.mobileconfig",
-        "dist/Swarix.apk",
         "dist/Swarix-for-Mac.zip",
         "dist/Swarix-for-Windows.zip"
     ]
@@ -117,6 +116,12 @@ def main():
         try:
             with urllib.request.urlopen(up_req) as up_resp:
                 print(f"✓ Uploaded {file_name}: HTTP {up_resp.status}")
+        except urllib.error.HTTPError as e:
+            if e.code == 422:
+                print(f"Asset {file_name} already exists: HTTP 422 (proceeding).")
+            else:
+                print(f"✗ Failed to upload {file_name}: {e}")
+                sys.exit(1)
         except Exception as e:
             print(f"✗ Failed to upload {file_name}: {e}")
             sys.exit(1)
