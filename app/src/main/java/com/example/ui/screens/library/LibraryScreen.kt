@@ -128,6 +128,9 @@ fun LibraryScreen(
         if (selectedSmartTag == null) allSongs
         else allSongs.filter { "${it.genre} • ${it.mood}" == selectedSmartTag }
     }
+    val offlineSongs = remember(allSongs, cachedSongIds) {
+        allSongs.filter { it.isLocal || cachedSongIds.contains(it.id) }
+    }
 
     if (showCreateDialog) {
         AlertDialog(
@@ -765,10 +768,6 @@ fun LibraryScreen(
             }
 
             "Offline Music" -> {
-                val offlineSongs = remember(allSongs, cachedSongIds) {
-                    allSongs.filter { it.isLocal || cachedSongIds.contains(it.id) }
-                }
-
                 item {
                     Surface(
                         modifier = Modifier

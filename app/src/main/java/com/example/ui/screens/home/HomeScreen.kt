@@ -139,6 +139,8 @@ fun HomeScreen(
         )
     }
 
+    val offlineSongs = remember(allSongs) { allSongs.filter { it.isLocal } }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -299,7 +301,6 @@ fun HomeScreen(
         // Offline Mode Banner when "Offline" tab is selected
         if (selectedCategoryTab == "Offline") {
             item {
-                val offlineSongs = remember(allSongs) { allSongs.filter { it.isLocal } }
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -443,7 +444,6 @@ fun HomeScreen(
         }
 
         if (selectedCategoryTab == "Offline") {
-            val offlineSongs = remember(allSongs) { allSongs.filter { it.isLocal } }
             item {
                 Spacer(modifier = Modifier.height(14.dp))
                 SectionTitle(title = "Device Storage Songs (${offlineSongs.size})", onSeeAllClick = null)
