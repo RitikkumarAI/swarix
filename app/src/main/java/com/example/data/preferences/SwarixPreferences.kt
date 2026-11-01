@@ -35,6 +35,28 @@ class SwarixPreferences(private val context: Context) {
         val KEY_REGION = stringPreferencesKey("region")
         val KEY_BATTERY_SAVER = booleanPreferencesKey("battery_saver")
         val KEY_OFFLINE_MODE = booleanPreferencesKey("offline_mode")
+        val KEY_USER_NAME = stringPreferencesKey("user_name")
+        val KEY_USER_AVATAR = stringPreferencesKey("user_avatar")
+    }
+
+    val userName: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_USER_NAME] ?: "Ritik Kumar"
+    }
+
+    suspend fun setUserName(name: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_USER_NAME] = name
+        }
+    }
+
+    val userAvatar: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_USER_AVATAR] ?: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80"
+    }
+
+    suspend fun setUserAvatar(avatar: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_USER_AVATAR] = avatar
+        }
     }
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { prefs ->

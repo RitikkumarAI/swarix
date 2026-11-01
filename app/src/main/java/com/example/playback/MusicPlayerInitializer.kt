@@ -55,6 +55,7 @@ object MusicPlayerInitializer {
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
             .setLoadControl(loadControl)
             .setHandleAudioBecomingNoisy(true)
+            .setWakeMode(C.WAKE_MODE_NETWORK)
             .build()
 
         Log.d(TAG, "ExoPlayer instance created successfully with USAGE_MEDIA and AudioFocus handling.")

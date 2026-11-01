@@ -22,7 +22,7 @@ object JioSaavnService {
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    fun decryptMediaUrl(encryptedUrl: String): String {
+    fun decryptMediaUrl(encryptedUrl: String, preferredBitrate: String = "320"): String {
         if (encryptedUrl.isBlank()) return ""
         return try {
             val keyBytes = DES_KEY.toByteArray(Charsets.UTF_8)
@@ -36,8 +36,14 @@ object JioSaavnService {
             }
             val decrypted = cipher.doFinal(decoded)
             val rawUrl = String(decrypted, Charsets.UTF_8)
-            rawUrl.replace("_96.mp4", "_320.mp4")
-                .replace("_160.mp4", "_320.mp4")
+            val targetSuffix = when (preferredBitrate) {
+                "96", "low", "datasaver" -> "_96.mp4"
+                "160", "standard" -> "_160.mp4"
+                else -> "_320.mp4"
+            }
+            rawUrl.replace("_96.mp4", targetSuffix)
+                .replace("_160.mp4", targetSuffix)
+                .replace("_320.mp4", targetSuffix)
                 .replace("http://", "https://")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to decrypt media url", e)

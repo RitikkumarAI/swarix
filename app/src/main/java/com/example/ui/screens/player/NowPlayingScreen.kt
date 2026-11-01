@@ -307,10 +307,33 @@ fun NowPlayingScreen(
     // Extract dynamic dominant color palette from currently playing album art
     val artworkPalette = com.example.ui.components.rememberArtworkPalette(song)
 
+    var syncedPreviewLines by remember(song.id) { mutableStateOf<List<com.example.ui.screens.lyrics.SynchronizedLyricLine>>(emptyList()) }
+    LaunchedEffect(song.id) {
+        val result = com.example.ui.screens.lyrics.LyricsService.fetchSynchronizedLyrics(
+            title = song.title,
+            artist = song.artist,
+            durationMs = song.durationMs,
+            existingLyrics = song.lyrics
+        )
+        syncedPreviewLines = result.first
+    }
+
+    val activeLyric = remember(progressMs, syncedPreviewLines) {
+        if (syncedPreviewLines.isEmpty()) null
+        else syncedPreviewLines.lastOrNull { progressMs >= it.timeMs } ?: syncedPreviewLines.firstOrNull()
+    }
+    val nextLyrics = remember(activeLyric, syncedPreviewLines) {
+        if (activeLyric == null) emptyList()
+        else {
+            val idx = syncedPreviewLines.indexOf(activeLyric)
+            syncedPreviewLines.drop(idx + 1).take(2)
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(artworkPalette.surfaceDark)
+            .background(Color(0xFF050505))
     ) {
         // 1. Dynamic Blurred Album Artwork Layer for Glassmorphism (Throttled during battery saver)
         if (song.artworkUri.isNotBlank()) {
@@ -322,7 +345,7 @@ fun NowPlayingScreen(
                     .fillMaxSize()
                     .blur(if (isBatterySaverEngaged) 8.dp else 50.dp)
                     .graphicsLayer {
-                        alpha = if (isBatterySaverEngaged) 0.20f else 0.40f
+                        alpha = if (isBatterySaverEngaged) 0.15f else 0.35f
                         scaleX = 1.25f
                         scaleY = 1.25f
                     }
@@ -336,16 +359,18 @@ fun NowPlayingScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 3. Dynamic Glassmorphic Tint & Frost Overlay
+        // 3. Dynamic Smooth Parrot Green + Luxury Gold + OLED Black Gradient Overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            artworkPalette.surfaceDark.copy(alpha = 0.40f),
-                            artworkPalette.dominant.copy(alpha = 0.15f),
-                            artworkPalette.surfaceDark.copy(alpha = 0.75f)
+                            Color(0xFF040E08), // OLED Emerald Dark
+                            Color(0xFF0B2417).copy(alpha = 0.88f), // Deep Parrot Green Tint
+                            Color(0xFF1D2816).copy(alpha = 0.72f), // Golden Acoustic Transition
+                            Color(0xFF0A0C0A).copy(alpha = 0.94f), // Deep OLED Surface
+                            Color(0xFF050505)  // Pure OLED Black
                         )
                     )
                 )
@@ -674,36 +699,42 @@ fun NowPlayingScreen(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            // 8K Ultra Quality, DSP Master Sound, and Tactile Bass Haptics Pills
+                            // 8K Ultra Quality, DSP Master Sound, and Tactile Bass Haptics Pills (Horizontally Scrollable, Non-Wrapping)
                             Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Surface(
                                     modifier = Modifier
+                                        .wrapContentWidth()
                                         .clip(RoundedCornerShape(6.dp))
                                         .clickable { showQualitySpecs = true }
                                         .testTag("4k_quality_badge"),
-                                    color = colors.primaryAccent.copy(alpha = 0.20f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.primaryAccent.copy(alpha = 0.40f))
+                                    color = Color(0xFF1ED760).copy(alpha = 0.20f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1ED760).copy(alpha = 0.50f))
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.HighQuality,
                                             contentDescription = null,
-                                            tint = colors.primaryAccent,
+                                            tint = Color(0xFF1ED760),
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
                                             text = "8K ULTRA",
+                                            maxLines = 1,
+                                            softWrap = false,
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = colors.primaryAccent,
+                                                color = Color(0xFF1ED760),
                                                 letterSpacing = 0.5.sp
                                             )
                                         )
@@ -712,14 +743,15 @@ fun NowPlayingScreen(
 
                                 Surface(
                                     modifier = Modifier
+                                        .wrapContentWidth()
                                         .clip(RoundedCornerShape(6.dp))
                                         .clickable { onToggleDsp() }
                                         .testTag("dsp_sound_pill"),
-                                    color = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                                    color = if (isDspEnabled) Color(0xFF6ED0C9).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f),
                                     border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.20f))
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
@@ -731,6 +763,8 @@ fun NowPlayingScreen(
                                         )
                                         Text(
                                             text = if (isDspEnabled) "DSP ON" else "DSP OFF",
+                                            maxLines = 1,
+                                            softWrap = false,
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
@@ -743,29 +777,32 @@ fun NowPlayingScreen(
 
                                 Surface(
                                     modifier = Modifier
+                                        .wrapContentWidth()
                                         .clip(RoundedCornerShape(6.dp))
                                         .clickable { onToggleBassHaptics?.invoke() }
                                         .testTag("tactile_bass_badge"),
-                                    color = if (bassHapticsEnabled) colors.primaryAccent.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.08f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (bassHapticsEnabled) colors.primaryAccent.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.15f))
+                                    color = if (bassHapticsEnabled) Color(0xFFE5C07B).copy(alpha = 0.20f) else Color.White.copy(alpha = 0.08f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (bassHapticsEnabled) Color(0xFFE5C07B).copy(alpha = 0.50f) else Color.White.copy(alpha = 0.15f))
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Vibration,
                                             contentDescription = "Bass Haptics",
-                                            tint = if (bassHapticsEnabled) colors.primaryAccent else Color.White.copy(alpha = 0.65f),
+                                            tint = if (bassHapticsEnabled) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.65f),
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
                                             text = if (bassHapticsEnabled) "BASS ON" else "BASS OFF",
+                                            maxLines = 1,
+                                            softWrap = false,
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = if (bassHapticsEnabled) colors.primaryAccent else Color.White.copy(alpha = 0.65f),
+                                                color = if (bassHapticsEnabled) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.65f),
                                                 letterSpacing = 0.5.sp
                                             )
                                         )
@@ -1345,7 +1382,7 @@ fun NowPlayingScreen(
                     }
 
                     // ==========================================
-                    // SECTION 3: Spotify-Inspired Deep Blue Theme Lyrics Card
+                    // SECTION 3: Spotify-Inspired Real-Time Synced Lyrics Card (Parrot Green & Gold)
                     // ==========================================
                     Spacer(modifier = Modifier.height(14.dp))
                     Surface(
@@ -1361,18 +1398,18 @@ fun NowPlayingScreen(
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
-                                            Color(0xFF0F172A),
-                                            Color(0xFF0369A1),
-                                            Color(0xFF0284C7)
+                                            Color(0xFF061A10),
+                                            Color(0xFF0E3823),
+                                            Color(0xFF14452C)
                                         )
                                     )
                                 )
                                 .border(
                                     1.dp,
-                                    Color(0xFF38BDF8).copy(alpha = 0.35f),
+                                    Color(0xFF1ED760).copy(alpha = 0.45f),
                                     RoundedCornerShape(20.dp)
                                 )
-                                .padding(16.dp)
+                                .padding(18.dp)
                         ) {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -1383,7 +1420,7 @@ fun NowPlayingScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Lyrics",
+                                        text = "Lyrics (Live Synced)",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.ExtraBold,
                                             color = Color.White,
@@ -1394,45 +1431,60 @@ fun NowPlayingScreen(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(12.dp))
-                                            .background(Color.White.copy(alpha = 0.20f))
+                                            .background(Color(0xFF1ED760).copy(alpha = 0.25f))
+                                            .border(1.dp, Color(0xFF1ED760).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
                                     ) {
                                         Text(
                                             text = "FULL SCREEN",
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color.White,
+                                                color = Color(0xFF1ED760),
                                                 fontSize = 10.sp
                                             )
                                         )
                                     }
                                 }
 
-                                Text(
-                                    text = "♪ Caught in the rhythm, echoes in time...",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFE0F2FE),
-                                        fontSize = 16.sp,
-                                        lineHeight = 22.sp
+                                if (activeLyric != null) {
+                                    Text(
+                                        text = "♪ ${activeLyric.text}",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color(0xFF1ED760), // Active line glows in Parrot Green
+                                            fontSize = 18.sp,
+                                            lineHeight = 24.sp
+                                        )
                                     )
-                                )
-                                Text(
-                                    text = "♪ High fidelity running through the sound...",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        fontSize = 14.sp
+                                    nextLyrics.forEach { nextLine ->
+                                        Text(
+                                            text = nextLine.text,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = Color(0xFFF5F5F7).copy(alpha = 0.85f), // Next lines in Soft White
+                                                fontSize = 15.sp,
+                                                lineHeight = 20.sp
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        text = "♪ Loading lyrics for ${song.title}...",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFE5C07B),
+                                            fontSize = 16.sp
+                                        )
                                     )
-                                )
-                                Text(
-                                    text = "♪ Tap to open interactive karaoke & synced lyrics...",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color(0xFFBAE6FD).copy(alpha = 0.75f),
-                                        fontSize = 12.sp
+                                    Text(
+                                        text = "♪ Tap to open interactive full-screen karaoke mode",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.White.copy(alpha = 0.70f),
+                                            fontSize = 13.sp
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }

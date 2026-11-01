@@ -174,6 +174,62 @@ object LyricsService {
             [00:40.00] Kaate kate na katte yeh din
             [00:46.00] Raataan lambiyan lambiyan re
             [00:52.00] Kate tere sangiyan sangiyan re
+        """.trimIndent(),
+
+        "tum kya mile" to """
+            [00:12.50] Be-iraada sahi par hua to sahi
+            [00:18.00] Ek tarafa sahi par sach to yahi
+            [00:24.00] Tum kya mile hum na rahe hum
+            [00:30.50] Bikhre the jo milke bane hum
+            [00:37.00] Jeene ko ab to tayyar hain hum
+            [00:44.00] Tum kya mile hum na rahe hum
+            [00:56.00] Raaste tere mud ke chale hain
+            [00:62.00] Khushiyon ke saare taare khile hain
+        """.trimIndent(),
+
+        "4 5 pistol" to """
+            [00:08.00] Gaddi ka number chaar paanch
+            [00:14.00] Pistol rakhun main loaded yaar
+            [00:20.00] Haryane ka chhora baanke
+            [00:26.00] Kaare shor kare hathiyar
+            [00:32.00] Masoom Sharma bolan laaga
+            [00:38.00] Dhol bajaave danka yaar
+            [00:45.00] 4 5 pistol gaadi mein rakhi
+            [00:52.00] Shaunk nawabi dushman hairaan
+        """.trimIndent(),
+
+        "295" to """
+            [00:12.00] Nitt controversy create milugi
+            [00:18.00] Dharman de naam te debate milugi
+            [00:24.00] Sach bolega taan milu 295
+            [00:30.00] Jeh karega tarakki putt hate milugi
+            [00:38.00] Sidhu Moose Wala naam sun ke
+            [00:45.00] Lokaan de pinde te agg lagdi
+        """.trimIndent(),
+
+        "so high" to """
+            [00:09.00] Tere karke main chhad ditte saare
+            [00:14.00] Tu hi bas dissdi ae mutiyaare
+            [00:20.00] Aapan vi udd gaye haan so high
+            [00:26.00] Saari duniya nu thalle chhad ke
+            [00:32.00] Gabru da naam challe top te
+            [00:38.00] Moosewala chha gaya kalla kalla
+        """.trimIndent(),
+
+        "softly" to """
+            [00:06.00] Ni softly softly chal kude
+            [00:12.00] Paunde asle de vich khal kude
+            [00:18.00] Karan Aujla naal yaari pakki
+            [00:24.00] Gallan kardi ae saari kudiye
+            [00:30.00] Making memories with you baby
+        """.trimIndent(),
+
+        "chaleya" to """
+            [00:10.00] Ishq mein dil bana hai bada be-imaan re
+            [00:16.00] Tu meri jaan lele, bas keh de haan re
+            [00:22.00] Chaleya te chaleya ishq da mausam
+            [00:28.00] Teri aankhon se hoke nikle sitaare
+            [00:35.00] Har pal teri raahon mein beete
         """.trimIndent()
     )
 
@@ -207,10 +263,18 @@ object LyricsService {
             }
         }
 
-        // 3. Attempt online fetch from open lyrics database (LRCLIB)
+        // 3. Attempt online fetch from open lyrics database (LRCLIB) with clean metadata search
         try {
-            val encodedTitle = URLEncoder.encode(title, "UTF-8")
-            val encodedArtist = URLEncoder.encode(artist, "UTF-8")
+            val simplifiedTitle = title.replace(Regex("\\(feat\\..*?\\)", RegexOption.IGNORE_CASE), "")
+                .replace(Regex("\\[.*?\\]"), "")
+                .replace(Regex("\\(.*?official.*?\\)", RegexOption.IGNORE_CASE), "")
+                .replace(Regex("\\(.*?video.*?\\)", RegexOption.IGNORE_CASE), "")
+                .replace(Regex("\\(.*?from.*?\\)", RegexOption.IGNORE_CASE), "")
+                .trim()
+            val simplifiedArtist = artist.split(",", "&", "ft.", "feat.").firstOrNull()?.trim() ?: artist
+
+            val encodedTitle = URLEncoder.encode(simplifiedTitle, "UTF-8")
+            val encodedArtist = URLEncoder.encode(simplifiedArtist, "UTF-8")
             val durationSec = (durationMs / 1000).toInt()
             val urlString = "https://lrclib.net/api/get?track_name=$encodedTitle&artist_name=$encodedArtist" +
                     (if (durationSec > 0) "&duration=$durationSec" else "")
@@ -218,9 +282,9 @@ object LyricsService {
             val url = URL(urlString)
             val connection = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
-                connectTimeout = 3200
-                readTimeout = 3200
-                setRequestProperty("User-Agent", "SwarixMusicPlayer/1.0 (Android)")
+                connectTimeout = 5000
+                readTimeout = 5000
+                setRequestProperty("User-Agent", "SwarixMusicPlayer/1.7 (Android)")
             }
 
             if (connection.responseCode in 200..299) {

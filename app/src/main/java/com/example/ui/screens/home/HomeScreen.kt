@@ -113,6 +113,9 @@ fun HomeScreen(
     onPlayDailyMix: (DailyMix) -> Unit = {},
     onRegenerateDailyMixes: () -> Unit = {},
     onRescanLibrary: (() -> Unit)? = null,
+    userName: String = "Ritik Kumar",
+    userAvatar: String = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+    onProfileClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
@@ -197,16 +200,17 @@ fun HomeScreen(
                         }
                     }
 
-                    // Profile Avatar (Ritik)
+                    // Profile Avatar (User Chosen Avatar)
                     Box(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
                             .background(colors.elevatedSurface)
-                            .border(1.dp, colors.primaryAccent.copy(alpha = 0.5f), CircleShape)
+                            .border(1.5.dp, Color(0xFF1ED760), CircleShape)
+                            .clickable { onProfileClick?.invoke() }
                     ) {
                         AsyncImage(
-                            model = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+                            model = userAvatar,
                             contentDescription = "Profile",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()

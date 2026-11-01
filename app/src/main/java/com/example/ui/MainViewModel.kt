@@ -148,7 +148,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.DARK)
 
     val audioQuality: StateFlow<String> = preferences.audioQuality
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Very High (320 kbps)")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "8K Ultra Studio Master (Lossless Hi-Res)")
+
+    val userName: StateFlow<String> = preferences.userName
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Ritik Kumar")
+
+    val userAvatar: StateFlow<String> = preferences.userAvatar
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80")
+
+    fun updateUserProfile(name: String, avatar: String) {
+        viewModelScope.launch {
+            if (name.isNotBlank()) preferences.setUserName(name.trim())
+            if (avatar.isNotBlank()) preferences.setUserAvatar(avatar.trim())
+        }
+    }
 
     val onboardingDone: StateFlow<Boolean> = preferences.onboardingDone
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)

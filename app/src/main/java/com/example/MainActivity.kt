@@ -388,7 +388,10 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Scanning device storage for audio...")
                             }
-                        }
+                        },
+                        userName = mainViewModel.userName.collectAsStateWithLifecycle().value,
+                        userAvatar = mainViewModel.userAvatar.collectAsStateWithLifecycle().value,
+                        onProfileClick = { mainViewModel.selectTab(NavItem.SETTINGS) }
                     )
                 }
                 NavItem.SEARCH -> {
@@ -477,6 +480,9 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                     SettingsScreen(
                         currentTheme = themeMode,
                         audioQuality = audioQuality,
+                        userName = mainViewModel.userName.collectAsStateWithLifecycle().value,
+                        userAvatar = mainViewModel.userAvatar.collectAsStateWithLifecycle().value,
+                        onUpdateProfile = { name, avatar -> mainViewModel.updateUserProfile(name, avatar) },
                         crossfadeEnabled = crossfadeEnabled,
                         crossfadeSeconds = crossfadeSeconds,
                         sleepTimerMinutesRemaining = sleepTimerMinutesRemaining,

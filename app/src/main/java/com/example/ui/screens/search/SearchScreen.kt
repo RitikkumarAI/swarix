@@ -151,13 +151,14 @@ fun SearchScreen(
         }
     }
 
-    val matchingArtists by remember(searchQuery, allSongs) {
+    val matchingArtists by remember(searchQuery, allSongs, onlineResults) {
         derivedStateOf {
             if (searchQuery.isBlank()) emptyList()
             else {
                 val q = searchQuery.trim().lowercase()
-                allSongs.groupBy { it.artist }
-                    .filter { (artistName, _) -> artistName.lowercase().contains(q) }
+                val combined = (allSongs + onlineResults).distinctBy { it.id }
+                combined.groupBy { it.artist }
+                    .filter { (artistName, _) -> artistName.lowercase().contains(q) || q.contains(artistName.lowercase()) }
                     .map { (artistName, songs) ->
                         Artist(
                             name = artistName,
@@ -550,11 +551,14 @@ fun SearchScreen(
                 }
             }
 
-            // Matching Artists Section with Circular Photos (Spotify Inspired)
+            // Matching Artists Section with Circular Photos & Complete Discography Playlist Card
             if (matchingArtists.isNotEmpty()) {
+                val dominantArtist = matchingArtists.first()
+                val artistDiscography = displaySongs.filter { it.artist.contains(dominantArtist.name, ignoreCase = true) }
+
                 item {
                     Text(
-                        text = "Artists",
+                        text = "Artist Spotlight",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = colors.primaryText
@@ -563,7 +567,7 @@ fun SearchScreen(
                     )
                 }
 
-                items(matchingArtists.take(4)) { artist ->
+                items(matchingArtists.take(1)) { artist ->
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -576,10 +580,10 @@ fun SearchScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(56.dp)
+                                    .size(64.dp)
                                     .clip(CircleShape)
                                     .background(colors.surface)
-                                    .border(1.dp, colors.divider, CircleShape)
+                                    .border(2.dp, Color(0xFF1ED760), CircleShape)
                             ) {
                                 AsyncImage(
                                     model = artist.artworkUri.ifBlank { "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
@@ -592,7 +596,7 @@ fun SearchScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = artist.name,
-                                    style = MaterialTheme.typography.titleMedium.copy(
+                                    style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = colors.primaryText
                                     ),
@@ -600,11 +604,136 @@ fun SearchScreen(
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
-                                    text = "Artist",
+                                    text = "Verified Artist • ${if (artistDiscography.isNotEmpty()) artistDiscography.size else artist.songCount} Songs Catalog",
                                     style = MaterialTheme.typography.bodySmall.copy(
-                                        color = colors.secondaryText
+                                        color = Color(0xFF1ED760)
                                     )
                                 )
+                            }
+                        }
+                    }
+                }
+
+                // Official Complete Artist Discography Playlist Card
+                if (artistDiscography.isNotEmpty()) {
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clip(RoundedCornerShape(20.dp)),
+                            color = Color(0xFF0C1F14),
+                            border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF1ED760).copy(alpha = 0.6f))
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(56.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFF1ED760).copy(alpha = 0.25f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = null,
+                                            tint = Color(0xFF1ED760),
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(14.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "This Is ${dominantArtist.name}",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = "Complete Discography Playlist (Hit to Classic • ${artistDiscography.size} Tracks)",
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = Color(0xFFE5C07B)
+                                            ),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .clickable { onSongClick(artistDiscography.first(), artistDiscography) },
+                                        color = Color(0xFF1ED760),
+                                        shape = RoundedCornerShape(20.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(vertical = 10.dp),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PlayArrow,
+                                                contentDescription = null,
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = "Play All Songs",
+                                                style = MaterialTheme.typography.labelMedium.copy(
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        }
+                                    }
+                                    if (onSavePlaylist != null) {
+                                        Surface(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .clickable {
+                                                    onSavePlaylist("This Is ${dominantArtist.name}", artistDiscography)
+                                                },
+                                            color = colors.elevatedSurface,
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.divider),
+                                            shape = RoundedCornerShape(20.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(vertical = 10.dp),
+                                                horizontalArrangement = Arrangement.Center,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.PlaylistAdd,
+                                                    contentDescription = null,
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Save Playlist",
+                                                    style = MaterialTheme.typography.labelMedium.copy(
+                                                        color = Color.White,
+                                                        fontWeight = FontWeight.SemiBold
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

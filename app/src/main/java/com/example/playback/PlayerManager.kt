@@ -285,6 +285,65 @@ class PlayerManager private constructor(private val context: Context) {
         }
     }
 
+    companion object {
+        enum class MusicCategory {
+            PUNJABI, HARYANVI, BOLLYWOOD, HIPHOP, INTERNATIONAL, OTHER
+        }
+
+        fun detectCategory(song: Song): MusicCategory {
+            val text = "${song.title} ${song.artist} ${song.album} ${song.genre}".lowercase()
+
+            val haryanviKeys = listOf("masoom", "sharma", "dhanda", "nyoliwala", "bintu", "pabra", "gulzaar", "chhaniwala", "renuka", "panwar", "raju punjabi", "ajay hooda", "ruchika", "jangid", "kd desi", "amit saini", "sumit goswami", "haryanvi", "ragni")
+            if (haryanviKeys.any { text.contains(it) }) return MusicCategory.HARYANVI
+
+            val punjabiKeys = listOf("sidhu", "moose", "moosewala", "karan", "aujla", "dosanjh", "diljit", "shubh", "dhillon", "ap dhillon", "amrit maan", "gurlez", "akhtar", "jordan sandhu", "b praak", "jass manak", "harrdy", "garry sandhu", "punjabi", "bhangra")
+            if (punjabiKeys.any { text.contains(it) }) return MusicCategory.PUNJABI
+
+            val hipHopKeys = listOf("mc stan", "divine", "seedhe maut", "kr\$na", "krsna", "raftaar", "badshah", "honey singh", "yo yo", "king", "ikka", "emiway", "hip hop", "rap")
+            if (hipHopKeys.any { text.contains(it) }) return MusicCategory.HIPHOP
+
+            val bollywoodKeys = listOf("arijit", "shreya", "ghoshal", "jubin", "nautiyal", "atif", "aslam", "pritam", "neha kakkar", "sonu nigam", "kk", "mohit chauhan", "armaan malik", "vishal mishra", "ami mishra", "darshan raval", "sachin-jigar", "bollywood", "hindi", "filmi", "romance")
+            if (bollywoodKeys.any { text.contains(it) }) return MusicCategory.BOLLYWOOD
+
+            val intlKeys = listOf("the weeknd", "taylor", "drake", "bieber", "sheeran", "dua lipa", "billie eilish", "pop", "english")
+            if (intlKeys.any { text.contains(it) }) return MusicCategory.INTERNATIONAL
+
+            return MusicCategory.OTHER
+        }
+
+        fun calculateAffinityScore(current: Song, candidate: Song): Int {
+            var score = 0
+            val currentCat = detectCategory(current)
+            val candidateCat = detectCategory(candidate)
+
+            // Strict Language/Culture Matching
+            if (currentCat != MusicCategory.OTHER && currentCat == candidateCat) {
+                score += 50
+            } else if (currentCat != candidateCat) {
+                score -= 30
+            }
+
+            // Artist match is highest affinity
+            if (current.artist.isNotBlank() && candidate.artist.equals(current.artist, ignoreCase = true)) {
+                score += 40
+            } else if (current.artist.isNotBlank() && candidate.artist.contains(current.artist, ignoreCase = true)) {
+                score += 25
+            }
+
+            // Genre match
+            if (current.genre.isNotBlank() && candidate.genre.equals(current.genre, ignoreCase = true)) {
+                score += 20
+            }
+
+            // Mood match
+            if (current.mood.isNotBlank() && candidate.mood.equals(current.mood, ignoreCase = true)) {
+                score += 15
+            }
+
+            return score
+        }
+    }
+
     private fun getSmartNextIndex(queue: List<Song>, currentIndex: Int): Int {
         if (queue.size <= 1) return 0
         val current = _currentSong.value ?: queue.getOrNull(currentIndex)
@@ -292,36 +351,8 @@ class PlayerManager private constructor(private val context: Context) {
         if (remainingIndices.isEmpty()) return 0
         if (current == null) return remainingIndices.random()
 
-        val punjabiKeywords = listOf("punjabi", "sidhu", "karan", "moose", "aujla", "dosanjh", "diljit", "sharma", "akhtar", "masoom", "bintu", "pabra", "dhillon", "ap dhillon", "amrit", "maan")
-        val isCurrentPunjabi = punjabiKeywords.any {
-            current.title.contains(it, ignoreCase = true) ||
-            current.artist.contains(it, ignoreCase = true) ||
-            current.album.contains(it, ignoreCase = true) ||
-            current.genre.contains(it, ignoreCase = true)
-        }
-
         val scored = remainingIndices.map { idx ->
-            val candidate = queue[idx]
-            var score = 0
-            if (current.genre.isNotBlank() && candidate.genre.equals(current.genre, ignoreCase = true)) {
-                score += 12
-            }
-            if (current.artist.isNotBlank() && candidate.artist.equals(current.artist, ignoreCase = true)) {
-                score += 10
-            }
-            if (current.mood.isNotBlank() && candidate.mood.equals(current.mood, ignoreCase = true)) {
-                score += 5
-            }
-            val isCandidatePunjabi = punjabiKeywords.any {
-                candidate.title.contains(it, ignoreCase = true) ||
-                candidate.artist.contains(it, ignoreCase = true) ||
-                candidate.album.contains(it, ignoreCase = true) ||
-                candidate.genre.contains(it, ignoreCase = true)
-            }
-            if (isCurrentPunjabi && isCandidatePunjabi) {
-                score += 20
-            }
-            idx to score
+            idx to calculateAffinityScore(current, queue[idx])
         }
 
         val maxScore = scored.maxOfOrNull { it.second } ?: 0
@@ -365,12 +396,21 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun playSong(song: Song, newQueue: List<Song>? = null) {
-        val effectiveQueue = if (newQueue != null && newQueue.isNotEmpty()) {
+        val rawQueue = if (newQueue != null && newQueue.isNotEmpty()) {
             newQueue
         } else if (_queue.value.none { it.id == song.id }) {
             _queue.value + song
         } else {
             _queue.value
+        }
+
+        // Smart Spotify-style Affinity Queue: Sort subsequent tracks by language/artist affinity
+        val effectiveQueue = if (rawQueue.size > 2) {
+            val remaining = rawQueue.filter { it.id != song.id }
+            val affinitySorted = remaining.sortedByDescending { calculateAffinityScore(song, it) }
+            listOf(song) + affinitySorted
+        } else {
+            rawQueue
         }
 
         _queue.value = effectiveQueue

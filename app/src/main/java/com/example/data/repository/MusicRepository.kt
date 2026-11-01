@@ -641,6 +641,98 @@ Diljit dosanjh baby!""".trimIndent(),
                 playCount = 16,
                 dateAdded = System.currentTimeMillis() - 1100000,
                 isLocal = false
+            ),
+            SongEntity(
+                id = "online_295",
+                title = "295",
+                artist = "Sidhu Moose Wala",
+                album = "Moosetape",
+                durationMs = 270000,
+                contentUri = "https://aac.saavncdn.com/264/3c23337f71120a1ebf2d4e680cfcf552_320.mp4",
+                artworkUri = "https://c.saavncdn.com/264/Moosetape-Punjabi-2021-20210514210636-500x500.jpg",
+                genre = "Punjabi Hip-Hop",
+                mood = "Workout",
+                lyrics = """Nitt controversy create milugi
+Dharman de naam te debate milugi
+Sach bolega taan milu 295
+Jeh karega tarakki putt hate milugi""".trimIndent(),
+                isFavorite = true,
+                playCount = 25,
+                dateAdded = System.currentTimeMillis() - 1200000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_so_high",
+                title = "So High",
+                artist = "Sidhu Moose Wala & BYG BYRD",
+                album = "PBX 1",
+                durationMs = 224000,
+                contentUri = "https://aac.saavncdn.com/712/e82cb229a1b9d4dfbc2dc022b7245b0a_320.mp4",
+                artworkUri = "https://c.saavncdn.com/712/PBX-1-Punjabi-2018-20181105073001-500x500.jpg",
+                genre = "Punjabi Hip-Hop",
+                mood = "Party",
+                lyrics = """Tere karke main chhad ditte saare
+Tu hi bas dissdi ae mutiyaare
+Aapan vi udd gaye haan so high
+Saari duniya nu thalle chhad ke""".trimIndent(),
+                isFavorite = true,
+                playCount = 20,
+                dateAdded = System.currentTimeMillis() - 1300000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_4_5_pistol",
+                title = "4 5 Pistol",
+                artist = "Masoom Sharma, Dev Chouhan, Shivani Yadav",
+                album = "4 5 Pistol Single",
+                durationMs = 175000,
+                contentUri = "https://aac.saavncdn.com/832/5e7308ca3cf409f984bb35a8286a07cf_320.mp4",
+                artworkUri = "https://c.saavncdn.com/832/4-5-Pistol-Haryanvi-2023-20230818141445-500x500.jpg",
+                genre = "Haryanvi Folk Pop",
+                mood = "Workout",
+                lyrics = """Gaddi ka number chaar paanch
+Pistol rakhun main loaded yaar
+Haryane ka chhora baanke
+Kaare shor kare hathiyar""".trimIndent(),
+                isFavorite = true,
+                playCount = 19,
+                dateAdded = System.currentTimeMillis() - 1400000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_dada_masoom",
+                title = "Dada Masoom",
+                artist = "Masoom Sharma & Vicky Gangwa",
+                album = "Dada Masoom Single",
+                durationMs = 188000,
+                contentUri = "https://aac.saavncdn.com/492/6c73ad7d812674268e3ef423bc2d44fc_320.mp4",
+                artworkUri = "https://c.saavncdn.com/492/Dada-Masoom-Haryanvi-2023-20230728143210-500x500.jpg",
+                genre = "Haryanvi Folk Pop",
+                mood = "Party",
+                lyrics = """Dada Masoom ka danka baaje
+Desi roop te shaan niraali
+Sheran varga jigar haryane ka""".trimIndent(),
+                isFavorite = true,
+                playCount = 17,
+                dateAdded = System.currentTimeMillis() - 1500000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_winning_speech",
+                title = "Winning Speech",
+                artist = "Karan Aujla & Mxrci",
+                album = "Four Me",
+                durationMs = 210000,
+                contentUri = "https://aac.saavncdn.com/152/e29a997d9fcb78c85ee31e7f12e2f38d_320.mp4",
+                artworkUri = "https://c.saavncdn.com/152/Four-Me-Punjabi-2024-20240126131015-500x500.jpg",
+                genre = "Punjabi Hip-Hop",
+                mood = "Joy",
+                lyrics = """Winning speech ready kiti hoyi ae
+Rab di mehar naal jitt ke aawange""".trimIndent(),
+                isFavorite = true,
+                playCount = 22,
+                dateAdded = System.currentTimeMillis() - 1600000,
+                isLocal = false
             )
         )
     }

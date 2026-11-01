@@ -121,6 +121,9 @@ fun SettingsScreen(
     playbackRecoveryCount: Int = 0,
     onResetPlayer: () -> Unit = {},
     onOpenDiagnostics: () -> Unit = {},
+    userName: String = "Ritik Kumar",
+    userAvatar: String = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+    onUpdateProfile: (String, String) -> Unit = { _, _ -> },
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -136,6 +139,103 @@ fun SettingsScreen(
     var showAboutDialog by remember { mutableStateOf(false) }
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showVoiceHistoryDialog by remember { mutableStateOf(false) }
+    var showEditProfileDialog by remember { mutableStateOf(false) }
+
+    var editedName by remember(userName) { mutableStateOf(userName) }
+    var editedAvatar by remember(userAvatar) { mutableStateOf(userAvatar) }
+
+    if (showEditProfileDialog) {
+        val presetAvatars = listOf(
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80"
+        )
+        AlertDialog(
+            onDismissRequest = { showEditProfileDialog = false },
+            title = {
+                Text(
+                    text = "Edit Profile & Avatar",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = colors.primaryText
+                    )
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = editedName,
+                        onValueChange = { editedName = it },
+                        label = { Text("Display Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF1ED760),
+                            unfocusedBorderColor = colors.divider,
+                            focusedTextColor = colors.primaryText,
+                            unfocusedTextColor = colors.primaryText
+                        )
+                    )
+
+                    Text(
+                        text = "Choose Profile Avatar:",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.secondaryText
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        presetAvatars.forEach { avatarUrl ->
+                            val isSelected = editedAvatar == avatarUrl
+                            Box(
+                                modifier = Modifier
+                                    .size(54.dp)
+                                    .clip(CircleShape)
+                                    .border(
+                                        width = if (isSelected) 3.dp else 1.dp,
+                                        color = if (isSelected) Color(0xFF1ED760) else colors.divider,
+                                        shape = CircleShape
+                                    )
+                                    .clickable { editedAvatar = avatarUrl }
+                            ) {
+                                AsyncImage(
+                                    model = avatarUrl,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onUpdateProfile(editedName, editedAvatar)
+                        showEditProfileDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1ED760))
+                ) {
+                    Text("Save Changes", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditProfileDialog = false }) {
+                    Text("Cancel", color = colors.secondaryText)
+                }
+            },
+            containerColor = colors.elevatedSurface
+        )
+    }
 
     if (showWakeUpDialog) {
         com.example.ui.components.MusicWakeUpDialog(
@@ -345,9 +445,8 @@ fun SettingsScreen(
         val qualities = listOf(
             "8K Ultra Studio Master (Lossless Hi-Res)",
             "4K Premium Master (320 kbps)",
-            "Very High (320 kbps)",
-            "High (256 kbps)",
-            "Standard (128 kbps)"
+            "Standard (128 kbps)",
+            "Data Saver (64-96 kbps - Ultra Fast / Weak Network)"
         )
         AlertDialog(
             onDismissRequest = { showQualityDialog = false },
@@ -558,12 +657,13 @@ fun SettingsScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Profile Card (from Image 1 Screen 14)
+            // Profile Card (Clickable to Edit Name & Avatar)
             item {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp)),
+                        .clip(RoundedCornerShape(18.dp))
+                        .clickable { showEditProfileDialog = true },
                     color = colors.elevatedSurface
                 ) {
                     Row(
@@ -576,12 +676,13 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(CircleShape)
-                                .background(colors.primaryAccent.copy(alpha = 0.2f)),
+                                .background(colors.primaryAccent.copy(alpha = 0.2f))
+                                .border(1.5.dp, Color(0xFF1ED760), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             AsyncImage(
-                                model = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
-                                contentDescription = "Ritik Profile",
+                                model = userAvatar,
+                                contentDescription = "Profile Avatar",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -591,23 +692,23 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Ritik",
+                                text = userName,
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = colors.primaryText
                                 )
                             )
                             Text(
-                                text = "ritik@example.com",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = colors.secondaryText
+                                text = "Tap to edit username & avatar ✎",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color(0xFF1ED760)
                                 )
                             )
                         }
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = { showEditProfileDialog = true }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
+                                contentDescription = "Edit Profile",
                                 tint = colors.mutedText
                             )
                         }
