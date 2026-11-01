@@ -242,7 +242,30 @@ class PlayerManager private constructor(private val context: Context) {
             }
 
             override fun onPlayerError(error: PlaybackException) {
-                Log.e("PlayerManager", "Playback error: ${error.message}", error)
+                Log.e("PlayerManager", "Playback error: ${error.message} (code: ${error.errorCode})", error)
+                val cur = _currentSong.value
+                if (cur != null) {
+                    val uri = cur.contentUri
+                    if (uri.contains("_320.mp4")) {
+                        val fallbackUri = uri.replace("_320.mp4", "_160.mp4")
+                        Log.w("PlayerManager", "320kbps CDN stream failed, auto-fallback to 160kbps: $fallbackUri")
+                        val fallbackSong = cur.copy(contentUri = fallbackUri)
+                        _currentSong.value = fallbackSong
+                        exoPlayer.setMediaItem(toMediaItem(fallbackSong))
+                        exoPlayer.prepare()
+                        exoPlayer.play()
+                        return
+                    } else if (uri.contains("_160.mp4")) {
+                        val fallbackUri = uri.replace("_160.mp4", "_96.mp4")
+                        Log.w("PlayerManager", "160kbps CDN stream failed, auto-fallback to 96kbps: $fallbackUri")
+                        val fallbackSong = cur.copy(contentUri = fallbackUri)
+                        _currentSong.value = fallbackSong
+                        exoPlayer.setMediaItem(toMediaItem(fallbackSong))
+                        exoPlayer.prepare()
+                        exoPlayer.play()
+                        return
+                    }
+                }
                 _isPlaying.value = false
                 playbackHealthManager.onPlayerError(error)
             }
@@ -381,7 +404,6 @@ class PlayerManager private constructor(private val context: Context) {
         } else {
             exoPlayer.volume = 1.0f
         }
-        audioFocusManager.requestAudioFocus()
         startPlaybackService()
         Log.d("PlayerManager", "Playing song: ${song.title}, uri: ${song.contentUri}")
         exoPlayer.play()
@@ -392,8 +414,8 @@ class PlayerManager private constructor(private val context: Context) {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
         } else {
-            audioFocusManager.requestAudioFocus()
             startPlaybackService()
+            exoPlayer.volume = 1.0f
             if (exoPlayer.playbackState == Player.STATE_ENDED) {
                 exoPlayer.seekTo(0)
             }

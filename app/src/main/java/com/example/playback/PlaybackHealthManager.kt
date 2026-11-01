@@ -130,15 +130,12 @@ class PlaybackHealthManager(
         try {
             _recoveryCount.value += 1
             val currentPos = player.currentPosition.coerceAtLeast(0L)
-            val wasPlaying = player.isPlaying
 
             player.prepare()
             if (currentPos > 0L) {
                 player.seekTo(currentPos)
             }
-            if (wasPlaying) {
-                player.play()
-            }
+            player.play()
             _healthStatus.value = "Auto-Recovered ($reason)"
             Log.i(TAG, "Auto-recovery executed successfully.")
         } catch (e: Exception) {

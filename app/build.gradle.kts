@@ -16,8 +16,8 @@ android {
     applicationId = "com.aistudio.swarix.musply"
     minSdk = 26
     targetSdk = 36
-    versionCode = 9
-    versionName = "1.8"
+    versionCode = 10
+    versionName = "1.9"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -112,6 +112,7 @@ dependencies {
   implementation(libs.androidx.room.runtime)
   implementation(libs.coil.compose)
   implementation(libs.androidx.media3.exoplayer)
+  implementation(libs.androidx.media3.datasource)
   implementation(libs.androidx.media3.session)
   implementation(libs.androidx.media3.ui)
   implementation(libs.converter.moshi)
