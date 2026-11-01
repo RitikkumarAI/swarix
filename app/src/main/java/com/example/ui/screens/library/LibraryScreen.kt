@@ -91,7 +91,7 @@ fun LibraryScreen(
 ) {
     val colors = LocalSwarixColors.current
     var selectedTab by remember { mutableStateOf("Playlists") }
-    val tabs = listOf("Playlists", "Smart Folders", "Songs", "Artists", "Albums")
+    val tabs = listOf("Playlists", "Smart Folders", "Songs", "Artists", "Albums", "Offline Music")
 
     val smartFolders = remember(allSongs) {
         allSongs.groupBy { song ->
@@ -760,6 +760,124 @@ fun LibraryScreen(
                                 )
                             )
                         }
+                    }
+                }
+            }
+
+            "Offline Music" -> {
+                val offlineSongs = remember(allSongs, cachedSongIds) {
+                    allSongs.filter { it.isLocal || cachedSongIds.contains(it.id) }
+                }
+
+                item {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color(0xFF1B2E23),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1ED760).copy(alpha = 0.4f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Offline Vault",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "${offlineSongs.size} tracks available offline without internet",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = Color(0xFF1ED760)
+                                    )
+                                )
+                            }
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable { onRescanLibrary() },
+                                color = Color(0xFF1ED760),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text(
+                                    text = "Scan Device",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (offlineSongs.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp, vertical = 40.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MusicNote,
+                                contentDescription = null,
+                                tint = colors.secondaryText,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "No Offline Tracks Found",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.primaryText
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Scan your device storage for local songs or stream online tracks to cache them offline automatically.",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = colors.secondaryText,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable { onRescanLibrary() },
+                                color = Color(0xFF1ED760),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text(
+                                    text = "Scan Device Storage Now",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(offlineSongs) { song ->
+                        SongRowItem(
+                            song = song,
+                            isPlaying = song.id == currentPlayingSong?.id && isPlaying,
+                            onSongClick = { onSongClick(song) },
+                            onFavoriteToggle = { onFavoriteToggle(song) }
+                        )
                     }
                 }
             }

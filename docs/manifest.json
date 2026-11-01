@@ -1,0 +1,17 @@
+{
+  "name": "Swarix Music Player",
+  "short_name": "Swarix",
+  "description": "High-Fidelity 8K Ultra Studio Music Player with AI Sonic Match and Synced Lyrics",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0B0D0C",
+  "theme_color": "#0B0D0C",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

@@ -29,8 +29,12 @@ object AppUpdateManager {
     private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk"
 
     private val client = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
+        .followRedirects(true)
+        .followSslRedirects(true)
+        .retryOnConnectionFailure(true)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(180, TimeUnit.SECONDS)
+        .writeTimeout(180, TimeUnit.SECONDS)
         .build()
 
     suspend fun checkForUpdate(currentVersionName: String): AppUpdateInfo? = withContext(Dispatchers.IO) {
@@ -115,17 +119,24 @@ object AppUpdateManager {
 
             body.byteStream().use { input ->
                 FileOutputStream(targetFile).use { output ->
-                    val buffer = ByteArray(8 * 1024)
+                    val buffer = ByteArray(64 * 1024)
                     var bytesRead: Int
                     var totalRead = 0L
+                    var lastUpdateMs = 0L
+                    var lastProgress = 0f
 
                     while (input.read(buffer).also { bytesRead = it } != -1) {
                         output.write(buffer, 0, bytesRead)
                         totalRead += bytesRead
                         if (contentLength > 0) {
-                            val progress = totalRead.toFloat() / contentLength.toFloat()
-                            withContext(Dispatchers.Main) {
-                                onProgress(progress.coerceIn(0f, 1f))
+                            val progress = (totalRead.toFloat() / contentLength.toFloat()).coerceIn(0f, 1f)
+                            val now = System.currentTimeMillis()
+                            if (progress - lastProgress >= 0.01f || now - lastUpdateMs >= 200L || progress >= 1f) {
+                                lastProgress = progress
+                                lastUpdateMs = now
+                                withContext(Dispatchers.Main.immediate) {
+                                    onProgress(progress)
+                                }
                             }
                         }
                     }
@@ -141,6 +152,16 @@ object AppUpdateManager {
 
     fun installApk(context: Context, apkFile: File) {
         try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (!context.packageManager.canRequestPackageInstalls()) {
+                    val settingsIntent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(settingsIntent)
+                }
+            }
+
             val authority = "${context.packageName}.fileprovider"
             val uri: Uri = FileProvider.getUriForFile(context, authority, apkFile)
 

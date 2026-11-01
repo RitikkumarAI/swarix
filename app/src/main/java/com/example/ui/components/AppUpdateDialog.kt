@@ -100,8 +100,9 @@ fun AppUpdateDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            val mbDownloaded = String.format("%.1f", downloadProgress * 24.2f)
                             Text(
-                                text = "Downloading update...",
+                                text = "Downloading update ($mbDownloaded MB / 24.2 MB)...",
                                 style = MaterialTheme.typography.bodySmall.copy(color = colors.mutedText)
                             )
                             Text(

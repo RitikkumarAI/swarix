@@ -8,7 +8,7 @@ import urllib.error
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY", "RitikkumarAI/swarix")
-    current_tag = os.environ.get("CURRENT_RELEASE_TAG", "v1.6")
+    current_tag = os.environ.get("CURRENT_RELEASE_TAG", "v1.7")
     
     if not token:
         print("No GITHUB_TOKEN found; skipping remote cleanup.")
@@ -47,7 +47,7 @@ def main():
             print(f"Error deleting release {rel_id}: {e}")
 
     # Delete old tags from git
-    old_tags = ["latest", "v1.0", "v1.1", "v1.2", "v1.3", "v1.4", "v1.5"]
+    old_tags = ["latest", "v1.0", "v1.1", "v1.2", "v1.3", "v1.4", "v1.5", "v1.6"]
     for t in old_tags:
         tag_url = f"https://api.github.com/repos/{repo}/git/refs/tags/{t}"
         tag_req = urllib.request.Request(tag_url, headers=headers, method="DELETE")

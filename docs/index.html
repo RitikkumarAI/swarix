@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Swarix - Web Player | 8K Ultra Studio Music</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="logo.png">
+  <meta name="theme-color" content="#0B0D0C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Swarix">
+  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0D0C;
+      --bg-surface: #141715;
+      --bg-card: #1C201D;
+      --primary: #E5C07B;
+      --primary-accent: #6ED0C9;
+      --spotify-green: #1DB954;
+      --blue-gradient-start: #0F172A;
+      --blue-gradient-end: #0284C7;
+      --text-main: #FFFFFF;
+      --text-sub: #A0A5A2;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    header {
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(11, 13, 12, 0.85);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: white;
+    }
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(229, 192, 123, 0.35);
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #FFF, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge-btn {
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .badge-dsp {
+      background: rgba(110, 208, 201, 0.15);
+      color: var(--primary-accent);
+      border: 1px solid rgba(110, 208, 201, 0.4);
+    }
+    .badge-dsp.active {
+      background: var(--primary-accent);
+      color: #000;
+      box-shadow: 0 0 12px rgba(110, 208, 201, 0.6);
+    }
+    .badge-install {
+      background: var(--spotify-green);
+      color: #000;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      width: 100%;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    @media (min-width: 860px) {
+      .container {
+        grid-template-columns: 360px 1fr;
+      }
+    }
+    .player-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+      position: sticky;
+      top: 88px;
+    }
+    .artwork-container {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      margin-bottom: 20px;
+    }
+    .vinyl-disc {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, #252825 0%, #101211 70%, #000 100%);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.7), inset 0 0 0 3px rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 16s linear infinite;
+      animation-play-state: paused;
+    }
+    .vinyl-disc.playing {
+      animation-play-state: running;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .disc-grooves {
+      width: 88%;
+      height: 88%;
+      border-radius: 50%;
+      border: 2px dashed rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .album-thumb {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #000;
+      box-shadow: 0 0 12px rgba(0,0,0,0.8);
+    }
+    .visualizer-canvas {
+      width: 100%;
+      height: 38px;
+      margin: 8px 0;
+    }
+    .song-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-top: 4px;
+      color: #FFF;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-artist {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .sound-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 0 16px;
+    }
+    .sound-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: var(--primary);
+      border: 1px solid rgba(229,192,123,0.3);
+      letter-spacing: 0.5px;
+    }
+    .progress-bar-container {
+      width: 100%;
+      margin: 10px 0 6px;
+    }
+    .progress-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+      cursor: pointer;
+    }
+    .progress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--primary-accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--primary-accent);
+    }
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      font-variant-numeric: tabular-nums;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 14px;
+      width: 100%;
+    }
+    .ctrl-btn {
+      background: none;
+      border: none;
+      color: #FFF;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .ctrl-btn:hover { color: var(--primary-accent); transform: scale(1.08); }
+    .ctrl-btn:active { transform: scale(0.94); }
+    .play-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #FFF;
+      color: #000;
+      box-shadow: 0 8px 24px rgba(255,255,255,0.25);
+    }
+    .play-btn:hover { background: var(--primary-accent); color: #000; transform: scale(1.06); }
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 18px;
+      padding: 0 8px;
+    }
+    .volume-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #FFF;
+      cursor: pointer;
+    }
+    .right-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .lyrics-card {
+      background: linear-gradient(135deg, var(--blue-gradient-start), var(--blue-gradient-end));
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 16px 32px rgba(2, 132, 199, 0.2);
+    }
+    .lyrics-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .lyrics-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lyrics-content {
+      max-height: 180px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+    .lyrics-line {
+      color: rgba(255, 255, 255, 0.5);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .lyrics-line.active {
+      color: #FFF;
+      text-shadow: 0 0 14px rgba(56, 189, 248, 0.8);
+      transform: scale(1.02);
+    }
+    .playlist-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 20px;
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .song-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .song-item:hover { background: rgba(255, 255, 255, 0.05); }
+    .song-item.active {
+      background: rgba(110, 208, 201, 0.12);
+      border: 1px solid rgba(110, 208, 201, 0.3);
+    }
+    .song-item img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .song-info { flex: 1; min-width: 0; }
+    .song-info-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-info-artist {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+    .song-duration {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      font-variant-numeric: tabular-nums;
+    }
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .download-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      text-decoration: none;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .download-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .download-icon {
+      font-size: 1.8rem;
+    }
+    .download-text h4 { font-size: 0.9rem; font-weight: 700; }
+    .download-text p { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+    footer {
+      padding: 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      margin-top: auto;
+    }
+    footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Navigation -->
+  <header>
+    <a href="./" class="brand">
+      <img src="logo.png" alt="Swarix Logo">
+      <span class="brand-title">Swarix Music</span>
+    </a>
+    <div class="header-actions">
+      <button class="badge-btn badge-dsp" id="dspToggle" onclick="toggleDsp()">
+        <span>✦</span> <span id="dspText">DSP OFF</span>
+      </button>
+      <a href="#downloads" class="badge-btn badge-install">
+        <span>↓</span> Get App
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Player Application Layout -->
+  <div class="container">
+    
+    <!-- Left Column: Audio Turntable & Control Panel -->
+    <div class="player-card">
+      <div class="artwork-container">
+        <div class="vinyl-disc" id="vinylDisc">
+          <div class="disc-grooves">
+            <img src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500&auto=format&fit=crop&q=80" alt="Album Cover" class="album-thumb" id="albumThumb">
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Audio Visualizer Canvas -->
+      <canvas class="visualizer-canvas" id="visCanvas"></canvas>
+
+      <div class="song-title" id="songTitle">4 5 Pistol</div>
+      <div class="song-artist" id="songArtist">Masoom Sharma, Dev Chouhan, Shivani Yadav</div>
+
+      <div class="sound-badge-row">
+        <span class="sound-badge">8K ULTRA</span>
+        <span class="sound-badge" id="dacModeBadge">DIRECT DAC 384kHz</span>
+        <span class="sound-badge">LOSSLESS</span>
+      </div>
+
+      <!-- Progress Timeline -->
+      <div class="progress-bar-container">
+        <input type="range" class="progress-slider" id="progressSlider" value="0" min="0" max="100" step="0.1">
+      </div>
+      <div class="time-row">
+        <span id="currentTime">0:00</span>
+        <span id="durationTime">2:43</span>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="controls">
+        <button class="ctrl-btn" onclick="prevTrack()" title="Previous Track">
+          <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="ctrl-btn play-btn" id="playBtn" onclick="togglePlay()" title="Play / Pause">
+          <svg width="28" height="28" fill="currentColor" id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="nextTrack()" title="Next Track">
+          <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+      </div>
+
+      <!-- Volume Bar -->
+      <div class="volume-container">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="0.85">
+      </div>
+    </div>
+
+    <!-- Right Column: Lyrics, Playlist & Native Download Links -->
+    <div class="right-content">
+
+      <!-- Spotify-Inspired Blue Lyrics Card -->
+      <div class="lyrics-card">
+        <div class="lyrics-header">
+          <div class="lyrics-title">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 13H6v-2h4v2zm8 0h-6v-2h6v2zm0-4H6v-2h12v2zm0-4H6V7h12v2z"/></svg>
+            Live Synced Lyrics
+          </div>
+          <span style="font-size: 0.75rem; color: #BAE6FD; font-weight: 700;">8K MASTER VOCALS</span>
+        </div>
+        <div class="lyrics-content" id="lyricsBox">
+          <div class="lyrics-line active">♪ 4 5 pistol ka load rakhe se...</div>
+          <div class="lyrics-line">♪ Gaddi me bass full throw rakhe se...</div>
+          <div class="lyrics-line">♪ Yaar gail hove jab road pe nikal...</div>
+          <div class="lyrics-line">♪ Duniya dekhe chhori flow rakhe se...</div>
+          <div class="lyrics-line">♪ High fidelity bit-perfect acoustic vibe...</div>
+          <div class="lyrics-line">♪ Swarix studio master sound playing live...</div>
+        </div>
+      </div>
+
+      <!-- Song Queue / Playlist -->
+      <div class="playlist-card">
+        <div class="section-title">
+          <span>Featured Playlist & Smart Shuffle</span>
+          <span style="font-size: 0.8rem; color: var(--primary-accent); font-weight: 600;">6 Tracks</span>
+        </div>
+        <div id="playlistContainer"></div>
+      </div>
+
+      <!-- Native Device Downloads Section -->
+      <div class="playlist-card" id="downloads">
+        <div class="section-title">
+          <span>Direct Native Downloads</span>
+          <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Official v1.6</span>
+        </div>
+        <div class="downloads-grid">
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v1.7/swarix.apk" class="download-card">
+            <div class="download-icon">📱</div>
+            <div class="download-text">
+              <h4>swarix.apk</h4>
+              <p>For Android Phones & Tablets</p>
+            </div>
+          </a>
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v1.7/swarix.dmg" class="download-card">
+            <div class="download-icon">💻</div>
+            <div class="download-text">
+              <h4>swarix.dmg</h4>
+              <p>For Apple Mac (macOS)</p>
+            </div>
+          </a>
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v1.7/swarix.exe" class="download-card">
+            <div class="download-icon">🖥️</div>
+            <div class="download-text">
+              <h4>swarix.exe</h4>
+              <p>For Windows PC / Laptops</p>
+            </div>
+          </a>
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v1.7/swarix-ios.mobileconfig" class="download-card">
+            <div class="download-icon">🍏</div>
+            <div class="download-text">
+              <h4>swarix-ios.mobileconfig</h4>
+              <p>1-Tap Install for iPhone & iPad</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Real Audio Engine Element -->
+  <audio id="audioElement" preload="metadata"></audio>
+
+  <!-- Official Footer -->
+  <footer>
+    Swarix Music Player &copy; 2026 &bull; Developed &amp; Maintained by <a href="https://ritikkumarai.vercel.app/" target="_blank">Ritik Kumar</a> &bull; 8K Ultra Studio Lossless Engine
+  </footer>
+
+  <script>
+    // Playlist Catalogue
+    const playlist = [
+      {
+        id: "1",
+        title: "4 5 Pistol",
+        artist: "Masoom Sharma, Dev Chouhan, Shivani Yadav",
+        art: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500&auto=format&fit=crop&q=80",
+        src: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverending_Story.mp3",
+        duration: "2:43",
+        lyrics: [
+          "♪ 4 5 pistol ka load rakhe se...",
+          "♪ Gaddi me bass full throw rakhe se...",
+          "♪ Yaar gail hove jab road pe nikal...",
+          "♪ Duniya dekhe chhori flow rakhe se...",
+          "♪ High fidelity bit-perfect acoustic vibe...",
+          "♪ Swarix studio master sound playing live..."
+        ]
+      },
+      {
+        id: "2",
+        title: "Dada Masoom",
+        artist: "Vicky Gangwa",
+        art: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80",
+        src: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3",
+        duration: "3:12",
+        lyrics: [
+          "♪ Dada Masoom chale roab jama ke...",
+          "♪ Yaari nibhave poori jaan laga ke...",
+          "♪ Sheran aali chaal dekh kaape dushman...",
+          "♪ Swarix studio master sound on blast..."
+        ]
+      },
+      {
+        id: "3",
+        title: "Raataan Lambiyan",
+        artist: "Jubin Nautiyal, Asees Kaur",
+        art: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80",
+        src: "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.mp3",
+        duration: "3:50",
+        lyrics: [
+          "♪ Teri meri gallan ho gayi mashhoor...",
+          "♪ Kar na kabhi tu mujhe nazron se door...",
+          "♪ Kithe chaliye tu kithe chaliye...",
+          "♪ Kaata kaise raatan, oh saawre..."
+        ]
+      },
+      {
+        id: "4",
+        title: "Apna Bana Le",
+        artist: "Arijit Singh, Sachin-Jigar",
+        art: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80",
+        src: "https://commondatastorage.googleapis.com/codeskulptor-demos/riceracer_assets/music/menu.ogg",
+        duration: "4:21",
+        lyrics: [
+          "♪ Tu mera koi na hoke bhi kuch laage...",
+          "♪ Kiya re jo bhi toone mujhe khuda aage...",
+          "♪ Apna bana le piya, apna bana le...",
+          "♪ Dil ke nagar me shehar basa le..."
+        ]
+      },
+      {
+        id: "5",
+        title: "Chota Bachcha Jaan Ke",
+        artist: "Master Aditya",
+        art: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80",
+        src: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverending_Story.mp3",
+        duration: "3:05",
+        lyrics: [
+          "♪ Chhota bachha jaan ke na koi aankh dikhana re...",
+          "♪ Pyaar se jo baat karega usko gale lagana re...",
+          "♪ Swarix studio acoustic frequency boost..."
+        ]
+      },
+      {
+        id: "6",
+        title: "G.O.A.T (Greatest Of All Time)",
+        artist: "Diljit Dosanjh",
+        art: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&auto=format&fit=crop&q=80",
+        src: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3",
+        duration: "3:44",
+        lyrics: [
+          "♪ Jatt da muqabla das mainu kithe ae...",
+          "♪ Saare pind ch charcha diljit da kithe ae...",
+          "♪ 8K ultra sound direct master delivery..."
+        ]
+      }
+    ];
+
+    let currentTrackIdx = 0;
+    let isPlaying = false;
+    let isDspActive = false;
+
+    const audio = document.getElementById('audioElement');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const vinylDisc = document.getElementById('vinylDisc');
+    const albumThumb = document.getElementById('albumThumb');
+    const songTitle = document.getElementById('songTitle');
+    const songArtist = document.getElementById('songArtist');
+    const progressSlider = document.getElementById('progressSlider');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationTimeEl = document.getElementById('durationTime');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const lyricsBox = document.getElementById('lyricsBox');
+    const playlistContainer = document.getElementById('playlistContainer');
+    const dspToggle = document.getElementById('dspToggle');
+    const dspText = document.getElementById('dspText');
+    const dacModeBadge = document.getElementById('dacModeBadge');
+
+    // Visualizer canvas setup
+    const canvas = document.getElementById('visCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    function renderPlaylist() {
+      playlistContainer.innerHTML = '';
+      playlist.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.className = `song-item ${index === currentTrackIdx ? 'active' : ''}`;
+        item.onclick = () => loadTrack(index, true);
+        item.innerHTML = `
+          <img src="${track.art}" alt="${track.title}">
+          <div class="song-info">
+            <div class="song-info-title">${track.title}</div>
+            <div class="song-info-artist">${track.artist}</div>
+          </div>
+          <div class="song-duration">${track.duration}</div>
+        `;
+        playlistContainer.appendChild(item);
+      });
+    }
+
+    function loadTrack(index, autoPlay = false) {
+      currentTrackIdx = index;
+      const track = playlist[index];
+      audio.src = track.src;
+      songTitle.textContent = track.title;
+      songArtist.textContent = track.artist;
+      albumThumb.src = track.art;
+      durationTimeEl.textContent = track.duration;
+
+      // Update lyrics
+      lyricsBox.innerHTML = '';
+      track.lyrics.forEach((line, i) => {
+        const div = document.createElement('div');
+        div.className = `lyrics-line ${i === 0 ? 'active' : ''}`;
+        div.textContent = line;
+        lyricsBox.appendChild(div);
+      });
+
+      renderPlaylist();
+      if (autoPlay) playAudio();
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseAudio();
+      } else {
+        playAudio();
+      }
+    }
+
+    function playAudio() {
+      audio.play().then(() => {
+        isPlaying = true;
+        vinylDisc.classList.add('playing');
+        playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      }).catch(err => {
+        console.warn("Autoplay blocked, user interaction required:", err);
+      });
+    }
+
+    function pauseAudio() {
+      audio.pause();
+      isPlaying = false;
+      vinylDisc.classList.remove('playing');
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    }
+
+    function nextTrack() {
+      currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
+      loadTrack(currentTrackIdx, true);
+    }
+
+    function prevTrack() {
+      currentTrackIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
+      loadTrack(currentTrackIdx, true);
+    }
+
+    function toggleDsp() {
+      isDspActive = !isDspActive;
+      if (isDspActive) {
+        dspToggle.classList.add('active');
+        dspText.textContent = 'DSP 8K ACTIVE';
+        dacModeBadge.textContent = '8K ULTRA DSP ACTIVE';
+        dacModeBadge.style.color = '#6ED0C9';
+      } else {
+        dspToggle.classList.remove('active');
+        dspText.textContent = 'DSP OFF';
+        dacModeBadge.textContent = 'DIRECT DAC 384kHz';
+        dacModeBadge.style.color = 'var(--primary)';
+      }
+    }
+
+    // Audio Timeline updates
+    audio.addEventListener('timeupdate', () => {
+      if (!isNaN(audio.duration)) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressSlider.value = progress;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+
+        // Update active lyrics line periodically
+        const lines = document.querySelectorAll('.lyrics-line');
+        if (lines.length > 0) {
+          const activeIndex = Math.floor((audio.currentTime / (audio.duration || 1)) * lines.length) % lines.length;
+          lines.forEach((l, i) => l.classList.toggle('active', i === activeIndex));
+        }
+      }
+    });
+
+    audio.addEventListener('ended', nextTrack);
+
+    progressSlider.addEventListener('input', () => {
+      if (!isNaN(audio.duration)) {
+        audio.currentTime = (progressSlider.value / 100) * audio.duration;
+      }
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      audio.volume = volumeSlider.value;
+    });
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // Animated Visualizer Bars Simulation
+    function drawVisualizer() {
+      requestAnimationFrame(drawVisualizer);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const barCount = 32;
+      const barWidth = canvas.width / barCount - 2;
+
+      for (let i = 0; i < barCount; i++) {
+        let height = 4;
+        if (isPlaying) {
+          const multiplier = isDspActive ? 1.4 : 1.0;
+          height = Math.sin(Date.now() / 150 + i * 0.4) * 14 + 16;
+          height = Math.max(3, height * multiplier);
+        }
+        const x = i * (barWidth + 2);
+        const y = canvas.height - height;
+        ctx.fillStyle = isDspActive ? '#6ED0C9' : '#E5C07B';
+        ctx.fillRect(x, y, barWidth, height);
+      }
+    }
+
+    // Register Service Worker for Offline PWA Support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(e => console.log('SW registration failed', e));
+    }
+
+    // Initialize
+    loadTrack(0, false);
+    drawVisualizer();
+  </script>
+</body>
+</html>
+

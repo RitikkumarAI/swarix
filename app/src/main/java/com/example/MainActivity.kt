@@ -382,6 +382,12 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Refreshed Daily Mixes based on your listening history & mood preferences!")
                             }
+                        },
+                        onRescanLibrary = {
+                            mainViewModel.rescanLibrary()
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Scanning device storage for audio...")
+                            }
                         }
                     )
                 }

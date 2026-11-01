@@ -81,7 +81,7 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: v1.6
+          RELEASE_TAG: v1.7
         run: python3 scripts/publish_release.py
 
       - name: Clean Old GitHub Releases & Tags
@@ -89,4 +89,4 @@ jobs:
         run: python3 scripts/delete_old_releases.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CURRENT_RELEASE_TAG: v1.6
+          CURRENT_RELEASE_TAG: v1.7

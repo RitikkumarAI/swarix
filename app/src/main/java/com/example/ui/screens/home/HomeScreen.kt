@@ -112,6 +112,7 @@ fun HomeScreen(
     onDailyMixClick: (DailyMix) -> Unit = {},
     onPlayDailyMix: (DailyMix) -> Unit = {},
     onRegenerateDailyMixes: () -> Unit = {},
+    onRescanLibrary: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
@@ -257,9 +258,9 @@ fun HomeScreen(
         }
 
 
-        // Spotify-style Filter Chips (All, Music, Podcasts)
+        // Spotify-style Filter Chips (All, Music, Podcasts, Offline)
         item {
-            val spotifyFilters = listOf("All", "Music", "Podcasts")
+            val spotifyFilters = listOf("All", "Music", "Podcasts", "Offline")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -295,10 +296,87 @@ fun HomeScreen(
             }
         }
 
+        // Offline Mode Banner when "Offline" tab is selected
+        if (selectedCategoryTab == "Offline") {
+            item {
+                val offlineSongs = remember(allSongs) { allSongs.filter { it.isLocal } }
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF1B2E23),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1ED760).copy(alpha = 0.4f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF1ED760)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Offline Mode Enabled",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                )
+                                Text(
+                                    text = "Playing without internet • ${offlineSongs.size} offline tracks available",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = Color(0xFF1ED760)
+                                    )
+                                )
+                            }
+                        }
+                        if (onRescanLibrary != null) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable { onRescanLibrary() },
+                                color = Color(0xFF1ED760),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text(
+                                    text = "Scan Phone Storage for Music",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Spotify Signature 2-Column Quick Access Grid (8 items matching Spotify Home)
         item {
-            val quickItems = remember(recentlyPlayed, allSongs) {
-                val pool = if (recentlyPlayed.isNotEmpty()) recentlyPlayed else allSongs
+            val quickItems = remember(recentlyPlayed, allSongs, selectedCategoryTab) {
+                val pool = if (selectedCategoryTab == "Offline") {
+                    allSongs.filter { it.isLocal }
+                } else if (recentlyPlayed.isNotEmpty()) {
+                    recentlyPlayed
+                } else {
+                    allSongs
+                }
                 pool.take(8)
             }
 
@@ -364,11 +442,53 @@ fun HomeScreen(
             }
         }
 
-        // Section: It's New Music Friday! (Horizontal Scroll Cards like Spotify Image 1)
-        item {
-            Spacer(modifier = Modifier.height(14.dp))
-            SectionTitle(title = "It's New Music Friday!", onSeeAllClick = {})
-        }
+        if (selectedCategoryTab == "Offline") {
+            val offlineSongs = remember(allSongs) { allSongs.filter { it.isLocal } }
+            item {
+                Spacer(modifier = Modifier.height(14.dp))
+                SectionTitle(title = "Device Storage Songs (${offlineSongs.size})", onSeeAllClick = null)
+            }
+            if (offlineSongs.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "No Local Audio Files Found",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = colors.primaryText
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Download or copy MP3 songs to your phone, then tap 'Scan Phone Storage for Music' above.",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = colors.secondaryText,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        )
+                    }
+                }
+            } else {
+                items(offlineSongs) { song ->
+                    SongRowItem(
+                        song = song,
+                        isPlaying = song.id == currentPlayingSong?.id && isPlaying,
+                        onSongClick = { onSongClick(song) },
+                        onFavoriteToggle = { onFavoriteToggle(song) }
+                    )
+                }
+            }
+        } else {
+            // Section: It's New Music Friday! (Horizontal Scroll Cards like Spotify Image 1)
+            item {
+                Spacer(modifier = Modifier.height(14.dp))
+                SectionTitle(title = "It's New Music Friday!", onSeeAllClick = {})
+            }
 
         item {
             val newMusicList = remember(allSongs) {
@@ -794,6 +914,7 @@ fun HomeScreen(
                     }
                 }
             }
+        }
         }
     }
 
