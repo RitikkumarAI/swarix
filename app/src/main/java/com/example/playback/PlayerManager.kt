@@ -285,65 +285,6 @@ class PlayerManager private constructor(private val context: Context) {
         }
     }
 
-    companion object {
-        enum class MusicCategory {
-            PUNJABI, HARYANVI, BOLLYWOOD, HIPHOP, INTERNATIONAL, OTHER
-        }
-
-        fun detectCategory(song: Song): MusicCategory {
-            val text = "${song.title} ${song.artist} ${song.album} ${song.genre}".lowercase()
-
-            val haryanviKeys = listOf("masoom", "sharma", "dhanda", "nyoliwala", "bintu", "pabra", "gulzaar", "chhaniwala", "renuka", "panwar", "raju punjabi", "ajay hooda", "ruchika", "jangid", "kd desi", "amit saini", "sumit goswami", "haryanvi", "ragni")
-            if (haryanviKeys.any { text.contains(it) }) return MusicCategory.HARYANVI
-
-            val punjabiKeys = listOf("sidhu", "moose", "moosewala", "karan", "aujla", "dosanjh", "diljit", "shubh", "dhillon", "ap dhillon", "amrit maan", "gurlez", "akhtar", "jordan sandhu", "b praak", "jass manak", "harrdy", "garry sandhu", "punjabi", "bhangra")
-            if (punjabiKeys.any { text.contains(it) }) return MusicCategory.PUNJABI
-
-            val hipHopKeys = listOf("mc stan", "divine", "seedhe maut", "kr\$na", "krsna", "raftaar", "badshah", "honey singh", "yo yo", "king", "ikka", "emiway", "hip hop", "rap")
-            if (hipHopKeys.any { text.contains(it) }) return MusicCategory.HIPHOP
-
-            val bollywoodKeys = listOf("arijit", "shreya", "ghoshal", "jubin", "nautiyal", "atif", "aslam", "pritam", "neha kakkar", "sonu nigam", "kk", "mohit chauhan", "armaan malik", "vishal mishra", "ami mishra", "darshan raval", "sachin-jigar", "bollywood", "hindi", "filmi", "romance")
-            if (bollywoodKeys.any { text.contains(it) }) return MusicCategory.BOLLYWOOD
-
-            val intlKeys = listOf("the weeknd", "taylor", "drake", "bieber", "sheeran", "dua lipa", "billie eilish", "pop", "english")
-            if (intlKeys.any { text.contains(it) }) return MusicCategory.INTERNATIONAL
-
-            return MusicCategory.OTHER
-        }
-
-        fun calculateAffinityScore(current: Song, candidate: Song): Int {
-            var score = 0
-            val currentCat = detectCategory(current)
-            val candidateCat = detectCategory(candidate)
-
-            // Strict Language/Culture Matching
-            if (currentCat != MusicCategory.OTHER && currentCat == candidateCat) {
-                score += 50
-            } else if (currentCat != candidateCat) {
-                score -= 30
-            }
-
-            // Artist match is highest affinity
-            if (current.artist.isNotBlank() && candidate.artist.equals(current.artist, ignoreCase = true)) {
-                score += 40
-            } else if (current.artist.isNotBlank() && candidate.artist.contains(current.artist, ignoreCase = true)) {
-                score += 25
-            }
-
-            // Genre match
-            if (current.genre.isNotBlank() && candidate.genre.equals(current.genre, ignoreCase = true)) {
-                score += 20
-            }
-
-            // Mood match
-            if (current.mood.isNotBlank() && candidate.mood.equals(current.mood, ignoreCase = true)) {
-                score += 15
-            }
-
-            return score
-        }
-    }
-
     private fun getSmartNextIndex(queue: List<Song>, currentIndex: Int): Int {
         if (queue.size <= 1) return 0
         val current = _currentSong.value ?: queue.getOrNull(currentIndex)
@@ -862,6 +803,63 @@ class PlayerManager private constructor(private val context: Context) {
                 INSTANCE = instance
                 instance
             }
+        }
+
+        enum class MusicCategory {
+            PUNJABI, HARYANVI, BOLLYWOOD, HIPHOP, INTERNATIONAL, OTHER
+        }
+
+        fun detectCategory(song: Song): MusicCategory {
+            val text = "${song.title} ${song.artist} ${song.album} ${song.genre}".lowercase()
+
+            val haryanviKeys = listOf("masoom", "sharma", "dhanda", "nyoliwala", "bintu", "pabra", "gulzaar", "chhaniwala", "renuka", "panwar", "raju punjabi", "ajay hooda", "ruchika", "jangid", "kd desi", "amit saini", "sumit goswami", "haryanvi", "ragni")
+            if (haryanviKeys.any { text.contains(it) }) return MusicCategory.HARYANVI
+
+            val punjabiKeys = listOf("sidhu", "moose", "moosewala", "karan", "aujla", "dosanjh", "diljit", "shubh", "dhillon", "ap dhillon", "amrit maan", "gurlez", "akhtar", "jordan sandhu", "b praak", "jass manak", "harrdy", "garry sandhu", "punjabi", "bhangra")
+            if (punjabiKeys.any { text.contains(it) }) return MusicCategory.PUNJABI
+
+            val hipHopKeys = listOf("mc stan", "divine", "seedhe maut", "kr\$na", "krsna", "raftaar", "badshah", "honey singh", "yo yo", "king", "ikka", "emiway", "hip hop", "rap")
+            if (hipHopKeys.any { text.contains(it) }) return MusicCategory.HIPHOP
+
+            val bollywoodKeys = listOf("arijit", "shreya", "ghoshal", "jubin", "nautiyal", "atif", "aslam", "pritam", "neha kakkar", "sonu nigam", "kk", "mohit chauhan", "armaan malik", "vishal mishra", "ami mishra", "darshan raval", "sachin-jigar", "bollywood", "hindi", "filmi", "romance")
+            if (bollywoodKeys.any { text.contains(it) }) return MusicCategory.BOLLYWOOD
+
+            val intlKeys = listOf("the weeknd", "taylor", "drake", "bieber", "sheeran", "dua lipa", "billie eilish", "pop", "english")
+            if (intlKeys.any { text.contains(it) }) return MusicCategory.INTERNATIONAL
+
+            return MusicCategory.OTHER
+        }
+
+        fun calculateAffinityScore(current: Song, candidate: Song): Int {
+            var score = 0
+            val currentCat = detectCategory(current)
+            val candidateCat = detectCategory(candidate)
+
+            // Strict Language/Culture Matching
+            if (currentCat != MusicCategory.OTHER && currentCat == candidateCat) {
+                score += 50
+            } else if (currentCat != candidateCat) {
+                score -= 30
+            }
+
+            // Artist match is highest affinity
+            if (current.artist.isNotBlank() && candidate.artist.equals(current.artist, ignoreCase = true)) {
+                score += 40
+            } else if (current.artist.isNotBlank() && candidate.artist.contains(current.artist, ignoreCase = true)) {
+                score += 25
+            }
+
+            // Genre match
+            if (current.genre.isNotBlank() && candidate.genre.equals(current.genre, ignoreCase = true)) {
+                score += 20
+            }
+
+            // Mood match
+            if (current.mood.isNotBlank() && candidate.mood.equals(current.mood, ignoreCase = true)) {
+                score += 15
+            }
+
+            return score
         }
     }
 }
