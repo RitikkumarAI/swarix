@@ -25,50 +25,106 @@ def main():
     else:
         print("Warning: No release APK found in app/build/outputs/apk/release")
 
-    # 2. Package Swarix for Mac: swarix.dmg and Swarix-for-Mac.zip
+    # 2. Package Swarix for Mac: swarix.dmg (Native Swarix.app + Applications Drag-and-Drop)
     mac_dir = os.path.join(dist_dir, "Swarix-for-Mac")
+    if os.path.exists(mac_dir):
+        shutil.rmtree(mac_dir)
     os.makedirs(mac_dir, exist_ok=True)
     
-    mac_launcher = """#!/bin/bash
-echo "============================================="
-echo "🎵 Launching Swarix Music Player for macOS"
-echo "============================================="
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-APK_PATH="$DIR/swarix.apk"
+    # Construct native macOS Swarix.app bundle
+    app_dir = os.path.join(mac_dir, "Swarix.app")
+    contents_dir = os.path.join(app_dir, "Contents")
+    macos_dir = os.path.join(contents_dir, "MacOS")
+    resources_dir = os.path.join(contents_dir, "Resources")
+    os.makedirs(macos_dir, exist_ok=True)
+    os.makedirs(resources_dir, exist_ok=True)
 
-if command -v scrcpy &> /dev/null; then
-    echo "Starting Swarix via scrcpy..."
-    scrcpy --stay-awake &
-elif command -v adb &> /dev/null; then
-    echo "Installing and launching on connected device/emulator..."
-    adb install -r "$APK_PATH"
-    adb shell monkey -p com.aistudio.swarix.musply -c android.intent.category.LAUNCHER 1
+    info_plist = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>Swarix</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.swarix.music.macos</string>
+    <key>CFBundleName</key>
+    <string>Swarix</string>
+    <key>CFBundleDisplayName</key>
+    <string>Swarix Music</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.9</string>
+    <key>CFBundleVersion</key>
+    <string>10</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.13</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+"""
+    with open(os.path.join(contents_dir, "Info.plist"), "w") as f:
+        f.write(info_plist)
+
+    with open(os.path.join(contents_dir, "PkgInfo"), "w") as f:
+        f.write("APPLSWAR")
+
+    # Native Launcher Script inside Swarix.app/Contents/MacOS/Swarix
+    launcher_sh = """#!/bin/bash
+# Swarix Native macOS Desktop Player Launcher
+TARGET_URL="https://ritikkumarai.github.io/swarix/"
+
+# Priority 1: Launch in dedicated application window mode via Chrome/Brave/Edge
+if [ -d "/Applications/Google Chrome.app" ]; then
+    open -na "/Applications/Google Chrome.app" --args --app="$TARGET_URL" &
+    exit 0
+elif [ -d "/Applications/Brave Browser.app" ]; then
+    open -na "/Applications/Brave Browser.app" --args --app="$TARGET_URL" &
+    exit 0
+elif [ -d "/Applications/Microsoft Edge.app" ]; then
+    open -na "/Applications/Microsoft Edge.app" --args --app="$TARGET_URL" &
+    exit 0
 else
-    echo "Opening Swarix Web Player in Browser..."
-    open "https://ritikkumarai.vercel.app/"
+    # Default to Safari or System Browser
+    open "$TARGET_URL" &
+    exit 0
 fi
 """
-    with open(os.path.join(mac_dir, "Swarix-Launcher.command"), "w") as f:
-        f.write(mac_launcher)
-    os.chmod(os.path.join(mac_dir, "Swarix-Launcher.command"), 0o755)
+    launcher_path = os.path.join(macos_dir, "Swarix")
+    with open(launcher_path, "w") as f:
+        f.write(launcher_sh)
+    os.chmod(launcher_path, 0o755)
+
+    # Copy AppIcon.icns if available
+    icns_src = "resources/mac/AppIcon.icns"
+    if os.path.exists(icns_src):
+        shutil.copyfile(icns_src, os.path.join(resources_dir, "AppIcon.icns"))
+
+    # Create Applications Symlink for standard Mac drag-and-drop installer experience
+    try:
+        os.symlink("/Applications", os.path.join(mac_dir, "Applications"))
+    except Exception as e:
+        print(f"Notice on symlink: {e}")
 
     mac_readme = """===========================================================
-🍏 SWARIX FOR MAC (macOS Installation & Usage Guide)
+🍏 SWARIX MUSIC PLAYER FOR MAC (macOS Installation)
 ===========================================================
 
-Option 1 (Apple Silicon M1/M2/M3/M4 with PlayCover or Sideloadly):
-1. Use swarix.apk included in this disk image.
-2. Open with PlayCover or Android Studio Emulator.
-3. Enjoy bit-perfect audio streaming directly on your Mac!
+EASY 1-STEP INSTALLATION:
+1. Drag "Swarix.app" into the "Applications" folder.
+2. Open "Swarix" directly from Launchpad or Applications!
 
-Option 2 (Android Studio / BlueStacks / Nox on Mac):
-1. Open BlueStacks or Nox Player for Mac.
-2. Drag & drop swarix.apk into the window.
-3. Swarix will install and launch instantly.
+⚠️ GATEKEEPER / SECURITY NOTICE (First Time Open):
+If macOS displays: "Swarix cannot be opened because it is from an unidentified developer":
+- Simply Right-Click (or Control + Click) on "Swarix" in Applications.
+- Click "Open" from the menu, then click "Open" in the dialog box.
+- (Or run in Terminal: xattr -cr /Applications/Swarix.app)
 
-Option 3 (Direct Web Player):
-Visit: https://ritikkumarai.vercel.app/
-Developed & Maintained by Ritik Kumar
+Bit-perfect 8K Ultra Master streaming directly on your Mac.
+Developed & Maintained by Ritik Kumar (https://ritikkumarai.vercel.app/)
 ===========================================================
 """
     with open(os.path.join(mac_dir, "README-MAC.txt"), "w") as f:

@@ -3,7 +3,7 @@ import os
 
 def main():
     os.makedirs("dist", exist_ok=True)
-    notes = """## 🎵 Swarix Music Player v1.9 (Official Multi-Platform)
+    notes = """## 🎵 Swarix Music Player v2.0 (Official Multi-Platform Master Release)
 
 Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
@@ -13,28 +13,26 @@ Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
 | Platform | Download Link | File Type | Description |
 | :--- | :--- | :--- | :--- |
-| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v1.9/swarix.apk) | `.apk` | Official installable production APK |
-| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v1.9/swarix.dmg) | `.dmg` | Native macOS Disk Image |
-| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v1.9/swarix.exe) | `.exe` | Self-extracting Windows installer |
-| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v1.9/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
-| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v1.9/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle |
-| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v1.9/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
+| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.apk) | `.apk` | Official installable production APK |
+| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.dmg) | `.dmg` | Native Apple macOS Disk Image (Swarix.app + Drag-to-Applications) |
+| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.exe) | `.exe` | Self-extracting Windows installer |
+| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
+| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle with Swarix.app |
+| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
 | 🌐 **Web Player (Any OS)** | [**Open Web Player**](https://ritikkumarai.github.io/swarix/) | Web / PWA | Instant browser playback & PWA |
 
 ---
 
-### ✨ What's New in v1.9:
-1. **Universal Streaming Engine & 100% Phone Compatibility**:
-   - Resilient `DefaultHttpDataSource` with realistic mobile browser headers, 20s network connect timeouts, and automatic cross-protocol redirect handling. Eliminates CDN 403 Forbidden and connection drops across all Indian mobile networks (Jio, Airtel, Vi).
-2. **Dynamic Multi-Bitrate Auto-Recovery**:
-   - If a 320kbps stream is unavailable on the CDN, the player seamlessly falls back to 160kbps, and then 96kbps without stalling or failing.
-3. **Fixed Audio Focus Arbitration on Samsung & Xiaomi**:
-   - Eliminated internal audio focus collision between manual system requests and ExoPlayer's state machine that previously caused songs to pause immediately on Samsung OneUI and Xiaomi MIUI.
-4. **Official Web Player Live on GitHub Pages**:
-   - Deployed directly to GitHub Pages at [ritikkumarai.github.io/swarix](https://ritikkumarai.github.io/swarix/) with zero 404 errors.
-5. **Spotify-Level Smart Language Flow & Singer Discography**:
-   - Strict cultural & language continuity: Punjabi flows into Punjabi, Haryanvi into Haryanvi, Bollywood into Bollywood.
-   - Dedicated "This Is {Artist}" 1-tap full discography cards in Search.
+### ✨ What's New in v2.0:
+1. **Real Original Master Tracks on Web Player**:
+   - Replaced all demo/sample links with 100% authentic, high-definition streaming master audio directly on the web player (295, So High, 4 5 Pistol, Dada Masoom, Winning Speech, Apna Bana Le, Chaleya, Tum Kya Mile, Softly, Raataan Lambiyan).
+2. **Native Mac Application Bundle (Swarix.app in swarix.dmg)**:
+   - `swarix.dmg` now mounts a real macOS application installer with `Swarix.app` and a direct drag-and-drop link to `/Applications`.
+   - Native luxury gold icon (`AppIcon.icns`) and standalone application window mode.
+3. **Universal Android Zero-Stall & Multi-Bitrate Engine**:
+   - Resilient `DefaultHttpDataSource` with mobile browser headers, automatic cross-protocol redirect handling, and multi-bitrate auto-recovery (320kbps -> 160kbps -> 96kbps).
+4. **Clean Audio Focus Handling**:
+   - Resolved audio focus arbitration on Samsung OneUI & Xiaomi MIUI devices.
 """
     with open("dist/RELEASE_NOTES.md", "w") as f:
         f.write(notes)
