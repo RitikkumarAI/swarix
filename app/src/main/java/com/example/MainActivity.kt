@@ -874,14 +874,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         artistSongs = allSongs.filter { it.artist.contains(artist.first, ignoreCase = true) },
                         onSongClick = { mainViewModel.playSong(it, allSongs) },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
-                        onBackClick = { mainViewModel.closeSubScreen() },
-                        onDeletePlaylist = {
-                            mainViewModel.deletePlaylist(playlist.id)
-                            mainViewModel.closeSubScreen()
-                            scope.launch {
-                                snackbarHostState.showSnackbar("Playlist \"${playlist.name}\" deleted")
-                            }
-                        }
+                        onBackClick = { mainViewModel.closeSubScreen() }
                     )
                 }
             }
