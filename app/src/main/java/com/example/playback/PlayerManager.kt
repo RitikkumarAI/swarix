@@ -2,6 +2,8 @@ package com.example.playback
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -14,8 +16,12 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.example.core.cache.LocalStorageCacheManager
 import com.example.core.model.Song
+import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class RepeatMode {
     OFF, ALL, ONE
@@ -238,6 +245,7 @@ class PlayerManager private constructor(private val context: Context) {
 
                     // Automatically cache newly started track in background for offline playback
                     LocalStorageCacheManager.getInstance(context).cacheRecentlyPlayedSong(nextSong)
+                    fetchAndAttachArtworkBitmap(nextSong)
                 }
             }
 
@@ -272,7 +280,7 @@ class PlayerManager private constructor(private val context: Context) {
         })
     }
 
-    private fun toMediaItem(song: Song): MediaItem {
+    fun toMediaItem(song: Song): MediaItem {
         val mediaMetadata = MediaMetadata.Builder()
             .setTitle(song.title)
             .setArtist(song.artist)
@@ -292,6 +300,41 @@ class PlayerManager private constructor(private val context: Context) {
             .setUri(finalUri)
             .setMediaMetadata(mediaMetadata)
             .build()
+    }
+
+    private fun fetchAndAttachArtworkBitmap(song: Song) {
+        if (song.artworkUri.isBlank()) return
+        scope.launch(Dispatchers.IO) {
+            try {
+                val loader = ImageLoader(context)
+                val request = ImageRequest.Builder(context)
+                    .data(song.artworkUri)
+                    .size(512, 512)
+                    .allowHardware(false)
+                    .build()
+                val result = (loader.execute(request) as? SuccessResult)?.drawable
+                val bitmap = (result as? BitmapDrawable)?.bitmap
+                if (bitmap != null) {
+                    val stream = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 85, stream)
+                    val bytes = stream.toByteArray()
+                    withContext(Dispatchers.Main) {
+                        if (_currentSong.value?.id == song.id) {
+                            val metadata = MediaMetadata.Builder()
+                                .setTitle(song.title)
+                                .setArtist(song.artist)
+                                .setAlbumTitle(song.album)
+                                .setArtworkUri(Uri.parse(song.artworkUri))
+                                .setArtworkData(bytes, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+                                .build()
+                            exoPlayer.setPlaylistMetadata(metadata)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("PlayerManager", "Failed to cache artwork bitmap for system media notification: ${e.message}")
+            }
+        }
     }
 
     /**
@@ -405,6 +448,7 @@ class PlayerManager private constructor(private val context: Context) {
             exoPlayer.volume = 1.0f
         }
         startPlaybackService()
+        fetchAndAttachArtworkBitmap(song)
         Log.d("PlayerManager", "Playing song: ${song.title}, uri: ${song.contentUri}")
         exoPlayer.play()
         Log.d("PlayerManager", "Play requested, exoPlayer is playing: ${exoPlayer.isPlaying}, playbackState: ${exoPlayer.playbackState}")

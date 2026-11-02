@@ -130,4 +130,22 @@ interface MusicDao {
 
     @Query("DELETE FROM search_queries")
     suspend fun clearSearchQueries()
+
+    // User Liked Songs Relationship
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertUserLikedSong(likedSong: UserLikedSongEntity): Long
+
+    @Query("DELETE FROM user_liked_songs WHERE userId = :userId AND songId = :songId")
+    suspend fun deleteUserLikedSong(userId: String, songId: String): Int
+
+    @Query("SELECT EXISTS(SELECT 1 FROM user_liked_songs WHERE userId = :userId AND songId = :songId LIMIT 1)")
+    suspend fun isSongLiked(userId: String, songId: String): Boolean
+
+    @Query("""
+        SELECT s.* FROM songs s
+        INNER JOIN user_liked_songs uls ON s.id = uls.songId
+        WHERE uls.userId = :userId
+        ORDER BY uls.createdAt DESC
+    """)
+    fun getUserLikedSongs(userId: String): Flow<List<SongEntity>>
 }

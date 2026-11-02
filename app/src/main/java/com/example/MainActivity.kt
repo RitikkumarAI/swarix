@@ -351,22 +351,10 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         },
                         onOpenStats = { mainViewModel.openSubScreen(SubScreen.STATS) },
                         onArtistClick = { artistName ->
-                            val artistSongs = allSongs.filter { it.artist.contains(artistName, ignoreCase = true) }
-                            if (artistSongs.isNotEmpty()) {
-                                mainViewModel.playSong(artistSongs.first(), artistSongs)
-                            } else {
-                                mainViewModel.search(artistName)
-                                mainViewModel.selectTab(NavItem.SEARCH)
-                            }
+                            mainViewModel.openArtistProfile(artistName, "")
                         },
                         onMoodClick = { mood ->
-                            val moodSongs = allSongs.filter { it.mood.contains(mood, ignoreCase = true) || it.genre.contains(mood, ignoreCase = true) }
-                            if (moodSongs.isNotEmpty()) {
-                                mainViewModel.playSong(moodSongs.first(), moodSongs)
-                            } else {
-                                mainViewModel.search("$mood Bollywood")
-                                mainViewModel.selectTab(NavItem.SEARCH)
-                            }
+                            mainViewModel.openMood(mood)
                         },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
                         onNotificationsClick = {
@@ -410,8 +398,11 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         onlineResults = mainViewModel.onlineSearchResults.collectAsStateWithLifecycle().value,
                         isSearchingOnline = mainViewModel.isSearchingOnline.collectAsStateWithLifecycle().value,
                         onSongClick = { song, queue -> mainViewModel.playSong(song, queue) },
+                        onArtistProfileClick = { name, artwork ->
+                            mainViewModel.openArtistProfile(name, artwork)
+                        },
                         onArtistClick = { artistName ->
-                            mainViewModel.search(artistName)
+                            mainViewModel.openArtistProfile(artistName, "")
                         },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
                         onSavePlaylist = { title, songs ->
@@ -453,9 +444,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         onSongClick = { mainViewModel.playSong(it, allSongs) },
                         onPlaylistClick = { mainViewModel.openPlaylist(it) },
                         onLikedSongsClick = {
-                            if (favoriteSongs.isNotEmpty()) {
-                                mainViewModel.playSong(favoriteSongs.first(), favoriteSongs)
-                            }
+                            mainViewModel.openLikedSongs()
                         },
                         onCreatePlaylist = { name, desc ->
                             mainViewModel.createPlaylist(name, desc)
@@ -868,12 +857,19 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                 exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(280)) + fadeOut()
             ) {
                 selectedArtist?.let { artist ->
+                    val artistTracks = allSongs.filter { it.artist.contains(artist.first, ignoreCase = true) }
                     ArtistProfileScreen(
                         artistName = artist.first,
                         artistArtworkUri = artist.second,
-                        artistSongs = allSongs.filter { it.artist.contains(artist.first, ignoreCase = true) },
-                        onSongClick = { mainViewModel.playSong(it, allSongs) },
+                        artistSongs = artistTracks,
+                        onSongClick = { mainViewModel.playSong(it, artistTracks) },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
+                        onPlayAll = { tracks -> if (tracks.isNotEmpty()) mainViewModel.playSong(tracks.first(), tracks) },
+                        onShuffleAll = { tracks ->
+                            val shf = tracks.shuffled()
+                            if (shf.isNotEmpty()) mainViewModel.playSong(shf.first(), shf)
+                        },
+                        onRelatedArtistClick = { name, art -> mainViewModel.openArtistProfile(name, art) },
                         onBackClick = { mainViewModel.closeSubScreen() }
                     )
                 }

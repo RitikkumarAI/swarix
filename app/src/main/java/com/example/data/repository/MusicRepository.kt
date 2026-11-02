@@ -20,6 +20,7 @@ import com.example.data.local.PlaylistEntity
 import com.example.data.local.PlaylistSongCrossRef
 import com.example.data.local.SearchQueryEntity
 import com.example.data.local.SongEntity
+import com.example.data.local.UserLikedSongEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -41,8 +42,12 @@ class MusicRepository(
         entities.map { it.toDomain() }
     }.flowOn(Dispatchers.IO)
 
-    val favoriteSongs: Flow<List<Song>> = musicDao.getFavoriteSongs().map { entities ->
-        entities.map { it.toDomain() }
+    val favoriteSongs: Flow<List<Song>> = musicDao.getUserLikedSongs("local_user").map { entities ->
+        if (entities.isNotEmpty()) {
+            entities.map { it.toDomain().copy(isFavorite = true) }
+        } else {
+            musicDao.getAllSongsOnce().filter { it.isFavorite }.map { it.toDomain().copy(isFavorite = true) }
+        }
     }.flowOn(Dispatchers.IO)
 
     val recentlyPlayed: Flow<List<Song>> = musicDao.getRecentlyPlayed().map { entities ->
@@ -77,12 +82,20 @@ class MusicRepository(
 
     suspend fun toggleFavorite(song: Song) {
         withContext(Dispatchers.IO) {
+            val isCurrentlyLiked = musicDao.isSongLiked("local_user", song.id) || song.isFavorite
+            val newFav = !isCurrentlyLiked
+
             val existing = musicDao.getSongById(song.id)
-            val newFav = !song.isFavorite
             if (existing == null) {
                 musicDao.insertSong(song.toEntity().copy(isFavorite = newFav))
             } else {
                 musicDao.updateFavorite(song.id, newFav)
+            }
+
+            if (newFav) {
+                musicDao.insertUserLikedSong(UserLikedSongEntity(userId = "local_user", songId = song.id))
+            } else {
+                musicDao.deleteUserLikedSong("local_user", song.id)
             }
         }
     }
@@ -93,6 +106,46 @@ class MusicRepository(
             val newFav = !isCurrentlyFavorite
             if (existing != null) {
                 musicDao.updateFavorite(songId, newFav)
+            }
+            if (newFav) {
+                musicDao.insertUserLikedSong(UserLikedSongEntity(userId = "local_user", songId = songId))
+            } else {
+                musicDao.deleteUserLikedSong("local_user", songId)
+            }
+        }
+    }
+
+    fun getSongsByMood(mood: String): Flow<List<Song>> {
+        return musicDao.getAllSongs().map { entities ->
+            entities.filter {
+                it.mood.equals(mood, ignoreCase = true) || it.genre.contains(mood, ignoreCase = true)
+            }.map { it.toDomain() }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    suspend fun getOrFetchMoodSongs(mood: String): List<Song> {
+        return withContext(Dispatchers.IO) {
+            val allLocal = musicDao.getAllSongsOnce()
+            val localMatching = allLocal.filter {
+                it.mood.equals(mood, ignoreCase = true) || it.genre.contains(mood, ignoreCase = true)
+            }.map { it.toDomain() }
+
+            if (localMatching.size >= 8) {
+                localMatching
+            } else {
+                val query = when (mood.lowercase()) {
+                    "happy" -> "bollywood happy party celebration dance songs"
+                    "sad" -> "bollywood sad heartbreak breakup songs arijit"
+                    "love" -> "romantic love songs romantic duets arijit"
+                    "focus" -> "lofi study instrumental focus beats"
+                    else -> "$mood songs"
+                }
+                val onlineEntities = com.example.data.remote.JioSaavnService.searchSongs(query, limit = 25)
+                val mapped = onlineEntities.map { it.copy(mood = mood) }
+                if (mapped.isNotEmpty()) {
+                    musicDao.insertSongs(mapped)
+                }
+                (localMatching + mapped.map { it.toDomain() }).distinctBy { it.id }
             }
         }
     }
@@ -226,12 +279,18 @@ class MusicRepository(
                 seedSongs.take(4).forEachIndexed { idx, s ->
                     musicDao.addSongToPlaylist(PlaylistSongCrossRef(p1, s.id, idx))
                 }
-                seedSongs.filter { it.mood == "Workout" }.forEachIndexed { idx, s ->
+                seedSongs.filter { it.mood == "Happy" || it.mood == "Workout" }.forEachIndexed { idx, s ->
                     musicDao.addSongToPlaylist(PlaylistSongCrossRef(p2, s.id, idx))
                 }
-                seedSongs.filter { it.mood == "Romance" }.forEachIndexed { idx, s ->
+                seedSongs.filter { it.mood == "Love" || it.mood == "Romance" }.forEachIndexed { idx, s ->
                     musicDao.addSongToPlaylist(PlaylistSongCrossRef(p3, s.id, idx))
                 }
+            }
+
+            // Always ensure liked songs relationship is populated for all favorited songs
+            val allCurrent = musicDao.getAllSongsOnce()
+            allCurrent.filter { it.isFavorite }.forEach { s ->
+                musicDao.insertUserLikedSong(UserLikedSongEntity(userId = "local_user", songId = s.id))
             }
         }
     }
@@ -456,8 +515,8 @@ class MusicRepository(
                 durationMs = 261000,
                 contentUri = "https://aac.saavncdn.com/815/483a6e118e8108cbb3e5cd8701674f32_320.mp4",
                 artworkUri = "https://c.saavncdn.com/815/Bhediya-Hindi-2023-20230927155213-500x500.webp",
-                genre = "Bollywood Romance",
-                mood = "Romance",
+                genre = "Bollywood Romantic",
+                mood = "Love",
                 lyrics = """Tu mera koi na hoke bhi kuch laage
 Kiya re jo bhi tune kiya re
 Apna bana le piya
@@ -475,8 +534,8 @@ Dil ke nagar mein shehar tu basa le piya""".trimIndent(),
                 durationMs = 194000,
                 contentUri = "https://aac.saavncdn.com/022/a192e8d320ea5630db314d04fedf0aa5_320.mp4",
                 artworkUri = "https://c.saavncdn.com/022/Heeriye-feat-Arijit-Singh-Hindi-2023-20230928050405-500x500.webp",
-                genre = "Acoustic Pop",
-                mood = "Chill",
+                genre = "Romantic Acoustic",
+                mood = "Love",
                 lyrics = """Heeriye heeriye aa...
 Teri hoke marjavan kujh aisa kar javan
 Hathan te likh leya ve dil da main haal sunavan""".trimIndent(),
@@ -493,8 +552,8 @@ Hathan te likh leya ve dil da main haal sunavan""".trimIndent(),
                 durationMs = 268000,
                 contentUri = "https://aac.saavncdn.com/871/c2febd353f3a076a406fa37510f31f9f_320.mp4",
                 artworkUri = "https://c.saavncdn.com/871/Brahmastra-Original-Motion-Picture-Soundtrack-Hindi-2022-20221006155213-500x500.webp",
-                genre = "Romantic",
-                mood = "Romance",
+                genre = "Love Classics",
+                mood = "Love",
                 lyrics = """Kesariya tera ishq hai piya
 Rang jaaun jo main haath lagaun
 Din beete saara teri fikr mein
@@ -512,8 +571,8 @@ Rain saari teri khair manaun""".trimIndent(),
                 durationMs = 217000,
                 contentUri = "https://aac.saavncdn.com/001/c5f5a30fa60d1340dde31e4bd2184934_320.mp4",
                 artworkUri = "https://c.saavncdn.com/001/Rocky-Aur-Rani-Kii-Prem-Kahaani-Hindi-2023-20250130073112-500x500.webp",
-                genre = "Duet Romance",
-                mood = "Romance",
+                genre = "Romantic Duets",
+                mood = "Love",
                 lyrics = """Tum kya mile hum na rahe hum
 Bikhre the jo milke bane hum
 Jeene ko ab to tayyar hain hum""".trimIndent(),
@@ -530,8 +589,8 @@ Jeene ko ab to tayyar hain hum""".trimIndent(),
                 durationMs = 200000,
                 contentUri = "https://aac.saavncdn.com/047/d1366530468931703ac909e82a3ee788_320.mp4",
                 artworkUri = "https://c.saavncdn.com/047/Jawan-Hindi-2023-20230921190854-500x500.webp",
-                genre = "Bollywood Dance",
-                mood = "Joy",
+                genre = "Bollywood Happy Songs",
+                mood = "Happy",
                 lyrics = """Ishq mein dil bana hai
 Bada be-imaan re
 Chaleya te chaleya""".trimIndent(),
@@ -548,7 +607,7 @@ Chaleya te chaleya""".trimIndent(),
                 durationMs = 250000,
                 contentUri = "https://aac.saavncdn.com/092/81b52beea90f186f27cf5c5eead972c8_320.mp4",
                 artworkUri = "https://c.saavncdn.com/092/ANIMAL-Hindi-2023-20260724191152-500x500.webp",
-                genre = "Soulful",
+                genre = "Emotional Songs",
                 mood = "Sad",
                 lyrics = """Pehle bhi main tumse mila hoon
 Pehli dafa hi milke laga
@@ -567,8 +626,8 @@ Marham sa kyun lagne laga""".trimIndent(),
                 durationMs = 230000,
                 contentUri = "https://aac.saavncdn.com/238/35726d4394604604e961bf5b846870d0_320.mp4",
                 artworkUri = "https://c.saavncdn.com/238/Shershaah-Original-Motion-Picture-Soundtrack--Hindi-2021-20210815181610-500x500.webp",
-                genre = "Romantic",
-                mood = "Chill",
+                genre = "Bollywood Romantic Songs",
+                mood = "Love",
                 lyrics = """Kaate kate na re raina
 Tere bina beswaad lagdi hai
 Raataan lambiyan lambiyan re""".trimIndent(),
@@ -585,7 +644,7 @@ Raataan lambiyan lambiyan re""".trimIndent(),
                 durationMs = 212000,
                 contentUri = "https://aac.saavncdn.com/945/b5067a1a8f2c0f7fc098fbb9277615a2_320.mp4",
                 artworkUri = "https://c.saavncdn.com/945/Hasi-Ban-Gaye-Hindi-2023-20230608172234-500x500.webp",
-                genre = "Melody",
+                genre = "Heartbreak Songs",
                 mood = "Sad",
                 lyrics = """Haan hasi ban gaye
 Haan nami ban gaye
@@ -604,8 +663,8 @@ Meri zameen ban gaye""".trimIndent(),
                 durationMs = 254000,
                 contentUri = "https://aac.saavncdn.com/910/00bad068211036ad7a4c06d705c52bd4_320.mp4",
                 artworkUri = "https://c.saavncdn.com/910/Wake-Up-Sid-Hindi-2009-20190617160255-500x500.webp",
-                genre = "Sufi Pop",
-                mood = "Chill",
+                genre = "Romantic Acoustic Songs",
+                mood = "Love",
                 lyrics = """O re manwa tu to bawra hai
 Tu hi jaane tu kya sochta hai
 Baaware se is jahan mein
@@ -623,8 +682,8 @@ Iktara goonje har gali""".trimIndent(),
                 durationMs = 230000,
                 contentUri = "https://aac.saavncdn.com/396/b4e570050007b056c662f2a98c9f28ec_320.mp4",
                 artworkUri = "https://c.saavncdn.com/396/The-Highlights-English-2021-20240207045714-500x500.webp",
-                genre = "Pop / R&B",
-                mood = "Workout",
+                genre = "Hollywood Happy Music",
+                mood = "Happy",
                 lyrics = """I'm tryna put you in the worst mood, ah
 P1 cleaner than your church shoes, ah
 Look what you've done
@@ -642,8 +701,8 @@ I'm a motherfuckin' starboy""".trimIndent(),
                 durationMs = 155000,
                 contentUri = "https://aac.saavncdn.com/538/727114725cd7ec508b1df0a7e4515e5e_320.mp4",
                 artworkUri = "https://c.saavncdn.com/538/Making-Memories-English-2023-20230818075015-500x500.webp",
-                genre = "Punjabi Pop",
-                mood = "Party",
+                genre = "Punjabi Romantic Songs",
+                mood = "Love",
                 lyrics = """Ni softly softly chal kude
 Paunde asle de vich khal kude""".trimIndent(),
                 isFavorite = true,
@@ -659,8 +718,8 @@ Paunde asle de vich khal kude""".trimIndent(),
                 durationMs = 190000,
                 contentUri = "https://aac.saavncdn.com/209/88cd9a1cc0af8768d67272876bb09851_320.mp4",
                 artworkUri = "https://c.saavncdn.com/209/MoonChild-Era-Punjabi-2021-20240715073449-500x500.webp",
-                genre = "Punjabi Pop",
-                mood = "Joy",
+                genre = "Feel-Good Songs",
+                mood = "Happy",
                 lyrics = """Tera ni tera ni lover
 Diljit dosanjh baby!""".trimIndent(),
                 isFavorite = true,
@@ -676,8 +735,8 @@ Diljit dosanjh baby!""".trimIndent(),
                 durationMs = 270000,
                 contentUri = "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_96.mp4",
                 artworkUri = "https://c.saavncdn.com/264/Moosetape-Punjabi-2021-20210514210636-500x500.jpg",
-                genre = "Punjabi Hip-Hop",
-                mood = "Workout",
+                genre = "Inspirational & Motivational Music",
+                mood = "Happy",
                 lyrics = """Das Putt Tera Head Down Kaston?
 Nitt controversy create milugi
 Dharma de naam te debate milugi
@@ -696,8 +755,8 @@ Jeh karenga tarakki putt hate milugi""".trimIndent(),
                 durationMs = 224000,
                 contentUri = "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_96.mp4",
                 artworkUri = "https://c.saavncdn.com/712/PBX-1-Punjabi-2018-20181105073001-500x500.jpg",
-                genre = "Punjabi Hip-Hop",
-                mood = "Party",
+                genre = "Punjabi Party Songs",
+                mood = "Happy",
                 lyrics = """Byg Byrd on the beat
 Tu gabbru nu mann jaan na mann
 Uchiyan ne gallan tere yaar diyan""".trimIndent(),
@@ -714,8 +773,8 @@ Uchiyan ne gallan tere yaar diyan""".trimIndent(),
                 durationMs = 175000,
                 contentUri = "https://aac.saavncdn.com/233/2917896e82decde8c2c623c6f4326936_96.mp4",
                 artworkUri = "https://c.saavncdn.com/233/4-5-Pistol-feat-Masoom-Sharma-Dev-Chouhan-Shivani-Yadav-Haryanvi-2025-20250503100151-500x500.webp",
-                genre = "Haryanvi Folk Pop",
-                mood = "Workout",
+                genre = "Dance & Party Music",
+                mood = "Happy",
                 lyrics = """Gaddi ka number chaar paanch
 Pistol rakhun main loaded yaar
 Haryane ka chhora baanke
@@ -733,8 +792,8 @@ Kaare shor kare hathiyar""".trimIndent(),
                 durationMs = 188000,
                 contentUri = "https://aac.saavncdn.com/832/4f76122fa109bd074c1cfac9ffc955f1_96.mp4",
                 artworkUri = "https://c.saavncdn.com/832/Dada-Masoom-Haryanvi-2026-20260805153607-500x500.webp",
-                genre = "Haryanvi Folk Pop",
-                mood = "Party",
+                genre = "Celebration Songs",
+                mood = "Happy",
                 lyrics = """Dada Masoom ka danka baaje
 Desi roop te shaan niraali
 Sheran varga jigar haryane ka""".trimIndent(),
@@ -751,13 +810,98 @@ Sheran varga jigar haryane ka""".trimIndent(),
                 durationMs = 210000,
                 contentUri = "https://aac.saavncdn.com/089/64beffa430e4c948223ec6bfcc3a13f0_96.mp4",
                 artworkUri = "https://c.saavncdn.com/089/Winning-Speech-Punjabi-2024-20260626013220-500x500.webp",
-                genre = "Punjabi Hip-Hop",
-                mood = "Joy",
+                genre = "Celebration Songs",
+                mood = "Happy",
                 lyrics = """Winning speech ready kiti hoyi ae
 Rab di mehar naal jitt ke aawange""".trimIndent(),
                 isFavorite = true,
                 playCount = 22,
                 dateAdded = System.currentTimeMillis() - 1600000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_channa_mereya",
+                title = "Channa Mereya",
+                artist = "Arijit Singh & Pritam",
+                album = "Ae Dil Hai Mushkil",
+                durationMs = 289000,
+                contentUri = "https://aac.saavncdn.com/871/c2febd353f3a076a406fa37510f31f9f_320.mp4",
+                artworkUri = "https://c.saavncdn.com/152/Ae-Dil-Hai-Mushkil-Hindi-2016-500x500.webp",
+                genre = "Bollywood Sad Songs",
+                mood = "Sad",
+                lyrics = """Achha chalta hoon duaaon mein yaad rakhna
+Mere zikr ka zubaan pe swaad rakhna
+Andheri raaton mein channa mereya mereya""".trimIndent(),
+                isFavorite = false,
+                playCount = 9,
+                dateAdded = System.currentTimeMillis() - 1700000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_tujhe_kitna",
+                title = "Tujhe Kitna Chahne Lage",
+                artist = "Arijit Singh & Mithoon",
+                album = "Kabir Singh",
+                durationMs = 284000,
+                contentUri = "https://aac.saavncdn.com/815/483a6e118e8108cbb3e5cd8701674f32_320.mp4",
+                artworkUri = "https://c.saavncdn.com/264/Kabir-Singh-Hindi-2019-20240409054602-500x500.webp",
+                genre = "Sad Romantic Songs",
+                mood = "Sad",
+                lyrics = """Dil ka dariya beh hi gaya
+Ishq ibadat ban hi gaya
+Tujhe kitna chahne lage hum""".trimIndent(),
+                isFavorite = true,
+                playCount = 13,
+                dateAdded = System.currentTimeMillis() - 1800000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_focus_lofi",
+                title = "Midnight Lo-Fi Study Beats",
+                artist = "Swarix Lo-Fi Studio",
+                album = "Deep Focus Vol. 1",
+                durationMs = 240000,
+                contentUri = "https://aac.saavncdn.com/910/00bad068211036ad7a4c06d705c52bd4_320.mp4",
+                artworkUri = "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500&auto=format&fit=crop&q=80",
+                genre = "Lo-Fi",
+                mood = "Focus",
+                lyrics = """Instrumental deep focus study session
+Breathe and concentrate""".trimIndent(),
+                isFavorite = false,
+                playCount = 11,
+                dateAdded = System.currentTimeMillis() - 1900000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_focus_flute",
+                title = "Morning Raag Classical Flute",
+                artist = "Pt. Hariprasad Chaurasia",
+                album = "Instrumental Peace",
+                durationMs = 310000,
+                contentUri = "https://aac.saavncdn.com/945/b5067a1a8f2c0f7fc098fbb9277615a2_320.mp4",
+                artworkUri = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80",
+                genre = "Classical Instrumental",
+                mood = "Focus",
+                lyrics = """Pure acoustic bamboo flute melody for deep calm and study""".trimIndent(),
+                isFavorite = false,
+                playCount = 15,
+                dateAdded = System.currentTimeMillis() - 2000000,
+                isLocal = false
+            ),
+            SongEntity(
+                id = "online_focus_ambient",
+                title = "Weightless Ambient Soundscape",
+                artist = "Ambient Music Works",
+                album = "Study & Concentration",
+                durationMs = 295000,
+                contentUri = "https://aac.saavncdn.com/001/c5f5a30fa60d1340dde31e4bd2184934_320.mp4",
+                artworkUri = "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80",
+                genre = "Deep Focus",
+                mood = "Focus",
+                lyrics = """Gentle harmonic ambient frequencies for deep mental flow""".trimIndent(),
+                isFavorite = true,
+                playCount = 19,
+                dateAdded = System.currentTimeMillis() - 2100000,
                 isLocal = false
             )
         )

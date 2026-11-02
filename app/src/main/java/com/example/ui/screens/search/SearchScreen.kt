@@ -90,6 +90,7 @@ fun SearchScreen(
     isSearchingOnline: Boolean = false,
     onSongClick: (Song, List<Song>) -> Unit,
     onArtistClick: (String) -> Unit,
+    onArtistProfileClick: ((String, String) -> Unit)? = null,
     onFavoriteToggle: (Song) -> Unit,
     onSavePlaylist: ((String, List<Song>) -> Unit)? = null,
     onSearch: (String) -> Unit,
@@ -124,10 +125,21 @@ fun SearchScreen(
 
     val popularArtists = remember {
         listOf(
-            Artist("Arijit Singh", 42, "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"),
-            Artist("Diljit Dosanjh", 28, "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80"),
-            Artist("Pritam", 35, "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&auto=format&fit=crop&q=80"),
-            Artist("Shreya Ghoshal", 38, "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&auto=format&fit=crop&q=80")
+            Artist("Arijit Singh", 58, "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Arijit_Singh_performance_at_Chandigarh_2025.jpg/500px-Arijit_Singh_performance_at_Chandigarh_2025.jpg"),
+            Artist("Diljit Dosanjh", 32, "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Diljit_Dosanjh.jpg/500px-Diljit_Dosanjh.jpg"),
+            Artist("Sidhu Moose Wala", 44, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Sidhu_Moose_Wala_during_the_shooting_of_his_film_Moosa_Jatt_%28cropped%29.jpg/500px-Sidhu_Moose_Wala_during_the_shooting_of_his_film_Moosa_Jatt_%28cropped%29.jpg"),
+            Artist("Shreya Ghoshal", 42, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Shreya_Ghoshal_Behindwoods_Gold_Icons_Awards_2023_%28cropped%29.jpg/500px-Shreya_Ghoshal_Behindwoods_Gold_Icons_Awards_2023_%28cropped%29.jpg"),
+            Artist("Pritam", 35, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Pritam_at_the_Filmfare_Glamour_and_Style_Awards_2016.jpg/500px-Pritam_at_the_Filmfare_Glamour_and_Style_Awards_2016.jpg"),
+            Artist("Sonu Nigam", 40, "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Sonu_Nigam_in_2017.jpg/500px-Sonu_Nigam_in_2017.jpg"),
+            Artist("AP Dhillon", 22, "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/AP_Dhillon_CA.jpg/500px-AP_Dhillon_CA.jpg"),
+            Artist("Badshah", 30, "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Badshah_at_the_launch_of_his_song_%E2%80%98Heartless%E2%80%99_%28cropped%29.jpg/500px-Badshah_at_the_launch_of_his_song_%E2%80%98Heartless%E2%80%99_%28cropped%29.jpg"),
+            Artist("Jubin Nautiyal", 28, "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Jubin_Nauityal_at_the_Good_Homes_Awards_2015.jpg/500px-Jubin_Nauityal_at_the_Good_Homes_Awards_2015.jpg"),
+            Artist("Neha Kakkar", 25, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Neha_Kakkar_in_2019.jpg/500px-Neha_Kakkar_in_2019.jpg"),
+            Artist("Atif Aslam", 35, "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Atif_Aslam_at_Badlapur_%28cropped%29.jpg/500px-Atif_Aslam_at_Badlapur_%28cropped%29.jpg"),
+            Artist("Taylor Swift", 45, "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_4.jpg/500px-Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_4.jpg"),
+            Artist("Ed Sheeran", 38, "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Ed_Sheeran-6886_%28cropped%29.jpg/500px-Ed_Sheeran-6886_%28cropped%29.jpg"),
+            Artist("The Weeknd", 34, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/The_Weeknd_Cannes_2023.png/500px-The_Weeknd_Cannes_2023.png"),
+            Artist("Bruno Mars", 30, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bruno_Mars_2017.jpg/500px-Bruno_Mars_2017.jpg")
         )
     }
 
@@ -568,10 +580,19 @@ fun SearchScreen(
                 }
 
                 items(matchingArtists.take(1)) { artist ->
+                    val verifiedArt = artist.artworkUri.ifBlank {
+                        popularArtists.find { it.name.equals(artist.name, ignoreCase = true) }?.artworkUri.orEmpty()
+                    }
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onArtistClick(artist.name) }
+                            .clickable {
+                                if (onArtistProfileClick != null) {
+                                    onArtistProfileClick(artist.name, verifiedArt)
+                                } else {
+                                    onArtistClick(artist.name)
+                                }
+                            }
                             .padding(horizontal = 16.dp, vertical = 6.dp),
                         color = Color.Transparent
                     ) {
@@ -586,7 +607,7 @@ fun SearchScreen(
                                     .border(2.dp, Color(0xFF1ED760), CircleShape)
                             ) {
                                 AsyncImage(
-                                    model = artist.artworkUri.ifBlank { "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+                                    model = verifiedArt.ifBlank { "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Arijit_Singh_performance_at_Chandigarh_2025.jpg/500px-Arijit_Singh_performance_at_Chandigarh_2025.jpg" },
                                     contentDescription = artist.name,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
@@ -707,8 +728,8 @@ fun SearchScreen(
                                                 .clickable {
                                                     onSavePlaylist("This Is ${dominantArtist.name}", artistDiscography)
                                                 },
-                                            color = Color.White.copy(alpha = 0.15f),
-                                            border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFF1ED760).copy(alpha = 0.65f)),
+                                            color = Color(0xFF132A1C),
+                                            border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFF1ED760).copy(alpha = 0.8f)),
                                             shape = RoundedCornerShape(20.dp)
                                         ) {
                                             Row(
@@ -931,8 +952,12 @@ fun SearchScreen(
                             modifier = Modifier
                                 .width(80.dp)
                                 .clickable {
-                                    onArtistClick(artist.name)
-                                    searchQuery = artist.name
+                                    if (onArtistProfileClick != null) {
+                                        onArtistProfileClick(artist.name, artist.artworkUri)
+                                    } else {
+                                        onArtistClick(artist.name)
+                                        searchQuery = artist.name
+                                    }
                                 }
                         ) {
                             Box(

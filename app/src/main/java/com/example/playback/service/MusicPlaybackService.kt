@@ -4,11 +4,15 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.PowerManager
 import android.util.Log
+import android.view.KeyEvent
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.example.MainActivity
+import com.example.SwarixApplication
 import com.example.playback.MusicPlayerInitializer
 import com.example.playback.PlayerManager
 
@@ -42,6 +46,14 @@ class MusicPlaybackService : MediaSessionService() {
             // Verify ExoPlayer configuration complies with USAGE_MEDIA & AudioFocus
             MusicPlayerInitializer.verifyConfiguration(playerManager.exoPlayer)
 
+            // Setup MediaNotificationProvider targeting Swarix Playback Notification Channel
+            setMediaNotificationProvider(
+                DefaultMediaNotificationProvider.Builder(this)
+                    .setChannelId(SwarixApplication.PLAYBACK_CHANNEL_ID)
+                    .setNotificationId(1001)
+                    .build()
+            )
+
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
@@ -52,8 +64,50 @@ class MusicPlaybackService : MediaSessionService() {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
 
+            // MediaSession Callback with Headphone & Bluetooth hardware media button support
+            val sessionCallback = object : MediaSession.Callback {
+                override fun onMediaButtonEvent(
+                    session: MediaSession,
+                    controllerInfo: MediaSession.ControllerInfo,
+                    intent: Intent
+                ): Boolean {
+                    val keyEvent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
+                    }
+                    if (keyEvent != null && keyEvent.action == KeyEvent.ACTION_DOWN) {
+                        when (keyEvent.keyCode) {
+                            KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                                playerManager.exoPlayer.play()
+                                return true
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                                playerManager.exoPlayer.pause()
+                                return true
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
+                                playerManager.togglePlayPause()
+                                return true
+                            }
+                            KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                                playerManager.playNext()
+                                return true
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                                playerManager.playPrevious()
+                                return true
+                            }
+                        }
+                    }
+                    return super.onMediaButtonEvent(session, controllerInfo, intent)
+                }
+            }
+
             mediaSession = MediaSession.Builder(this, playerManager.exoPlayer)
                 .setSessionActivity(pendingIntent)
+                .setCallback(sessionCallback)
                 .setId("SwarixMediaSession")
                 .build()
 
@@ -78,7 +132,7 @@ class MusicPlaybackService : MediaSessionService() {
                 }
             })
 
-            Log.d(TAG, "MusicPlaybackService MediaSession initialized successfully.")
+            Log.d(TAG, "MusicPlaybackService MediaSession & System Notification initialized successfully.")
         } catch (t: Throwable) {
             Log.e(TAG, "Error initializing MusicPlaybackService: ${t.message}", t)
         }

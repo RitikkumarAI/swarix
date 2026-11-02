@@ -73,6 +73,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun openArtistProfile(name: String, artwork: String) {
         _selectedArtist.value = name to artwork
         _activeSubScreen.value = SubScreen.ARTIST_PROFILE
+        viewModelScope.launch {
+            val localCount = allSongs.value.count { it.artist.contains(name, ignoreCase = true) }
+            if (localCount < 6) {
+                repository.searchOnline(name)
+            }
+        }
     }
     private val friendRepository = MockFriendActivityRepository()
     val preferences = SwarixPreferences(application)
@@ -289,6 +295,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
+            favoriteSongs.collect { favs ->
+                if (_selectedPlaylist.value?.id == -1L) {
+                    _playlistSongs.value = favs
+                    _selectedPlaylist.value = _selectedPlaylist.value?.copy(songCount = favs.size)
+                }
+            }
+        }
+
+        viewModelScope.launch {
             allSongs.collect { songs ->
                 if (songs.isNotEmpty()) {
                     aiCacheDataStore.seedInitialCacheIfEmpty(songs)
@@ -380,6 +395,45 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         _activeSubScreen.value = SubScreen.PLAYLIST_DETAIL
+    }
+
+    fun openLikedSongs() {
+        val likedPlaylist = Playlist(
+            id = -1L,
+            name = "Liked Songs",
+            description = "Auto-synced favorite tracks in your library",
+            songCount = favoriteSongs.value.size,
+            coverUri = "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&auto=format&fit=crop&q=80"
+        )
+        _selectedPlaylist.value = likedPlaylist
+        _playlistSongs.value = favoriteSongs.value
+        _activeSubScreen.value = SubScreen.PLAYLIST_DETAIL
+    }
+
+    fun openMood(mood: String) {
+        val moodCover = when (mood.lowercase()) {
+            "happy" -> "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80"
+            "sad" -> "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500&auto=format&fit=crop&q=80"
+            "love" -> "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fit=crop&q=80"
+            else -> "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80"
+        }
+        val moodPlaylist = Playlist(
+            id = -2L,
+            name = "$mood Mix",
+            description = "Verified tracks matching $mood vibes across Bollywood, Punjabi & Pop",
+            songCount = 0,
+            coverUri = moodCover
+        )
+        _selectedPlaylist.value = moodPlaylist
+        _playlistSongs.value = repository.getSongsByMood(mood)
+        _activeSubScreen.value = SubScreen.PLAYLIST_DETAIL
+        viewModelScope.launch {
+            val enriched = repository.getOrFetchMoodSongs(mood)
+            if (enriched.isNotEmpty()) {
+                _playlistSongs.value = enriched
+                _selectedPlaylist.value = moodPlaylist.copy(songCount = enriched.size)
+            }
+        }
     }
 
     fun playSong(song: Song, customQueue: List<Song>? = null) {

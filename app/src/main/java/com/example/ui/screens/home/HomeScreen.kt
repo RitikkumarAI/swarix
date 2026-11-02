@@ -125,25 +125,30 @@ fun HomeScreen(
 
     val popularArtists = remember {
         listOf(
-            Artist("Sidhu Moose Wala", 44, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Sidhu_Moose_Wala_during_the_shooting_of_his_film_Moosa_Jatt_%28cropped%29.jpg/500px-Sidhu_Moose_Wala_during_the_shooting_of_his_film_Moosa_Jatt_%28cropped%29.jpg"),
             Artist("Arijit Singh", 58, "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Arijit_Singh_performance_at_Chandigarh_2025.jpg/500px-Arijit_Singh_performance_at_Chandigarh_2025.jpg"),
-            Artist("Karan Aujla", 36, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Karan_Aujla_2020.jpg/500px-Karan_Aujla_2020.jpg"),
-            Artist("Diljit Dosanjh", 32, "https://upload.wikimedia.org/wikipedia/commons/e/e2/Diljit_Dosanjh.jpg"),
-            Artist("Masoom Sharma", 26, "https://c.saavncdn.com/233/4-5-Pistol-Haryanvi-2023-20230502053127-500x500.jpg"),
+            Artist("Diljit Dosanjh", 32, "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Diljit_Dosanjh.jpg/500px-Diljit_Dosanjh.jpg"),
+            Artist("Sidhu Moose Wala", 44, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Sidhu_Moose_Wala_during_the_shooting_of_his_film_Moosa_Jatt_%28cropped%29.jpg/500px-Sidhu_Moose_Wala_during_the_shooting_of_his_film_Moosa_Jatt_%28cropped%29.jpg"),
             Artist("Shreya Ghoshal", 42, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Shreya_Ghoshal_Behindwoods_Gold_Icons_Awards_2023_%28cropped%29.jpg/500px-Shreya_Ghoshal_Behindwoods_Gold_Icons_Awards_2023_%28cropped%29.jpg"),
-            Artist("Jubin Nautiyal", 28, "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Jubin_Nauityal_at_the_Good_Homes_Awards_2015.jpg/500px-Jubin_Nauityal_at_the_Good_Homes_Awards_2015.jpg"),
+            Artist("Pritam", 35, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Pritam_at_the_Filmfare_Glamour_and_Style_Awards_2016.jpg/500px-Pritam_at_the_Filmfare_Glamour_and_Style_Awards_2016.jpg"),
+            Artist("Sonu Nigam", 40, "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Sonu_Nigam_in_2017.jpg/500px-Sonu_Nigam_in_2017.jpg"),
             Artist("AP Dhillon", 22, "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/AP_Dhillon_CA.jpg/500px-AP_Dhillon_CA.jpg"),
             Artist("Badshah", 30, "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Badshah_at_the_launch_of_his_song_%E2%80%98Heartless%E2%80%99_%28cropped%29.jpg/500px-Badshah_at_the_launch_of_his_song_%E2%80%98Heartless%E2%80%99_%28cropped%29.jpg"),
-            Artist("Atif Aslam", 35, "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Atif_Aslam_at_Badlapur_%28cropped%29.jpg/500px-Atif_Aslam_at_Badlapur_%28cropped%29.jpg")
+            Artist("Jubin Nautiyal", 28, "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Jubin_Nauityal_at_the_Good_Homes_Awards_2015.jpg/500px-Jubin_Nauityal_at_the_Good_Homes_Awards_2015.jpg"),
+            Artist("Neha Kakkar", 25, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Neha_Kakkar_in_2019.jpg/500px-Neha_Kakkar_in_2019.jpg"),
+            Artist("Atif Aslam", 35, "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Atif_Aslam_at_Badlapur_%28cropped%29.jpg/500px-Atif_Aslam_at_Badlapur_%28cropped%29.jpg"),
+            Artist("Taylor Swift", 45, "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_4.jpg/500px-Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_4.jpg"),
+            Artist("Ed Sheeran", 38, "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Ed_Sheeran-6886_%28cropped%29.jpg/500px-Ed_Sheeran-6886_%28cropped%29.jpg"),
+            Artist("The Weeknd", 34, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/The_Weeknd_Cannes_2023.png/500px-The_Weeknd_Cannes_2023.png"),
+            Artist("Bruno Mars", 30, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bruno_Mars_2017.jpg/500px-Bruno_Mars_2017.jpg")
         )
     }
 
     val moodCards = remember {
         listOf(
-            Triple("Chill Evening", "Let go and relax", "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500&auto=format&fit=crop&q=80"),
-            Triple("Workout", "High bpm energy", "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&auto=format&fit=crop&q=80"),
-            Triple("Deep Focus", "Ambient & study", "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80"),
-            Triple("Romance", "Warm love ballads", "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fit=crop&q=80")
+            Triple("Happy", "Party, Dance & Feel-Good", "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80"),
+            Triple("Sad", "Heartbreak & Emotional Hits", "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500&auto=format&fit=crop&q=80"),
+            Triple("Love", "Romantic Duets & Classics", "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fit=crop&q=80"),
+            Triple("Focus", "Lo-Fi, Study & Instrumental", "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80")
         )
     }
 
@@ -810,7 +815,9 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .width(86.dp)
-                            .bouncyClick { onArtistClick(artist.name) }
+                            .bouncyClick { 
+                                onArtistSpotlightClick(artist.name, artist.artworkUri)
+                            }
                             .testTag("artist_${artist.name.lowercase()}")
                     ) {
                         Box(

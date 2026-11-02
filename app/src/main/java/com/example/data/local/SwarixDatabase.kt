@@ -12,9 +12,10 @@ import androidx.room.RoomDatabase
         PlaylistSongCrossRef::class,
         PlaybackHistoryEntity::class,
         EqualizerPresetEntity::class,
-        SearchQueryEntity::class
+        SearchQueryEntity::class,
+        UserLikedSongEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class SwarixDatabase : RoomDatabase() {

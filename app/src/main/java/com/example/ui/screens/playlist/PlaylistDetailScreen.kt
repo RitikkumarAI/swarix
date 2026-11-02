@@ -122,7 +122,7 @@ fun PlaylistDetailScreen(
                     )
                 }
 
-                if (onDeletePlaylist != null) {
+                if (onDeletePlaylist != null && playlist.id > 0L) {
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(
                             imageVector = Icons.Default.Delete,

@@ -72,3 +72,14 @@ data class SearchQueryEntity(
     @PrimaryKey val query: String,
     val timestamp: Long = System.currentTimeMillis()
 )
+
+@Entity(
+    tableName = "user_liked_songs",
+    primaryKeys = ["userId", "songId"],
+    indices = [Index("userId"), Index("songId")]
+)
+data class UserLikedSongEntity(
+    val userId: String = "local_user",
+    val songId: String,
+    val createdAt: Long = System.currentTimeMillis()
+)
