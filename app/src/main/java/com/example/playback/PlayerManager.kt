@@ -325,7 +325,7 @@ class PlayerManager private constructor(private val context: Context) {
                                 .setArtist(song.artist)
                                 .setAlbumTitle(song.album)
                                 .setArtworkUri(Uri.parse(song.artworkUri))
-                                .setArtworkData(bytes, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+                                .setArtworkData(bytes)
                                 .build()
                             exoPlayer.setPlaylistMetadata(metadata)
                         }

@@ -42,12 +42,12 @@ class MusicRepository(
         entities.map { it.toDomain() }
     }.flowOn(Dispatchers.IO)
 
-    val favoriteSongs: Flow<List<Song>> = musicDao.getUserLikedSongs("local_user").map { entities ->
-        if (entities.isNotEmpty()) {
-            entities.map { it.toDomain().copy(isFavorite = true) }
-        } else {
-            musicDao.getAllSongsOnce().filter { it.isFavorite }.map { it.toDomain().copy(isFavorite = true) }
-        }
+    val favoriteSongs: Flow<List<Song>> = kotlinx.coroutines.flow.combine(
+        musicDao.getUserLikedSongs("local_user"),
+        musicDao.getFavoriteSongs()
+    ) { userLiked, favEntities ->
+        val effective = if (userLiked.isNotEmpty()) userLiked else favEntities
+        effective.map { it.toDomain().copy(isFavorite = true) }
     }.flowOn(Dispatchers.IO)
 
     val recentlyPlayed: Flow<List<Song>> = musicDao.getRecentlyPlayed().map { entities ->

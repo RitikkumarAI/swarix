@@ -417,15 +417,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             "love" -> "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fit=crop&q=80"
             else -> "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80"
         }
+        val initialTracks = allSongs.value.filter {
+            it.mood.contains(mood, ignoreCase = true) || it.genre.contains(mood, ignoreCase = true)
+        }
         val moodPlaylist = Playlist(
             id = -2L,
             name = "$mood Mix",
             description = "Verified tracks matching $mood vibes across Bollywood, Punjabi & Pop",
-            songCount = 0,
+            songCount = initialTracks.size,
             coverUri = moodCover
         )
         _selectedPlaylist.value = moodPlaylist
-        _playlistSongs.value = repository.getSongsByMood(mood)
+        _playlistSongs.value = initialTracks
         _activeSubScreen.value = SubScreen.PLAYLIST_DETAIL
         viewModelScope.launch {
             val enriched = repository.getOrFetchMoodSongs(mood)
