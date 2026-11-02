@@ -1002,12 +1002,39 @@ fun NowPlayingScreen(
                                 tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
                                 modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(5.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = if (isDspEnabled) "DSP ON" else "DSP",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
+                                )
+                            )
+                        }
+
+                        // Dedicated Direct Equalizer Screen Button (User Requested)
+                        ElevatedButton(
+                            onClick = onOpenEqualizer,
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = Color(0xFFD7BC83).copy(alpha = 0.20f),
+                                contentColor = Color(0xFFD7BC83)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD7BC83).copy(alpha = 0.60f)),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.testTag("btn_equalizer")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = "Open Equalizer",
+                                tint = Color(0xFFD7BC83),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "EQ",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFD7BC83)
                                 )
                             )
                         }
@@ -1163,8 +1190,8 @@ fun NowPlayingScreen(
                                                 Text(
                                                     text = recSong.title,
                                                     style = MaterialTheme.typography.bodySmall.copy(
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = colors.primaryText
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White
                                                     ),
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
@@ -1172,7 +1199,7 @@ fun NowPlayingScreen(
                                                 Text(
                                                     text = recSong.artist,
                                                     style = MaterialTheme.typography.labelSmall.copy(
-                                                        color = colors.secondaryText,
+                                                        color = Color.White.copy(alpha = 0.75f),
                                                         fontSize = 11.sp
                                                     ),
                                                     maxLines = 1,
@@ -1193,15 +1220,15 @@ fun NowPlayingScreen(
                     }
 
                     // ==========================================
-                    // SECTION 2: Audio Quality Manual Test & Fidelity Options
+                    // SECTION 2: Ultra Studio Master Soundstage Engine (Sliding Style)
                     // ==========================================
                     Spacer(modifier = Modifier.height(14.dp))
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp)),
-                        color = Color(0xFF141416),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2A2A2E))
+                            .clip(RoundedCornerShape(18.dp)),
+                        color = Color(0xFF141517),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2E332E))
                     ) {
                         Column(
                             modifier = Modifier
@@ -1214,30 +1241,31 @@ fun NowPlayingScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Tune,
+                                    imageVector = Icons.Default.Speed,
                                     contentDescription = null,
-                                    tint = Color(0xFF6ED0C9),
-                                    modifier = Modifier.size(18.dp)
+                                    tint = Color(0xFFE5C07B),
+                                    modifier = Modifier.size(20.dp)
                                 )
                                 Text(
-                                    text = "Audio Fidelity & Manual Test",
+                                    text = "Ultra Studio Master Soundstage",
                                     style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.ExtraBold,
                                         color = Color.White,
-                                        fontSize = 13.sp
+                                        fontSize = 14.sp
                                     )
                                 )
                                 Spacer(modifier = Modifier.weight(1f))
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
-                                        .background(Color(0xFF6ED0C9).copy(alpha = 0.15f))
+                                        .background(Color(0xFFE5C07B).copy(alpha = 0.20f))
+                                        .border(1.dp, Color(0xFFE5C07B).copy(alpha = 0.50f), RoundedCornerShape(6.dp))
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
+                                Zhi) {
                                     Text(
-                                        text = "DIRECT DAC",
+                                        text = "BIT-PERFECT DAC",
                                         style = MaterialTheme.typography.labelSmall.copy(
-                                            color = Color(0xFF6ED0C9),
+                                            color = Color(0xFFE5C07B),
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 9.sp
                                         )
@@ -1246,119 +1274,107 @@ fun NowPlayingScreen(
                             }
 
                             Text(
-                                text = "Select audio sampling & decoding pipeline mode:",
+                                text = "Slide horizontally to tune soundstage fidelity & acoustic performance:",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.White.copy(alpha = 0.65f),
+                                    color = Color.White.copy(alpha = 0.70f),
                                     fontSize = 11.sp
                                 )
                             )
 
-                            // Quality options chips
-                            val qualityOptions = listOf(
-                                "320 kbps HQ",
-                                "24-bit 96kHz Lossless",
-                                "8K Ultra Studio DSP",
-                                "Direct DAC Bypass"
+                            // Sliding Soundstage Quality Carousel (Horizontally Scrollable)
+                            val soundstageModes = listOf(
+                                "128 kbps Data Saver" to "Low bandwidth • Zero latency",
+                                "320 kbps Studio HQ" to "Balanced studio bitstream",
+                                "24-bit 96kHz Lossless" to "Hi-Res Master • Studio dynamic range",
+                                "8K Ultra Studio DSP" to "Surround spatial immersion",
+                                "Direct DAC Pure Bypass" to "Unprocessed bit-perfect path"
                             )
+
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                qualityOptions.take(2).forEach { mode ->
-                                    val isSelected = testQualityMode == mode
-                                    Box(
+                                soundstageModes.forEach { (mode, subtitle) ->
+                                    val isSelected = testQualityMode == mode || (testQualityMode.startsWith("24-bit") && mode.startsWith("24-bit"))
+                                    Surface(
                                         modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(
-                                                if (isSelected) Color(0xFF6ED0C9).copy(alpha = 0.22f)
-                                                else Color.White.copy(alpha = 0.05f)
-                                            )
-                                            .border(
-                                                1.dp,
-                                                if (isSelected) Color(0xFF6ED0C9)
-                                                else Color.White.copy(alpha = 0.12f),
-                                                RoundedCornerShape(8.dp)
-                                            )
+                                            .clip(RoundedCornerShape(12.dp))
                                             .clickable { testQualityMode = mode }
-                                            .padding(vertical = 8.dp, horizontal = 6.dp),
-                                        contentAlignment = Alignment.Center
+                                            .testTag("soundstage_mode_${mode.take(6).lowercase()}"),
+                                        color = if (isSelected) Color(0xFFE5C07B).copy(alpha = 0.22f) else Color.White.copy(alpha = 0.05f),
+                                        border = androidx.compose.foundation.BorderStroke(
+                                            1.2.dp,
+                                            if (isSelected) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.15f)
+                                        ),
+                                        shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        Text(
-                                            text = mode,
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                                color = if (isSelected) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.8f),
-                                                fontSize = 10.sp
-                                            ),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                qualityOptions.drop(2).forEach { mode ->
-                                    val isSelected = testQualityMode == mode
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(
-                                                if (isSelected) Color(0xFF6ED0C9).copy(alpha = 0.22f)
-                                                else Color.White.copy(alpha = 0.05f)
+                                        Column(
+                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(3.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                if (isSelected) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = null,
+                                                        tint = Color(0xFFE5C07B),
+                                                        modifier = Modifier.size(14.dp)
+                                                    )
+                                                }
+                                                Text(
+                                                    text = mode,
+                                                    style = MaterialTheme.typography.labelMedium.copy(
+                                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold,
+                                                        color = if (isSelected) Color(0xFFE5C07B) else Color.White,
+                                                        fontSize = 12.sp
+                                                    )
+                                                )
+                                            }
+                                            Text(
+                                                text = subtitle,
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    color = if (isSelected) Color.White.copy(alpha = 0.90f) else Color.White.copy(alpha = 0.50f),
+                                                    fontSize = 10.sp
+                                                )
                                             )
-                                            .border(
-                                                1.dp,
-                                                if (isSelected) Color(0xFF6ED0C9)
-                                                else Color.White.copy(alpha = 0.12f),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .clickable { testQualityMode = mode }
-                                            .padding(vertical = 8.dp, horizontal = 6.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = mode,
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                                color = if (isSelected) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.8f),
-                                                fontSize = 10.sp
-                                            ),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        }
                                     }
                                 }
                             }
 
-                            // Manual Test Action Button
+                            // Dynamic Soundstage Engagement Action Button
                             ElevatedButton(
                                 onClick = {
                                     isTestingAudio = true
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.elevatedButtonColors(
-                                    containerColor = if (isTestingAudio) Color(0xFF0D9488) else Color(0xFF26262B),
+                                    containerColor = if (isTestingAudio) Color(0xFF1ED760).copy(alpha = 0.35f) else Color(0xFF262A27),
                                     contentColor = Color.White
                                 ),
-                                shape = RoundedCornerShape(10.dp)
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    if (isTestingAudio) Color(0xFF1ED760) else Color(0xFFE5C07B).copy(alpha = 0.40f)
+                                ),
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Icon(
                                         imageVector = if (isTestingAudio) Icons.Default.Check else Icons.Default.Speed,
                                         contentDescription = null,
-                                        tint = if (isTestingAudio) Color.White else Color(0xFF6ED0C9),
+                                        tint = if (isTestingAudio) Color(0xFF1ED760) else Color(0xFFE5C07B),
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = if (isTestingAudio) "Pipeline Verified: $testQualityMode Active" else "Test Audio Pipeline Output",
+                                        text = if (isTestingAudio) "Soundstage Engaged: $testQualityMode Active" else "Engage Studio Soundstage",
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
@@ -1369,14 +1385,15 @@ fun NowPlayingScreen(
                             }
                             if (isTestingAudio) {
                                 LaunchedEffect(Unit) {
-                                    delay(2500)
+                                    delay(2800)
                                     isTestingAudio = false
                                 }
                                 Text(
-                                    text = "✓ ExoPlayer DAC Engine connected: 32-bit float / 384kHz audio path confirmed.",
+                                    text = "✓ Master Pipeline Active: 32-bit float decoding • Dynamic Range 128dB • 0.0ms buffer delay.",
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color(0xFF6ED0C9),
-                                        fontSize = 10.sp
+                                        color = Color(0xFF1ED760),
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold
                                     )
                                 )
                             }

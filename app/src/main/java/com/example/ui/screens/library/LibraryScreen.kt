@@ -1,5 +1,6 @@
 package com.example.ui.screens.library
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridView
@@ -32,10 +34,13 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -57,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -87,10 +93,15 @@ fun LibraryScreen(
     onFavoriteToggle: (Song) -> Unit,
     recentSearches: List<String> = emptyList(),
     onSearchQueryClick: ((String) -> Unit)? = null,
+    onDeletePlaylist: ((Playlist) -> Unit)? = null,
+    onSharePlaylist: ((Playlist) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val colors = LocalSwarixColors.current
     var selectedTab by remember { mutableStateOf("Playlists") }
+    var playlistToDelete by remember { mutableStateOf<Playlist?>(null) }
+    var activeMenuPlaylistId by remember { mutableStateOf<Long?>(null) }
     val tabs = listOf("Playlists", "Smart Folders", "Songs", "Artists", "Albums", "Offline Music")
 
     val smartFolders = remember(allSongs) {
@@ -492,6 +503,59 @@ fun LibraryScreen(
                                     )
                                 )
                             }
+
+                            // Playlist Actions (Share & Delete)
+                            Box {
+                                IconButton(onClick = { activeMenuPlaylistId = playlist.id }) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "Playlist Options",
+                                        tint = colors.mutedText
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = activeMenuPlaylistId == playlist.id,
+                                    onDismissRequest = { activeMenuPlaylistId = null }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Share Playlist") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Share,
+                                                contentDescription = null,
+                                                tint = colors.primaryAccent
+                                            )
+                                        },
+                                        onClick = {
+                                            activeMenuPlaylistId = null
+                                            val shareIntent = Intent().apply {
+                                                action = Intent.ACTION_SEND
+                                                putExtra(
+                                                    Intent.EXTRA_TEXT,
+                                                    "Listen to my playlist '${playlist.name}' on Swarix Music Player! https://ritikkumarai.github.io/swarix/"
+                                                )
+                                                type = "text/plain"
+                                            }
+                                            context.startActivity(Intent.createChooser(shareIntent, "Share Playlist"))
+                                            onSharePlaylist?.invoke(playlist)
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Delete Playlist", color = Color(0xFFCF6D68)) },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = null,
+                                                tint = Color(0xFFCF6D68)
+                                            )
+                                        },
+                                        onClick = {
+                                            activeMenuPlaylistId = null
+                                            playlistToDelete = playlist
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -881,5 +945,46 @@ fun LibraryScreen(
                 }
             }
         }
+    }
+
+    if (playlistToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { playlistToDelete = null },
+            title = {
+                Text(
+                    text = "Delete Playlist",
+                    color = colors.primaryText,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete '${playlistToDelete?.name}'? The original songs in your library will not be deleted.",
+                    color = colors.secondaryText
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        playlistToDelete?.let { pl ->
+                            onDeletePlaylist?.invoke(pl)
+                        }
+                        playlistToDelete = null
+                    }
+                ) {
+                    Text(
+                        text = "Delete",
+                        color = Color(0xFFCF6D68),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { playlistToDelete = null }) {
+                    Text("Cancel", color = colors.primaryAccent)
+                }
+            },
+            containerColor = colors.elevatedSurface
+        )
     }
 }

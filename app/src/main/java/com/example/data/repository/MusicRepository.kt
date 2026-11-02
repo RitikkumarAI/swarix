@@ -75,9 +75,35 @@ class MusicRepository(
         }.flowOn(Dispatchers.IO)
     }
 
+    suspend fun toggleFavorite(song: Song) {
+        withContext(Dispatchers.IO) {
+            val existing = musicDao.getSongById(song.id)
+            val newFav = !song.isFavorite
+            if (existing == null) {
+                musicDao.insertSong(song.toEntity().copy(isFavorite = newFav))
+            } else {
+                musicDao.updateFavorite(song.id, newFav)
+            }
+        }
+    }
+
     suspend fun toggleFavorite(songId: String, isCurrentlyFavorite: Boolean) {
         withContext(Dispatchers.IO) {
-            musicDao.updateFavorite(songId, !isCurrentlyFavorite)
+            val existing = musicDao.getSongById(songId)
+            val newFav = !isCurrentlyFavorite
+            if (existing != null) {
+                musicDao.updateFavorite(songId, newFav)
+            }
+        }
+    }
+
+    suspend fun deletePlaylist(playlistId: Long) {
+        withContext(Dispatchers.IO) {
+            val pl = musicDao.getPlaylistById(playlistId)
+            if (pl != null) {
+                musicDao.deletePlaylistSongs(playlistId)
+                musicDao.deletePlaylist(pl)
+            }
         }
     }
 
@@ -648,14 +674,15 @@ Diljit dosanjh baby!""".trimIndent(),
                 artist = "Sidhu Moose Wala",
                 album = "Moosetape",
                 durationMs = 270000,
-                contentUri = "https://aac.saavncdn.com/264/3c23337f71120a1ebf2d4e680cfcf552_320.mp4",
+                contentUri = "https://aac.saavncdn.com/609/852628435c98083dfe217c1cfa731bb5_96.mp4",
                 artworkUri = "https://c.saavncdn.com/264/Moosetape-Punjabi-2021-20210514210636-500x500.jpg",
                 genre = "Punjabi Hip-Hop",
                 mood = "Workout",
-                lyrics = """Nitt controversy create milugi
-Dharman de naam te debate milugi
-Sach bolega taan milu 295
-Jeh karega tarakki putt hate milugi""".trimIndent(),
+                lyrics = """Das Putt Tera Head Down Kaston?
+Nitt controversy create milugi
+Dharma de naam te debate milugi
+Sach bolenga ta milu 295
+Jeh karenga tarakki putt hate milugi""".trimIndent(),
                 isFavorite = true,
                 playCount = 25,
                 dateAdded = System.currentTimeMillis() - 1200000,
@@ -667,14 +694,13 @@ Jeh karega tarakki putt hate milugi""".trimIndent(),
                 artist = "Sidhu Moose Wala & BYG BYRD",
                 album = "PBX 1",
                 durationMs = 224000,
-                contentUri = "https://aac.saavncdn.com/712/e82cb229a1b9d4dfbc2dc022b7245b0a_320.mp4",
+                contentUri = "https://aac.saavncdn.com/544/fa128b5b00df068d78bc50bf19bf137f_96.mp4",
                 artworkUri = "https://c.saavncdn.com/712/PBX-1-Punjabi-2018-20181105073001-500x500.jpg",
                 genre = "Punjabi Hip-Hop",
                 mood = "Party",
-                lyrics = """Tere karke main chhad ditte saare
-Tu hi bas dissdi ae mutiyaare
-Aapan vi udd gaye haan so high
-Saari duniya nu thalle chhad ke""".trimIndent(),
+                lyrics = """Byg Byrd on the beat
+Tu gabbru nu mann jaan na mann
+Uchiyan ne gallan tere yaar diyan""".trimIndent(),
                 isFavorite = true,
                 playCount = 20,
                 dateAdded = System.currentTimeMillis() - 1300000,

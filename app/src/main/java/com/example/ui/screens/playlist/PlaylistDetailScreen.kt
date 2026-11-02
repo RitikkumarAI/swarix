@@ -1,5 +1,6 @@
 package com.example.ui.screens.playlist
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +21,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -30,13 +34,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,9 +69,12 @@ fun PlaylistDetailScreen(
     onShuffleAll: () -> Unit,
     onFavoriteToggle: (Song) -> Unit,
     onBackClick: () -> Unit,
+    onDeletePlaylist: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val colors = LocalSwarixColors.current
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -69,12 +82,13 @@ fun PlaylistDetailScreen(
             .background(colors.mainBackground)
             .systemBarsPadding()
     ) {
-        // Back Bar
+        // Top Navigation Bar with Back, Share, and Delete
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
                 onClick = onBackClick,
@@ -85,6 +99,38 @@ fun PlaylistDetailScreen(
                     contentDescription = "Back",
                     tint = colors.primaryText
                 )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = {
+                        val shareIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Listen to my playlist '${playlist.name}' on Swarix Music Player! https://ritikkumarai.github.io/swarix/"
+                            )
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "Share Playlist"))
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share",
+                        tint = colors.primaryText
+                    )
+                }
+
+                if (onDeletePlaylist != null) {
+                    IconButton(onClick = { showDeleteConfirm = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Playlist",
+                            tint = Color(0xFFCF6D68)
+                        )
+                    }
+                }
             }
         }
 
@@ -217,5 +263,29 @@ fun PlaylistDetailScreen(
                 )
             }
         }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete Playlist", color = colors.primaryText, fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to delete '${playlist.name}'? Tracks will stay in your library.", color = colors.secondaryText) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        onDeletePlaylist?.invoke()
+                    }
+                ) {
+                    Text("Delete", color = Color(0xFFCF6D68), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancel", color = colors.primaryAccent)
+                }
+            },
+            containerColor = colors.elevatedSurface
+        )
     }
 }

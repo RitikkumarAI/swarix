@@ -109,20 +109,185 @@ object LyricsService {
      * Curated authentic synchronized LRC lyrics for featured catalog tracks
      */
     private val BUILTIN_SYNCED_LYRICS = mapOf(
+        "295" to """
+            [00:11.93] Das Putt Tera Head Down Kaston?
+            [00:14.58] Changa Bhala Hasda Si Maun Kaston?
+            [00:17.14] Ah Jehre Darwaje Vich Board Chakki Kharhe Aa
+            [00:19.79] Mai Changi Tarah Janda Ea Kaun Kaston
+            [00:22.52] Kuch Ethe Chandi Chamkauna Chahunde Ne
+            [00:25.14] Kuch Tainu Farh Thalle Launa Chahunde Ne
+            [00:27.98] Kujh Ke Ne Aye Ethe Bhukhe Fame De
+            [00:30.65] Naam Laike Tera Agge Auna Chahunde Ne
+            [00:33.13] Museebat Tan Marda'an Te Pendi Rehndi Ae
+            [00:36.03] Dabi'n Naa Tu Duniya Swaad Lendi Ae
+            [00:38.59] Naale Jehre Raste Te Tu Turre'a
+            [00:41.15] Ethe Badnami High Rate Milugi
+            [00:44.05] Nitt Controversy Create Milugi
+            [00:46.57] Dharma De Naam Te Debate Milugi
+            [00:49.12] Sach Bolenga Ta Milu 295
+            [00:51.71] Jeh Karenga Tarakki Putt Hate Milugi
+            [00:54.61] Nitt Controversy Create Milugi
+            [00:57.24] Dharma De Naam Te Debate Milugi
+            [00:59.76] Sach Bolenga Ta Milu 295
+            [01:02.32] Jeh Karenga Tarakki Putt Hate Milugi
+            [01:05.22] Ajj Kai Bachaun Sabheachaar Jutt Ke
+            [01:07.83] Janna Khana Dinda Ae Vichar Uthke
+            [01:10.61] Inj Lagge Rabb Jiven Hath Kharhe Kargea
+            [01:13.17] Parhan Jado Subah Akhbar Uthke
+            [01:16.02] Chup Reh Oh Puttra Ni Bhed Kholide
+            [01:18.57] Leader Hunde Ne Salhe Bebe Bapu Ji
+            [01:21.14] Bhed Kholde Ni Ethe Sach Bolda
+            [01:23.75] Thalle Launa Chahunde Ne Sidhu Moosewala Nu
+            [01:26.54] Nitt Controversy Create Milugi
+            [01:29.15] Dharma De Naam Te Debate Milugi
+            [01:31.78] Sach Bolenga Ta Milu 295
+            [01:34.36] Jeh Karenga Tarakki Putt Hate Milugi
+        """.trimIndent(),
+
+        "so high" to """
+            [00:04.19] Byg Byrd on the beat
+            [00:07.64] Yeah, Byg Byrd, haan
+            [00:13.38] I'm a brown boy
+            [00:14.43] Tu gabbru nu mann jaan na mann, alhre
+            [00:17.41] Akh 12 gauge shotgun, alhre
+            [00:20.03] Dilan 'te nishane sidhe maardi aa
+            [00:22.73] Dilan 'te nishane sidhe maardi aa
+            [00:24.98] O, sir utton langhan fly karke
+            [00:27.97] Uchiyan ne gallan tere yaar diyan
+            [00:30.66] Uchiyan ne gallan tere yaar diyan
+            [00:33.49] Uchiyan ne gallan tere yaar diyan
+            [00:46.26] Ho, dukki-tikki poori thok-thok rakhda
+            [00:49.36] Danger te jaan-lewa shaunk rakhda
+            [00:51.73] Doori foot di bana ke ae mandeer kharhdi
+            [00:54.66] Dabb vich bhar ke Glock rakhda
+            [00:57.45] Dukki-tikki poori thok-thok rakhda
+            [00:59.91] Danger te jaan-lewa shaunk rakhda
+            [01:02.46] Doori foot di bana ke ae mandeer kharhdi
+            [01:05.48] Dabb vich bhar ke Glock rakhda
+            [01:07.82] Ho, khoon nu daleri rehndi pump kardi
+            [01:10.39] Lowrider sarak utte jump kardi
+            [01:13.31] Uchiyan ne gallan tere yaar diyan
+            [01:16.14] Uchiyan ne gallan tere yaar diyan
+        """.trimIndent(),
+
+        "winning speech" to """
+            [00:08.16] Show MXRCI on it
+            [00:11.77] Do-do kole Magn'an ni, char G-Wagon'an ni
+            [00:14.56] Utte nu main chhe-chhe inch chakkiyan
+            [00:17.32] Time laggu mitne nu, saanu thalle sitne nu
+            [00:20.21] 21 vaari jor la laye chhatiyan
+            [00:22.95] Fan ikko naar da main, 10 vaari vaarda main
+            [00:25.84] Ohde utton 100-100 diyan gatthiyan
+            [00:28.58] Time laggu mitne nu, saanu thalle sitne nu
+            [00:31.35] 21 vaari jor la laye chhati
+            [00:33.29] Val kaddhta rakane, hun tutte na crease
+            [00:36.02] Thoda rukkhe aan subha de, saanu aaundi nahi tameez
+            [00:38.78] Aah lai tainu ditti, sambh la ni bebe aali chunni
+            [00:41.63] Baitha double R vich pa ke baapu di kameez
+            [00:44.38] Bahla door nahi rakane hun ranjhiyan nu kheda
+            [00:47.05] Bahla nede nu na jaawan, bas jhaka ee bada mera
+        """.trimIndent(),
+
+        "softly" to """
+            [00:05.38] Gal sun lallaria ve
+            [00:07.95] Ah lok mere te hasde
+            [00:10.47] Paise jyada dedugi
+            [00:12.76] Matching krdenga tan dsde
+            [00:15.59] Sunla ve ditto same chahidi
+            [00:18.06] Ah le photo ve Ferrari laal di
+            [00:20.81] Chunni meri rangde lallaria
+            [00:25.76] Ve chunni meri rangde lallaria
+            [00:28.36] Mere yaar di gaddi de naal di
+            [00:31.19] Chunni meri rangde lallaria ve
+            [00:33.50] Mere yaar di gaddi de naal di
+            [00:36.35] Oda pange lagde aa
+            [00:37.73] Ohnu change lagde aa
+            [00:39.01] Tahi socha kundla pvaalva
+            [00:41.47] Socha shar-e-aam hoja
+            [00:42.85] Sochdi aan naam ohda
+            [00:44.18] Gutt utte tatto bnwalava
+        """.trimIndent(),
+
         "apna bana le" to """
-            [00:08.50] Tu mera koi na hoke bhi kuch laage
-            [00:15.20] Tu mera koi na hoke bhi kuch laage
-            [00:22.00] Kiya re jo bhi toone kaise kiya re
-            [00:28.40] Jiya ko mere baandh aise liya re
-            [00:35.10] Samajh ke bhi na samajh main sakoon
-            [00:41.80] Sawere ka mere tu dhoop laage
-            [00:48.50] Tu mera koi na hoke bhi kuch laage
-            [00:55.20] Apna bana le piya, apna bana le piya
-            [01:02.00] Dil ke nagar mein shehar tu basa le piya
-            [01:08.80] Chhoo le magar tu labon se labon ko
-            [01:15.40] Saanson se saanson ko jod le piya
-            [01:22.20] Apna bana le piya, apna bana le piya
-            [01:35.00] Tu mera koi na hoke bhi kuch laage
+            [00:21.98] Tu mera koi na hoke bhi kuch laage
+            [00:27.25] Tu mera koi na hoke bhi kuch laage
+            [00:32.25] Kiya re jo bhi tune, kaise kiya re?
+            [00:37.39] Jiya ko mere baandh aise liya re
+            [00:42.44] Samajh ke bhi na samajh main sakoon
+            [00:47.41] Saveron ka mere tu sooraj laage
+            [00:52.79] Tu mera koi na hoke bhi kuch laage
+            [00:57.75] Tu mera koi na hoke bhi kuch laage
+            [01:02.82] Tu mera koi na hoke bhi kuch laage
+            [01:09.92] Apna bana le, piya, apna bana le, piya
+            [01:14.94] Apna bana le mujhe, apna bana le, piya
+            [01:20.18] Apna bana le, piya, apna bana le, piya
+            [01:25.24] Dil ke nagar mein shehar tu basa le, piya
+            [01:53.48] Chhoone se tere, haan, tere, haan, tere
+            [01:58.44] Pheeki ruton ko rang lage
+            [02:19.09] Teri disha mein kyun chalne se mere pairon ko pankh lage?
+            [02:27.04] Raha na mere kaam ka jag saara
+            [02:32.01] Ho bas tere naam se hi guzaara
+            [02:44.96] Zubaniyan teri jhoothi bhi sach laage
+            [02:50.05] Tu mera koi na hoke bhi kuch laage
+        """.trimIndent(),
+
+        "chaleya" to """
+            [00:11.18] Ishq mein dil bana hai
+            [00:13.74] Ishq mein dil fana hai, ohh
+            [00:21.29] Mita de ya bana de
+            [00:23.83] Maine tujhko chuna hai, ohh
+            [00:29.78] Tere saare rang odh ke, dhang odh ke
+            [00:33.51] Tera hua main sab ko chhod ke
+            [00:39.76] Ishq nahi karna naap-tol ke, raaz khol ke
+            [00:43.75] Aaya hoon main sab ko bol ke
+            [00:50.36] O, main taan chaleya teri aur, tera chaleya hai zor
+            [00:55.42] Tera hoya main, yaar ve, bhulleya ae sansaar ve
+            [01:01.25] Chaleya teri aur, tera chaleya hai zor
+            [01:05.74] Tera hoya main, yaar ve, bhulleya ae sansaar ve
+            [01:12.82] Jag tere liye chhodiyan, dil tere sang jodiyan
+            [01:17.94] Ab tera main toh ho gaya, paake tujhe main kho gaya
+        """.trimIndent(),
+
+        "tum kya mile" to """
+            [00:12.50] Be-iraada sahi par hua to sahi
+            [00:18.00] Ek tarafa sahi par sach to yahi
+            [00:24.00] Tum kya mile hum na rahe hum
+            [00:30.50] Bikhre the jo milke bane hum
+            [00:37.00] Jeene ko ab to tayyar hain hum
+            [00:44.00] Tum kya mile hum na rahe hum
+            [00:56.00] Raaste tere mud ke chale hain
+            [01:02.00] Khushiyon ke saare taare khile hain
+        """.trimIndent(),
+
+        "raataan lambiyan" to """
+            [00:10.00] Teri meri gallan ho gayi mashhur
+            [00:16.00] Kar na kabhi tu mujhe nazron se door
+            [00:22.00] Kithe chaliye tu kithe chaliye
+            [00:28.00] Jaanta hai dil yeh toh jaandi hai tu
+            [00:34.00] Tere bina main na rahoon mere bina tu
+            [00:40.00] Kaate kate na katte yeh din
+            [00:46.00] Raataan lambiyan lambiyan re
+            [00:52.00] Kate tere sangiyan sangiyan re
+        """.trimIndent(),
+
+        "4 5 pistol" to """
+            [00:12.00] Gaddi ka number chaar paanch
+            [00:18.00] Pistol rakhun main loaded yaar
+            [00:24.00] Haryane ka chhora baanke
+            [00:30.00] Kaare shor kare hathiyar
+            [00:38.00] Masoom Sharma bolan laaga
+            [00:44.00] Dhol bajaave danka yaar
+            [00:51.00] 4 5 pistol gaadi mein rakhi
+            [00:58.00] Shaunk nawabi dushman hairaan
+        """.trimIndent(),
+
+        "dada masoom" to """
+            [00:10.00] Vicky Gangwa aagya re
+            [00:16.00] Dada Masoom Sharma ka danka
+            [00:22.00] Haryanvi beat pe naachega saara
+            [00:28.00] Yaari mein jaan vaar de
+            [00:36.00] Kise te na dabde laadle
+            [00:42.00] Systumm baitha diya poora
         """.trimIndent(),
 
         "kesariya" to """
@@ -150,86 +315,6 @@ object LyricsService {
             [00:46.00] Dil vich tu hi tu vasiyaan
             [00:51.80] Akhiyan vich tera chehra
             [00:57.50] Saahan vich tu hi samaa
-        """.trimIndent(),
-
-        "tum hi ho" to """
-            [00:14.00] Hum tere bin ab reh nahi sakte
-            [00:21.00] Tere bina kya wajood mera
-            [00:28.00] Tujhse juda gar ho jaayenge
-            [00:35.00] Toh khud se hi ho jaayenge judaa
-            [00:42.00] Kyunki tum hi ho, ab tum hi ho
-            [00:49.00] Zindagi ab tum hi ho
-            [00:56.00] Chain bhi, mera dard bhi
-            [01:03.00] Meri aashiqui ab tum hi ho
-            [01:17.00] Tera mera rishta hai kaisa
-            [01:24.00] Ik pal door gawaara nahi
-        """.trimIndent(),
-
-        "raataan lambiyan" to """
-            [00:10.00] Teri meri gallan ho gayi mashhur
-            [00:16.00] Kar na kabhi tu mujhe nazron se door
-            [00:22.00] Kithe chaliye tu kithe chaliye
-            [00:28.00] Jaanta hai dil yeh toh jaandi hai tu
-            [00:34.00] Tere bina main na rahoon mere bina tu
-            [00:40.00] Kaate kate na katte yeh din
-            [00:46.00] Raataan lambiyan lambiyan re
-            [00:52.00] Kate tere sangiyan sangiyan re
-        """.trimIndent(),
-
-        "tum kya mile" to """
-            [00:12.50] Be-iraada sahi par hua to sahi
-            [00:18.00] Ek tarafa sahi par sach to yahi
-            [00:24.00] Tum kya mile hum na rahe hum
-            [00:30.50] Bikhre the jo milke bane hum
-            [00:37.00] Jeene ko ab to tayyar hain hum
-            [00:44.00] Tum kya mile hum na rahe hum
-            [00:56.00] Raaste tere mud ke chale hain
-            [00:62.00] Khushiyon ke saare taare khile hain
-        """.trimIndent(),
-
-        "4 5 pistol" to """
-            [00:08.00] Gaddi ka number chaar paanch
-            [00:14.00] Pistol rakhun main loaded yaar
-            [00:20.00] Haryane ka chhora baanke
-            [00:26.00] Kaare shor kare hathiyar
-            [00:32.00] Masoom Sharma bolan laaga
-            [00:38.00] Dhol bajaave danka yaar
-            [00:45.00] 4 5 pistol gaadi mein rakhi
-            [00:52.00] Shaunk nawabi dushman hairaan
-        """.trimIndent(),
-
-        "295" to """
-            [00:12.00] Nitt controversy create milugi
-            [00:18.00] Dharman de naam te debate milugi
-            [00:24.00] Sach bolega taan milu 295
-            [00:30.00] Jeh karega tarakki putt hate milugi
-            [00:38.00] Sidhu Moose Wala naam sun ke
-            [00:45.00] Lokaan de pinde te agg lagdi
-        """.trimIndent(),
-
-        "so high" to """
-            [00:09.00] Tere karke main chhad ditte saare
-            [00:14.00] Tu hi bas dissdi ae mutiyaare
-            [00:20.00] Aapan vi udd gaye haan so high
-            [00:26.00] Saari duniya nu thalle chhad ke
-            [00:32.00] Gabru da naam challe top te
-            [00:38.00] Moosewala chha gaya kalla kalla
-        """.trimIndent(),
-
-        "softly" to """
-            [00:06.00] Ni softly softly chal kude
-            [00:12.00] Paunde asle de vich khal kude
-            [00:18.00] Karan Aujla naal yaari pakki
-            [00:24.00] Gallan kardi ae saari kudiye
-            [00:30.00] Making memories with you baby
-        """.trimIndent(),
-
-        "chaleya" to """
-            [00:10.00] Ishq mein dil bana hai bada be-imaan re
-            [00:16.00] Tu meri jaan lele, bas keh de haan re
-            [00:22.00] Chaleya te chaleya ishq da mausam
-            [00:28.00] Teri aankhon se hoke nikle sitaare
-            [00:35.00] Har pal teri raahon mein beete
         """.trimIndent()
     )
 

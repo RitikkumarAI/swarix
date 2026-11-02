@@ -707,8 +707,8 @@ fun SearchScreen(
                                                 .clickable {
                                                     onSavePlaylist("This Is ${dominantArtist.name}", artistDiscography)
                                                 },
-                                            color = colors.elevatedSurface,
-                                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.divider),
+                                            color = Color.White.copy(alpha = 0.15f),
+                                            border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFF1ED760).copy(alpha = 0.65f)),
                                             shape = RoundedCornerShape(20.dp)
                                         ) {
                                             Row(
@@ -719,7 +719,7 @@ fun SearchScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.PlaylistAdd,
                                                     contentDescription = null,
-                                                    tint = Color.White,
+                                                    tint = Color(0xFF1ED760),
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))

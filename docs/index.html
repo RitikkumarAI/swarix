@@ -207,6 +207,28 @@
       border: 1px solid rgba(229,192,123,0.3);
       letter-spacing: 0.5px;
     }
+    .soundstage-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .soundstage-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .soundstage-btn.active {
+      background: rgba(30, 215, 96, 0.2);
+      border-color: #1ED760;
+      color: #1ED760;
+      font-weight: 700;
+    }
     .progress-bar-container {
       width: 100%;
       margin: 10px 0 6px;
@@ -463,13 +485,36 @@
       <!-- Real-time Audio Visualizer Canvas -->
       <canvas class="visualizer-canvas" id="visCanvas"></canvas>
 
-      <div class="song-title" id="songTitle">4 5 Pistol</div>
-      <div class="song-artist" id="songArtist">Masoom Sharma, Dev Chouhan, Shivani Yadav</div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
+        <div style="text-align: left; flex: 1;">
+          <div class="song-title" id="songTitle" style="margin-top: 0;">4 5 Pistol</div>
+          <div class="song-artist" id="songArtist">Masoom Sharma, Dev Chouhan, Shivani Yadav</div>
+        </div>
+        <button id="favoriteBtn" onclick="toggleFavorite()" style="background: transparent; border: none; cursor: pointer; padding: 8px; color: #E5C07B; display: flex; align-items: center;" title="Save to Favorites">
+          <svg id="favIcon" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
+      </div>
 
       <div class="sound-badge-row">
         <span class="sound-badge">8K ULTRA</span>
         <span class="sound-badge" id="dacModeBadge">DIRECT DAC 384kHz</span>
-        <span class="sound-badge">LOSSLESS</span>
+        <span class="sound-badge" id="soundstageBadge">STUDIO MASTER</span>
+      </div>
+
+      <!-- Ultra Studio Master Soundstage Selector -->
+      <div style="margin: 16px 0 10px 0; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(229, 192, 123, 0.25); border-radius: 12px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: #E5C07B; letter-spacing: 0.5px;">⚡ SOUNDSTAGE ENGINE</span>
+          <span id="activeSoundstageText" style="font-size: 0.7rem; color: #1ED760; font-weight: 600;">8K Lossless Active</span>
+        </div>
+        <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;" id="soundstageContainer">
+          <button class="soundstage-btn active" onclick="selectSoundstage('8K Ultra Lossless', '8K ULTRA')">8K Lossless</button>
+          <button class="soundstage-btn" onclick="selectSoundstage('24-bit 96kHz Master', '24-BIT 96kHz')">24-bit 96kHz</button>
+          <button class="soundstage-btn" onclick="selectSoundstage('320 kbps Studio HQ', '320 KBPS HQ')">320kbps HQ</button>
+          <button class="soundstage-btn" onclick="selectSoundstage('Direct DAC Passthrough', 'DIRECT DAC')">DAC Bypass</button>
+        </div>
       </div>
 
       <!-- Progress Timeline -->
@@ -536,31 +581,31 @@
       <div class="playlist-card" id="downloads">
         <div class="section-title">
           <span>Direct Native Downloads</span>
-          <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Official v2.0</span>
+          <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Official v2.1</span>
         </div>
         <div class="downloads-grid">
-          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.apk" class="download-card">
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.1/swarix.apk" class="download-card">
             <div class="download-icon">📱</div>
             <div class="download-text">
               <h4>swarix.apk</h4>
               <p>For Android Phones & Tablets</p>
             </div>
           </a>
-          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.dmg" class="download-card">
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.1/swarix.dmg" class="download-card">
             <div class="download-icon">💻</div>
             <div class="download-text">
               <h4>swarix.dmg</h4>
               <p>For Apple Mac (macOS Native App)</p>
             </div>
           </a>
-          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.exe" class="download-card">
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.1/swarix.exe" class="download-card">
             <div class="download-icon">🖥️</div>
             <div class="download-text">
               <h4>swarix.exe</h4>
               <p>For Windows PC / Laptops</p>
             </div>
           </a>
-          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix-ios.mobileconfig" class="download-card">
+          <a href="https://github.com/RitikkumarAI/swarix/releases/download/v2.1/swarix-ios.mobileconfig" class="download-card">
             <div class="download-icon">🍏</div>
             <div class="download-text">
               <h4>swarix-ios.mobileconfig</h4>
@@ -755,6 +800,46 @@
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
+    // Favorite songs storage
+    let favoriteSongIds = new Set(JSON.parse(localStorage.getItem('swarix_favorites') || '[]'));
+
+    function updateFavoriteButton() {
+      const track = playlist[currentTrackIdx];
+      const isFav = favoriteSongIds.has(track.id);
+      const favIcon = document.getElementById('favIcon');
+      if (favIcon) {
+        if (isFav) {
+          favIcon.setAttribute('fill', '#1ED760');
+          favIcon.setAttribute('stroke', '#1ED760');
+        } else {
+          favIcon.setAttribute('fill', 'none');
+          favIcon.setAttribute('stroke', '#E5C07B');
+        }
+      }
+    }
+
+    function toggleFavorite() {
+      const track = playlist[currentTrackIdx];
+      if (favoriteSongIds.has(track.id)) {
+        favoriteSongIds.delete(track.id);
+      } else {
+        favoriteSongIds.add(track.id);
+      }
+      localStorage.setItem('swarix_favorites', JSON.stringify(Array.from(favoriteSongIds)));
+      updateFavoriteButton();
+    }
+
+    function selectSoundstage(label, badgeText) {
+      const activeText = document.getElementById('activeSoundstageText');
+      const badge = document.getElementById('soundstageBadge');
+      if (activeText) activeText.textContent = label + ' Active';
+      if (badge) badge.textContent = badgeText;
+
+      document.querySelectorAll('.soundstage-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(badgeText.split(' ')[0]) || btn.textContent.includes(label.split(' ')[0]));
+      });
+    }
+
     function renderPlaylist() {
       playlistContainer.innerHTML = '';
       playlist.forEach((track, index) => {
@@ -782,17 +867,34 @@
       albumThumb.src = track.art;
       durationTimeEl.textContent = track.duration;
 
-      // Update lyrics
+      updateFavoriteButton();
+
+      // Update lyrics with click-to-seek
       lyricsBox.innerHTML = '';
+      const stepTime = (parseDuration(track.duration) || 180) / track.lyrics.length;
       track.lyrics.forEach((line, i) => {
         const div = document.createElement('div');
         div.className = `lyrics-line ${i === 0 ? 'active' : ''}`;
         div.textContent = line;
+        div.title = "Click line to jump";
+        div.onclick = () => {
+          if (!isNaN(audio.duration)) {
+            audio.currentTime = i * stepTime;
+            playAudio();
+          }
+        };
         lyricsBox.appendChild(div);
       });
 
       renderPlaylist();
       if (autoPlay) playAudio();
+    }
+
+    function parseDuration(durStr) {
+      if (!durStr) return 180;
+      const parts = durStr.split(':').map(Number);
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      return 180;
     }
 
     function togglePlay() {

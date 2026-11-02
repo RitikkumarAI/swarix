@@ -354,12 +354,18 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                             val artistSongs = allSongs.filter { it.artist.contains(artistName, ignoreCase = true) }
                             if (artistSongs.isNotEmpty()) {
                                 mainViewModel.playSong(artistSongs.first(), artistSongs)
+                            } else {
+                                mainViewModel.search(artistName)
+                                mainViewModel.selectTab(NavItem.SEARCH)
                             }
                         },
                         onMoodClick = { mood ->
-                            val moodSongs = allSongs.filter { it.mood.contains(mood, ignoreCase = true) }
+                            val moodSongs = allSongs.filter { it.mood.contains(mood, ignoreCase = true) || it.genre.contains(mood, ignoreCase = true) }
                             if (moodSongs.isNotEmpty()) {
                                 mainViewModel.playSong(moodSongs.first(), moodSongs)
+                            } else {
+                                mainViewModel.search("$mood Bollywood")
+                                mainViewModel.selectTab(NavItem.SEARCH)
                             }
                         },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
@@ -472,6 +478,12 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                                 mainViewModel.removeCachedSong(song.id)
                             } else {
                                 mainViewModel.cacheSong(song)
+                            }
+                        },
+                        onDeletePlaylist = { playlist ->
+                            mainViewModel.deletePlaylist(playlist.id)
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Playlist \"${playlist.name}\" deleted")
                             }
                         }
                     )
@@ -762,7 +774,14 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                             }
                         },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
-                        onBackClick = { mainViewModel.closeSubScreen() }
+                        onBackClick = { mainViewModel.closeSubScreen() },
+                        onDeletePlaylist = {
+                            mainViewModel.deletePlaylist(playlist.id)
+                            mainViewModel.closeSubScreen()
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Playlist \"${playlist.name}\" deleted")
+                            }
+                        }
                     )
                 }
             }
@@ -855,7 +874,14 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         artistSongs = allSongs.filter { it.artist.contains(artist.first, ignoreCase = true) },
                         onSongClick = { mainViewModel.playSong(it, allSongs) },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
-                        onBackClick = { mainViewModel.closeSubScreen() }
+                        onBackClick = { mainViewModel.closeSubScreen() },
+                        onDeletePlaylist = {
+                            mainViewModel.deletePlaylist(playlist.id)
+                            mainViewModel.closeSubScreen()
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Playlist \"${playlist.name}\" deleted")
+                            }
+                        }
                     )
                 }
             }

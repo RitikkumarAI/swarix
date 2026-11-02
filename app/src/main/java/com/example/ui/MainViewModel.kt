@@ -464,8 +464,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun cancelSleepTimer() = playerManager.cancelSleepTimer()
 
     fun toggleFavorite(song: Song) {
+        val newFav = !song.isFavorite
+        playerManager.updateCurrentSongFavorite(newFav)
         viewModelScope.launch {
-            repository.toggleFavorite(song.id, song.isFavorite)
+            repository.toggleFavorite(song)
+        }
+    }
+
+    fun deletePlaylist(playlistId: Long) {
+        viewModelScope.launch {
+            repository.deletePlaylist(playlistId)
         }
     }
 

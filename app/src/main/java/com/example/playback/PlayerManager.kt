@@ -410,6 +410,14 @@ class PlayerManager private constructor(private val context: Context) {
         Log.d("PlayerManager", "Play requested, exoPlayer is playing: ${exoPlayer.isPlaying}, playbackState: ${exoPlayer.playbackState}")
     }
 
+    fun updateCurrentSongFavorite(isFav: Boolean) {
+        val current = _currentSong.value ?: return
+        _currentSong.value = current.copy(isFavorite = isFav)
+        _queue.value = _queue.value.map {
+            if (it.id == current.id) it.copy(isFavorite = isFav) else it
+        }
+    }
+
     fun togglePlayPause() {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
