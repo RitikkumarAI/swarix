@@ -298,7 +298,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             favoriteSongs.collect { favs ->
                 if (_selectedPlaylist.value?.id == -1L) {
                     _playlistSongs.value = favs
-                    _selectedPlaylist.value = _selectedPlaylist.value?.copy(songCount = favs.size)
+                    _selectedPlaylist.value = _selectedPlaylist.value?.copy(trackCount = favs.size)
                 }
             }
         }
@@ -402,7 +402,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             id = -1L,
             name = "Liked Songs",
             description = "Auto-synced favorite tracks in your library",
-            songCount = favoriteSongs.value.size,
+            trackCount = favoriteSongs.value.size,
             coverUri = "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&auto=format&fit=crop&q=80"
         )
         _selectedPlaylist.value = likedPlaylist
@@ -424,7 +424,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             id = -2L,
             name = "$mood Mix",
             description = "Verified tracks matching $mood vibes across Bollywood, Punjabi & Pop",
-            songCount = initialTracks.size,
+            trackCount = initialTracks.size,
             coverUri = moodCover
         )
         _selectedPlaylist.value = moodPlaylist
@@ -434,7 +434,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val enriched = repository.getOrFetchMoodSongs(mood)
             if (enriched.isNotEmpty()) {
                 _playlistSongs.value = enriched
-                _selectedPlaylist.value = moodPlaylist.copy(songCount = enriched.size)
+                _selectedPlaylist.value = moodPlaylist.copy(trackCount = enriched.size)
             }
         }
     }
