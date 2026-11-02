@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import shutil
 import zipfile
 import subprocess
@@ -103,11 +104,12 @@ fi
     if os.path.exists(icns_src):
         shutil.copyfile(icns_src, os.path.join(resources_dir, "AppIcon.icns"))
 
-    # Create Applications Symlink for standard Mac drag-and-drop installer experience
-    try:
-        os.symlink("/Applications", os.path.join(mac_dir, "Applications"))
-    except Exception as e:
-        print(f"Notice on symlink: {e}")
+    # Create Applications Symlink for standard Mac drag-and-drop installer experience ONLY if on macOS where /Applications exists
+    if sys.platform == "darwin" and os.path.exists("/Applications"):
+        try:
+            os.symlink("/Applications", os.path.join(mac_dir, "Applications"))
+        except Exception as e:
+            print(f"Notice on symlink: {e}")
 
     mac_readme = """===========================================================
 🍏 SWARIX MUSIC PLAYER FOR MAC (macOS Installation)
@@ -124,6 +126,7 @@ If macOS displays: "Swarix cannot be opened because it is from an unidentified d
 - (Or run in Terminal: xattr -cr /Applications/Swarix.app)
 
 Bit-perfect 8K Ultra Master streaming directly on your Mac.
+Web Player: https://ritikkumarai.github.io/swarix/
 Developed & Maintained by Ritik Kumar (https://ritikkumarai.vercel.app/)
 ===========================================================
 """
@@ -175,8 +178,13 @@ Developed & Maintained by Ritik Kumar (https://ritikkumarai.vercel.app/)
         for root, _, files in os.walk(mac_dir):
             for file in files:
                 file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, mac_dir)
-                zipf.write(file_path, arcname)
+                if os.path.islink(file_path) and not os.path.exists(file_path):
+                    continue
+                try:
+                    arcname = os.path.relpath(file_path, mac_dir)
+                    zipf.write(file_path, arcname)
+                except Exception as ze:
+                    print(f"Warning: skipped {file_path} in zip: {ze}")
     print(f"Created {mac_zip_path}")
 
     # If dmg could not be created via external tools, package zip as dmg-compatible
@@ -203,7 +211,7 @@ if %ERRORLEVEL% equ 0 (
     adb shell monkey -p com.aistudio.swarix.musply -c android.intent.category.LAUNCHER 1
 ) else (
     echo Opening Swarix Web Player...
-    start https://ritikkumarai.vercel.app/
+    start https://ritikkumarai.github.io/swarix/
 )
 """
     with open(os.path.join(win_dir, "Swarix-Launcher.bat"), "w") as f:
@@ -223,8 +231,8 @@ Option 2 (BlueStacks / LDPlayer):
 2. Play 8K Ultra Studio sound directly from your PC.
 
 Option 3 (Direct Web Player):
-Visit: https://ritikkumarai.vercel.app/
-Developed & Maintained by Ritik Kumar
+Visit: https://ritikkumarai.github.io/swarix/
+Developed & Maintained by Ritik Kumar (https://ritikkumarai.vercel.app/)
 ===========================================================
 """
     with open(os.path.join(win_dir, "README-WINDOWS.txt"), "w") as f:
@@ -241,8 +249,13 @@ Developed & Maintained by Ritik Kumar
         for root, _, files in os.walk(win_dir):
             for file in files:
                 file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, win_dir)
-                zipf.write(file_path, arcname)
+                if os.path.islink(file_path) and not os.path.exists(file_path):
+                    continue
+                try:
+                    arcname = os.path.relpath(file_path, win_dir)
+                    zipf.write(file_path, arcname)
+                except Exception as ze:
+                    print(f"Warning: skipped {file_path} in win zip: {ze}")
     print(f"Created {win_zip_path}")
 
     exe_created = False
@@ -302,7 +315,7 @@ Developed & Maintained by Ritik Kumar
             <key>Precomposed</key>
             <true/>
             <key>URL</key>
-            <string>https://ritikkumarai.vercel.app/</string>
+            <string>https://ritikkumarai.github.io/swarix/</string>
         </dict>
     </array>
     <key>PayloadDisplayName</key>

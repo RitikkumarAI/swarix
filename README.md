@@ -12,9 +12,9 @@
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack_Compose_M3-purple.svg)](https://developer.android.com/jetpack/compose)
 [![Media3 ExoPlayer](https://img.shields.io/badge/Audio-AndroidX_Media3_1.2.1-red.svg)](https://developer.android.com/media/media3)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Download APK](https://img.shields.io/badge/Download-Latest_APK-blue?logo=android&logoColor=white)](https://github.com/RitikkumarAI/swarix/releases/download/v1.4/Swarix.apk)
+[![Download APK](https://img.shields.io/badge/Download-Latest_APK-blue?logo=android&logoColor=white)](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.apk)
 
-[**📥 Download Latest Release APK**](https://github.com/RitikkumarAI/swarix/releases/download/v1.4/Swarix.apk) • [**👨‍💻 Developer Portfolio**](https://ritikkumarai.vercel.app/) • [**✨ Features**](#-key-features) • [**🛠️ Tech Stack**](#%EF%B8%8F-architecture--tech-stack) • [**🚀 Building from Source**](#-building-from-source)
+[**📥 Download Latest Release**](https://github.com/RitikkumarAI/swarix/releases/latest) • [**🌐 Web Player**](https://ritikkumarai.github.io/swarix/) • [**👨‍💻 Developer Portfolio**](https://ritikkumarai.vercel.app/) • [**✨ Features**](#-key-features) • [**🛠️ Tech Stack**](#%EF%B8%8F-architecture--tech-stack) • [**🚀 Building from Source**](#-building-from-source)
 
 </div>
 
@@ -26,20 +26,30 @@
 
 ---
 
-## 📥 Direct APK Download
+## 📥 Multi-Platform Downloads (v2.0)
 
-Download and install Swarix directly onto your Android device:
+Download Swarix directly onto your device:
 
-| File | Description | Download |
-|---|---|---|
-| **Swarix Release APK** | Official production build (8K Master Sound, 320kbps streaming) | [**Download Swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v1.4/Swarix.apk) |
-| **All Releases** | View changelogs and previous builds | [**Releases Page**](https://github.com/RitikkumarAI/swarix/releases) |
+| Platform | Download Link | File Type | Description |
+|:---|:---|:---|:---|
+| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.apk) | `.apk` | Official installable production APK |
+| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.dmg) | `.dmg` | Native Apple macOS Disk Image (Swarix.app) |
+| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.exe) | `.exe` | Self-extracting Windows installer |
+| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
+| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle with Swarix.app |
+| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
+| 🌐 **Web Player (Any OS)** | [**Open Web Player**](https://ritikkumarai.github.io/swarix/) | Web / PWA | Instant browser playback & PWA |
 
-### 📲 Quick Install Guide:
-1. Tap the **[Download Swarix.apk](https://github.com/RitikkumarAI/swarix/releases/download/v1.4/Swarix.apk)** link on your Android device.
+### 📲 Quick Install Guide for Android:
+1. Tap the **[Download swarix.apk](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.apk)** link on your Android device.
 2. When the download completes, tap the file in your notification bar or **Downloads** folder.
 3. If prompted with *"Install unknown apps"*, enable permission for your browser or file manager.
 4. Tap **Install** and open **Swarix**!
+
+### 🍏 Quick Install Guide for macOS:
+1. Download **[swarix.dmg](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/swarix.dmg)** or **[Swarix-for-Mac.zip](https://github.com/RitikkumarAI/swarix/releases/download/v2.0/Swarix-for-Mac.zip)**.
+2. Drag **Swarix.app** into your **Applications** folder.
+3. Open **Swarix** directly from Launchpad or Applications. (If Gatekeeper asks, Right-click -> Open).
 
 ---
 
