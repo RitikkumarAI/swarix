@@ -1261,7 +1261,7 @@ fun NowPlayingScreen(
                                         .background(Color(0xFFE5C07B).copy(alpha = 0.20f))
                                         .border(1.dp, Color(0xFFE5C07B).copy(alpha = 0.50f), RoundedCornerShape(6.dp))
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
-                                Zhi) {
+                                ) {
                                     Text(
                                         text = "BIT-PERFECT DAC",
                                         style = MaterialTheme.typography.labelSmall.copy(
