@@ -161,6 +161,8 @@ class PlayerManager private constructor(private val context: Context) {
     private val _isDspEnabled = MutableStateFlow(false)
     val isDspEnabled: StateFlow<Boolean> = _isDspEnabled.asStateFlow()
 
+    private var playbackRetryCount = 0
+
     fun toggleDsp(): Boolean {
         val newState = !_isDspEnabled.value
         _isDspEnabled.value = newState
@@ -203,6 +205,7 @@ class PlayerManager private constructor(private val context: Context) {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 playbackHealthManager.onPlaybackStateChanged(playbackState)
                 if (playbackState == Player.STATE_READY) {
+                    playbackRetryCount = 0
                     _durationMs.value = exoPlayer.duration.coerceAtLeast(0L)
                     equalizerHelper.initSession(exoPlayer.audioSessionId)
                     bassHapticEngine.initSession(exoPlayer.audioSessionId)
@@ -218,6 +221,7 @@ class PlayerManager private constructor(private val context: Context) {
              * without stalling, re-buffering, or tearing down audio sinks.
              */
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                playbackRetryCount = 0
                 val newIndex = exoPlayer.currentMediaItemIndex
                 val q = _queue.value
                 if (newIndex in q.indices) {
@@ -274,7 +278,23 @@ class PlayerManager private constructor(private val context: Context) {
                         return
                     }
                 }
-                _isPlaying.value = false
+                if (playbackRetryCount < 3) {
+                    playbackRetryCount++
+                    Log.w("PlayerManager", "Transient playback error, retrying attempt $playbackRetryCount / 3...")
+                    serviceScope.launch {
+                        delay(600L)
+                        try {
+                            exoPlayer.prepare()
+                            exoPlayer.play()
+                        } catch (e: Exception) {
+                            Log.e("PlayerManager", "Auto-retry failed: ${e.message}")
+                        }
+                    }
+                    return
+                }
+                playbackRetryCount = 0
+                Log.w("PlayerManager", "Max playback retries reached for track, smoothly auto-advancing to next track")
+                playNext()
                 playbackHealthManager.onPlayerError(error)
             }
         })
@@ -345,9 +365,9 @@ class PlayerManager private constructor(private val context: Context) {
     private fun startPlaybackService() {
         try {
             val intent = Intent(context, com.example.playback.service.MusicPlaybackService::class.java)
-            context.startService(intent)
+            androidx.core.content.ContextCompat.startForegroundService(context, intent)
         } catch (t: Throwable) {
-            Log.e("PlayerManager", "Failed to start MusicPlaybackService", t)
+            Log.e("PlayerManager", "Failed to start MusicPlaybackService as foreground service", t)
         }
     }
 

@@ -698,119 +698,6 @@ fun NowPlayingScreen(
                                     compact = false
                                 )
                             }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            // 8K Ultra Quality, DSP Master Sound, and Tactile Bass Haptics Pills (Horizontally Scrollable, Non-Wrapping)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState()),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Surface(
-                                    modifier = Modifier
-                                        .wrapContentWidth()
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .clickable { showQualitySpecs = true }
-                                        .testTag("4k_quality_badge"),
-                                    color = Color(0xFF1ED760).copy(alpha = 0.20f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1ED760).copy(alpha = 0.50f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.HighQuality,
-                                            contentDescription = null,
-                                            tint = Color(0xFF1ED760),
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Text(
-                                            text = "8K ULTRA",
-                                            maxLines = 1,
-                                            softWrap = false,
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF1ED760),
-                                                letterSpacing = 0.5.sp
-                                            )
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    modifier = Modifier
-                                        .wrapContentWidth()
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .clickable { onToggleDsp() }
-                                        .testTag("dsp_sound_pill"),
-                                    color = if (isDspEnabled) Color(0xFF6ED0C9).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.20f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.GraphicEq,
-                                            contentDescription = "DSP Equalizer",
-                                            tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.50f),
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Text(
-                                            text = if (isDspEnabled) "DSP ON" else "DSP OFF",
-                                            maxLines = 1,
-                                            softWrap = false,
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.60f),
-                                                letterSpacing = 0.5.sp
-                                            )
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    modifier = Modifier
-                                        .wrapContentWidth()
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .clickable { onToggleBassHaptics?.invoke() }
-                                        .testTag("tactile_bass_badge"),
-                                    color = if (bassHapticsEnabled) Color(0xFFE5C07B).copy(alpha = 0.20f) else Color.White.copy(alpha = 0.08f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (bassHapticsEnabled) Color(0xFFE5C07B).copy(alpha = 0.50f) else Color.White.copy(alpha = 0.15f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Vibration,
-                                            contentDescription = "Bass Haptics",
-                                            tint = if (bassHapticsEnabled) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.65f),
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Text(
-                                            text = if (bassHapticsEnabled) "BASS ON" else "BASS OFF",
-                                            maxLines = 1,
-                                            softWrap = false,
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (bassHapticsEnabled) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.65f),
-                                                letterSpacing = 0.5.sp
-                                            )
-                                        )
-                                    }
-                                }
-                            }
                         }
 
                         IconButton(
@@ -823,6 +710,119 @@ fun NowPlayingScreen(
                                 tint = if (song.isFavorite) colors.primaryAccent else Color.White.copy(alpha = 0.75f),
                                 modifier = Modifier.size(28.dp)
                             )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    // 8K Ultra Quality, DSP Master Sound, and Tactile Bass Haptics Pills (Full Width Non-Wrapping)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { showQualitySpecs = true }
+                                .testTag("4k_quality_badge"),
+                            color = Color(0xFF1ED760).copy(alpha = 0.20f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1ED760).copy(alpha = 0.50f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.HighQuality,
+                                    contentDescription = null,
+                                    tint = Color(0xFF1ED760),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = "8K ULTRA",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1ED760),
+                                        letterSpacing = 0.5.sp
+                                    )
+                                )
+                            }
+                        }
+
+                        Surface(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { onToggleDsp() }
+                                .testTag("dsp_sound_pill"),
+                            color = if (isDspEnabled) Color(0xFF6ED0C9).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.20f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GraphicEq,
+                                    contentDescription = "DSP Equalizer",
+                                    tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.50f),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = if (isDspEnabled) "DSP ON" else "DSP OFF",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.60f),
+                                        letterSpacing = 0.5.sp
+                                    )
+                                )
+                            }
+                        }
+
+                        Surface(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { onToggleBassHaptics?.invoke() }
+                                .testTag("tactile_bass_badge"),
+                            color = if (bassHapticsEnabled) Color(0xFFE5C07B).copy(alpha = 0.20f) else Color.White.copy(alpha = 0.08f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (bassHapticsEnabled) Color(0xFFE5C07B).copy(alpha = 0.50f) else Color.White.copy(alpha = 0.15f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Vibration,
+                                    contentDescription = "Bass Haptics",
+                                    tint = if (bassHapticsEnabled) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.65f),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = if (bassHapticsEnabled) "BASS ON" else "BASS OFF",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (bassHapticsEnabled) Color(0xFFE5C07B) else Color.White.copy(alpha = 0.65f),
+                                        letterSpacing = 0.5.sp
+                                    )
+                                )
+                            }
                         }
                     }
 
@@ -967,110 +967,138 @@ fun NowPlayingScreen(
 
                     // Bottom Action Bar:
                     // [Device Connect icon] [DSP button] [Lyrics pill] [Share icon] [Queue icon]
+                    // Controls Row: Device Picker | DSP | EQ | Lyrics | Share | Queue (Universal Responsive Fixed-Height Bar)
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Device Switcher / Connect Icon
                         IconButton(
                             onClick = { showDevicePicker = true },
-                            modifier = Modifier.testTag("btn_connect_device")
+                            modifier = Modifier.size(36.dp).testTag("btn_connect_device")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Devices,
                                 contentDescription = "Connect to a device",
                                 tint = if (currentDeviceId != "phone") colors.primaryAccent else Color.White.copy(alpha = 0.70f),
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
-                        // Dedicated DSP Sound & Equalizer Button
-                        ElevatedButton(
-                            onClick = onToggleDsp,
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.12f),
-                                contentColor = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
-                            ),
+                        // Dedicated DSP Sound & Equalizer Pill (Fixed 36dp Height, Single-Line)
+                        Surface(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .bouncyClick { onToggleDsp() }
+                                .testTag("btn_dsp"),
+                            color = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.12f),
                             border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.25f)),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.testTag("btn_dsp")
+                            shape = RoundedCornerShape(18.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.GraphicEq,
-                                contentDescription = "DSP Equalizer",
-                                tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isDspEnabled) "DSP ON" else "DSP",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GraphicEq,
+                                    contentDescription = "DSP Equalizer",
+                                    tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
+                                    modifier = Modifier.size(15.dp)
                                 )
-                            )
+                                Text(
+                                    text = if (isDspEnabled) "DSP ON" else "DSP",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp,
+                                        color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
+                                    )
+                                )
+                            }
                         }
 
-                        // Dedicated Direct Equalizer Screen Button (User Requested)
-                        ElevatedButton(
-                            onClick = onOpenEqualizer,
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = Color(0xFFD7BC83).copy(alpha = 0.20f),
-                                contentColor = Color(0xFFD7BC83)
-                            ),
+                        // Dedicated Direct Equalizer Screen Button (Fixed 36dp Height, Single-Line)
+                        Surface(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .bouncyClick { onOpenEqualizer() }
+                                .testTag("btn_equalizer"),
+                            color = Color(0xFFD7BC83).copy(alpha = 0.20f),
                             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD7BC83).copy(alpha = 0.60f)),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.testTag("btn_equalizer")
+                            shape = RoundedCornerShape(18.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = "Open Equalizer",
-                                tint = Color(0xFFD7BC83),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "EQ",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFD7BC83)
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tune,
+                                    contentDescription = "Open Equalizer",
+                                    tint = Color(0xFFD7BC83),
+                                    modifier = Modifier.size(15.dp)
                                 )
-                            )
+                                Text(
+                                    text = "EQ",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp,
+                                        color = Color(0xFFD7BC83)
+                                    )
+                                )
+                            }
                         }
 
-                        // Lyrics Pill Button (Center)
-                        ElevatedButton(
-                            onClick = onOpenLyrics,
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = Color.White.copy(alpha = 0.16f),
-                                contentColor = Color.White
-                            ),
+                        // Lyrics Pill Button (Fixed 36dp Height, Single-Line Non-Wrapping)
+                        Surface(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .bouncyClick { onOpenLyrics() }
+                                .testTag("btn_lyrics"),
+                            color = Color.White.copy(alpha = 0.16f),
                             border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.testTag("btn_lyrics")
+                            shape = RoundedCornerShape(18.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Subtitles,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = "Lyrics",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Subtitles,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(15.dp)
                                 )
-                            )
+                                Text(
+                                    text = "Lyrics",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp,
+                                        color = Color.White
+                                    )
+                                )
+                            }
                         }
 
                         // Share Button
                         IconButton(
                             onClick = {
                                 com.example.core.share.ShareHelper.shareTrack(context, song)
-                            }
+                            },
+                            modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
@@ -1081,12 +1109,15 @@ fun NowPlayingScreen(
                         }
 
                         // Queue Button (Far Right)
-                        IconButton(onClick = onOpenQueue) {
+                        IconButton(
+                            onClick = onOpenQueue,
+                            modifier = Modifier.size(36.dp)
+                        ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.QueueMusic,
                                 contentDescription = "Queue",
                                 tint = Color.White.copy(alpha = 0.70f),
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -1237,33 +1268,45 @@ fun NowPlayingScreen(
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Row(
+                                modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Speed,
-                                    contentDescription = null,
-                                    tint = Color(0xFFE5C07B),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Text(
-                                    text = "Ultra Studio Master Soundstage",
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color.White,
-                                        fontSize = 14.sp
+                                Row(
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Speed,
+                                        contentDescription = null,
+                                        tint = Color(0xFFE5C07B),
+                                        modifier = Modifier.size(18.dp)
                                     )
-                                )
-                                Spacer(modifier = Modifier.weight(1f))
+                                    Text(
+                                        text = "Studio Soundstage",
+                                        style = MaterialTheme.typography.titleSmall.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.White,
+                                            fontSize = 13.sp
+                                        ),
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                                 Box(
                                     modifier = Modifier
+                                        .wrapContentWidth()
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(Color(0xFFE5C07B).copy(alpha = 0.20f))
                                         .border(1.dp, Color(0xFFE5C07B).copy(alpha = 0.50f), RoundedCornerShape(6.dp))
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        .padding(horizontal = 7.dp, vertical = 3.dp)
                                 ) {
                                     Text(
                                         text = "BIT-PERFECT DAC",
+                                        maxLines = 1,
+                                        softWrap = false,
                                         style = MaterialTheme.typography.labelSmall.copy(
                                             color = Color(0xFFE5C07B),
                                             fontWeight = FontWeight.ExtraBold,

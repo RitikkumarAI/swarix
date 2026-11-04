@@ -75,8 +75,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _activeSubScreen.value = SubScreen.ARTIST_PROFILE
         viewModelScope.launch {
             val localCount = allSongs.value.count { it.artist.contains(name, ignoreCase = true) }
-            if (localCount < 6) {
+            if (localCount < 20) {
                 repository.searchOnline(name)
+                repository.searchOnline("$name top hits")
             }
         }
     }

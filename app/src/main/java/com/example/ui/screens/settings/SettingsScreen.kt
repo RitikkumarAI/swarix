@@ -549,7 +549,7 @@ fun SettingsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Version 2.2 (Master Release)",
+                        text = "Version 2.3 (Master Release)",
                         style = MaterialTheme.typography.labelLarge.copy(color = colors.primaryAccent)
                     )
                     Text(
@@ -1220,7 +1220,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.SystemUpdate,
                     title = "Check for Updates",
-                    value = "v2.2",
+                    value = "v2.3",
                     onClick = onCheckForUpdates
                 )
             }
@@ -1229,7 +1229,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v2.2",
+                    value = "v2.3",
                     onClick = { showAboutDialog = true }
                 )
             }
@@ -1291,6 +1291,7 @@ fun SettingsRow(
                         color = colors.primaryText
                     ),
                     maxLines = 1,
+                    softWrap = false,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (value.isNotEmpty()) {
@@ -1302,6 +1303,7 @@ fun SettingsRow(
                             fontSize = 13.sp
                         ),
                         maxLines = 1,
+                        softWrap = false,
                         overflow = TextOverflow.Ellipsis
                     )
                 }

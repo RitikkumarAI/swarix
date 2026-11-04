@@ -20,6 +20,11 @@ class MusicPlaybackService : MediaSessionService() {
 
     companion object {
         private const val TAG = "MusicPlaybackService"
+        const val ACTION_TOGGLE_PLAY_PAUSE = "com.example.playback.ACTION_TOGGLE_PLAY_PAUSE"
+        const val ACTION_PLAY = "com.example.playback.ACTION_PLAY"
+        const val ACTION_PAUSE = "com.example.playback.ACTION_PAUSE"
+        const val ACTION_NEXT = "com.example.playback.ACTION_NEXT"
+        const val ACTION_PREVIOUS = "com.example.playback.ACTION_PREVIOUS"
     }
 
     private var mediaSession: MediaSession? = null
@@ -139,6 +144,18 @@ class MusicPlaybackService : MediaSessionService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        try {
+            val playerManager = PlayerManager.getInstance(this)
+            when (intent?.action) {
+                ACTION_TOGGLE_PLAY_PAUSE -> playerManager.togglePlayPause()
+                ACTION_PLAY -> playerManager.exoPlayer.play()
+                ACTION_PAUSE -> playerManager.exoPlayer.pause()
+                ACTION_NEXT -> playerManager.playNext()
+                ACTION_PREVIOUS -> playerManager.playPrevious()
+            }
+        } catch (t: Throwable) {
+            Log.e(TAG, "Error handling playback action intent: ${t.message}", t)
+        }
         super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }

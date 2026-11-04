@@ -163,21 +163,24 @@ fun SearchScreen(
         }
     }
 
-    val matchingArtists by remember(searchQuery, allSongs, onlineResults) {
+    val matchingArtists by remember(searchQuery, allSongs, onlineResults, popularArtists) {
         derivedStateOf {
             if (searchQuery.isBlank()) emptyList()
             else {
                 val q = searchQuery.trim().lowercase()
+                val popularMatches = popularArtists.filter { it.name.lowercase().contains(q) || q.contains(it.name.lowercase()) }
                 val combined = (allSongs + onlineResults).distinctBy { it.id }
-                combined.groupBy { it.artist }
+                val dynamicMatches = combined.groupBy { it.artist }
                     .filter { (artistName, _) -> artistName.lowercase().contains(q) || q.contains(artistName.lowercase()) }
                     .map { (artistName, songs) ->
+                        val verifiedPhoto = popularArtists.firstOrNull { it.name.equals(artistName, ignoreCase = true) }?.artworkUri
                         Artist(
                             name = artistName,
                             songCount = songs.size,
-                            artworkUri = songs.firstOrNull { it.artworkUri.isNotBlank() }?.artworkUri ?: ""
+                            artworkUri = verifiedPhoto ?: songs.firstOrNull { it.artworkUri.isNotBlank() }?.artworkUri ?: ""
                         )
                     }
+                (popularMatches + dynamicMatches).distinctBy { it.name.lowercase() }
             }
         }
     }

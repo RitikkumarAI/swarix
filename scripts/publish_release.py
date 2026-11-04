@@ -9,7 +9,7 @@ import urllib.error
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY", "RitikkumarAI/swarix")
-    tag = os.environ.get("RELEASE_TAG", "v2.2")
+    tag = os.environ.get("RELEASE_TAG", "v2.3")
     name = f"Swarix Music Player {tag} (Official Multi-Platform)"
     
     if not token:

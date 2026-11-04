@@ -213,7 +213,11 @@ class MusicRepository(
 
     suspend fun searchOnline(query: String): List<Song> {
         return withContext(Dispatchers.IO) {
-            val entities = com.example.data.remote.JioSaavnService.searchSongs(query)
+            val entities = com.example.data.remote.JioSaavnService.searchSongs(query, limit = 80).toMutableList()
+            if (entities.size < 15 && query.isNotBlank()) {
+                val extraHits = com.example.data.remote.JioSaavnService.searchSongs("$query songs", limit = 40)
+                entities.addAll(extraHits.filter { extra -> entities.none { it.id == extra.id } })
+            }
             if (entities.isNotEmpty()) {
                 musicDao.insertSongs(entities)
             }
