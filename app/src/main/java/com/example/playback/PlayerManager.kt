@@ -281,7 +281,7 @@ class PlayerManager private constructor(private val context: Context) {
                 if (playbackRetryCount < 3) {
                     playbackRetryCount++
                     Log.w("PlayerManager", "Transient playback error, retrying attempt $playbackRetryCount / 3...")
-                    serviceScope.launch {
+                    scope.launch {
                         delay(600L)
                         try {
                             exoPlayer.prepare()
