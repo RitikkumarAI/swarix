@@ -100,6 +100,6 @@ jobs:
         run: python3 scripts/delete_old_releases.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CURRENT_RELEASE_TAG: v2.2
+          CURRENT_RELEASE_TAG: v2.3
 
 
