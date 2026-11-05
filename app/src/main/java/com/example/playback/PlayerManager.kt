@@ -162,6 +162,7 @@ class PlayerManager private constructor(private val context: Context) {
     val isDspEnabled: StateFlow<Boolean> = _isDspEnabled.asStateFlow()
 
     private var playbackRetryCount = 0
+    var cachedArtworkBitmap: Bitmap? = null
 
     fun toggleDsp(): Boolean {
         val newState = !_isDspEnabled.value
@@ -301,6 +302,16 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun toMediaItem(song: Song): MediaItem {
+        val originalUriStr = song.contentUri
+        // Always enforce world-best 320 kbps Extreme Studio Quality stream if available
+        val highestQualityUri = if (originalUriStr.contains("_96.mp4")) {
+            originalUriStr.replace("_96.mp4", "_320.mp4")
+        } else if (originalUriStr.contains("_160.mp4")) {
+            originalUriStr.replace("_160.mp4", "_320.mp4")
+        } else {
+            originalUriStr
+        }
+
         val mediaMetadata = MediaMetadata.Builder()
             .setTitle(song.title)
             .setArtist(song.artist)
@@ -310,7 +321,7 @@ class PlayerManager private constructor(private val context: Context) {
 
         // Prioritize local cached file for offline 0ms latency playback if present
         val cacheManager = LocalStorageCacheManager.getInstance(context)
-        val playbackUri = cacheManager.getCachedFileUri(song.id) ?: Uri.parse(song.contentUri)
+        val playbackUri = cacheManager.getCachedFileUri(song.id) ?: Uri.parse(highestQualityUri)
         
         // Final fallback to a reliable stream if original contentUri is invalid
         val finalUri = if (playbackUri.toString().isNotEmpty()) playbackUri else Uri.parse("https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverending_Story.mp3")
@@ -335,6 +346,7 @@ class PlayerManager private constructor(private val context: Context) {
                 val result = (loader.execute(request) as? SuccessResult)?.drawable
                 val bitmap = (result as? BitmapDrawable)?.bitmap
                 if (bitmap != null) {
+                    cachedArtworkBitmap = bitmap
                     val stream = ByteArrayOutputStream()
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 85, stream)
                     val bytes = stream.toByteArray()
@@ -348,6 +360,21 @@ class PlayerManager private constructor(private val context: Context) {
                                 .setArtworkData(bytes)
                                 .build()
                             exoPlayer.setPlaylistMetadata(metadata)
+                            try {
+                                val currentItem = exoPlayer.currentMediaItem
+                                if (currentItem != null) {
+                                    val updatedItem = currentItem.buildUpon()
+                                        .setMediaMetadata(metadata)
+                                        .build()
+                                    exoPlayer.replaceMediaItem(exoPlayer.currentMediaItemIndex, updatedItem)
+                                }
+                                val serviceIntent = Intent(context, com.example.playback.service.MusicPlaybackService::class.java).apply {
+                                    action = com.example.playback.service.MusicPlaybackService.ACTION_REFRESH_NOTIFICATION
+                                }
+                                context.startService(serviceIntent)
+                            } catch (e: Exception) {
+                                Log.w("PlayerManager", "Notification refresh after artwork fetch error: ${e.message}")
+                            }
                         }
                     }
                 }
@@ -365,9 +392,19 @@ class PlayerManager private constructor(private val context: Context) {
     private fun startPlaybackService() {
         try {
             val intent = Intent(context, com.example.playback.service.MusicPlaybackService::class.java)
-            androidx.core.content.ContextCompat.startForegroundService(context, intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                androidx.core.content.ContextCompat.startForegroundService(context, intent)
+            } else {
+                context.startService(intent)
+            }
         } catch (t: Throwable) {
-            Log.e("PlayerManager", "Failed to start MusicPlaybackService as foreground service", t)
+            Log.e("PlayerManager", "Failed to start MusicPlaybackService as foreground service, fallback to normal start", t)
+            try {
+                val fallbackIntent = Intent(context, com.example.playback.service.MusicPlaybackService::class.java)
+                context.startService(fallbackIntent)
+            } catch (e: Throwable) {
+                Log.e("PlayerManager", "Fallback startService failed", e)
+            }
         }
     }
 

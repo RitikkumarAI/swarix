@@ -128,6 +128,24 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 101 && grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            try {
+                val serviceIntent = Intent(this, com.example.playback.service.MusicPlaybackService::class.java).apply {
+                    action = com.example.playback.service.MusicPlaybackService.ACTION_REFRESH_NOTIFICATION
+                }
+                startService(serviceIntent)
+            } catch (e: Exception) {
+                Log.w("MainActivity", "Failed to refresh notification after permission grant", e)
+            }
+        }
+    }
 }
 
 private const val TAG = "AppCheckInit"
@@ -247,6 +265,8 @@ fun SwarixApp(mainViewModel: MainViewModel) {
     val availableUpdate by mainViewModel.availableUpdate.collectAsStateWithLifecycle()
     val isDownloadingUpdate by mainViewModel.isDownloadingUpdate.collectAsStateWithLifecycle()
     val updateDownloadProgress by mainViewModel.updateDownloadProgress.collectAsStateWithLifecycle()
+    val cachedSongs by mainViewModel.cachedSongs.collectAsStateWithLifecycle()
+    val cachedSongIds by mainViewModel.cachedSongIds.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     var showVoiceCommandSheet by remember { mutableStateOf(false) }
@@ -651,6 +671,16 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         scope.launch {
                             snackbarHostState.showSnackbar(if (active) "8K DSP Sound Engine: Active" else "8K DSP Sound Engine: Bypassed")
                         }
+                    },
+                    isSongCached = cachedSongIds.contains(currentSong?.id),
+                    onToggleDownload = { song ->
+                        if (cachedSongIds.contains(song.id)) {
+                            mainViewModel.removeCachedSong(song.id)
+                            scope.launch { snackbarHostState.showSnackbar("Removed \"${song.title}\" from offline storage") }
+                        } else {
+                            mainViewModel.cacheSong(song)
+                            scope.launch { snackbarHostState.showSnackbar("Downloading \"${song.title}\" in 320kbps Original Lossless quality...") }
+                        }
                     }
                 )
             }
@@ -717,10 +747,10 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                 exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(280)) + fadeOut()
             ) {
                 DownloadsScreen(
-                    downloadedSongs = allSongs.take(6),
+                    downloadedSongs = cachedSongs,
                     currentPlayingSong = currentSong,
                     isPlaying = isPlaying,
-                    onSongClick = { mainViewModel.playSong(it, allSongs) },
+                    onSongClick = { mainViewModel.playSong(it, cachedSongs) },
                     onBackClick = { mainViewModel.closeSubScreen() }
                 )
             }

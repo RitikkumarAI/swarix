@@ -39,6 +39,8 @@ import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Favorite
@@ -146,6 +148,8 @@ fun NowPlayingScreen(
     isBatterySaverEngaged: Boolean = false,
     isDspEnabled: Boolean = false,
     onToggleDsp: () -> Unit = {},
+    isSongCached: Boolean = false,
+    onToggleDownload: ((Song) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     if (song == null) return
@@ -1091,6 +1095,22 @@ fun NowPlayingScreen(
                                     )
                                 )
                             }
+                        }
+
+                        // Direct Local Offline Download Button (36dp, Single-Touch Storage)
+                        val isCached = isSongCached || song.isLocal || song.contentUri.startsWith("content://") || song.contentUri.startsWith("file://")
+                        IconButton(
+                            onClick = { onToggleDownload?.invoke(song) },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("btn_download_offline")
+                        ) {
+                            Icon(
+                                imageVector = if (isCached) Icons.Default.DownloadDone else Icons.Default.Download,
+                                contentDescription = if (isCached) "Saved Offline" else "Download to Local Storage",
+                                tint = if (isCached) Color(0xFF1ED760) else Color.White.copy(alpha = 0.70f),
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
 
                         // Share Button

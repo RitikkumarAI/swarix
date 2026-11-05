@@ -33,6 +33,8 @@ class SwarixApplication : Application() {
                 description = "Shows live music soundtrack and playback controls on lock screen"
                 setShowBadge(false)
                 lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                setSound(null, null)
+                enableVibration(false)
             }
 
             // 2. OTA In-App Update Channel
