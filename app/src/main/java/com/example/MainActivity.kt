@@ -128,24 +128,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 101 && grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            try {
-                val serviceIntent = Intent(this, com.example.playback.service.MusicPlaybackService::class.java).apply {
-                    action = com.example.playback.service.MusicPlaybackService.ACTION_REFRESH_NOTIFICATION
-                }
-                startService(serviceIntent)
-            } catch (e: Exception) {
-                Log.w("MainActivity", "Failed to refresh notification after permission grant", e)
-            }
-        }
-    }
 }
 
 private const val TAG = "AppCheckInit"
