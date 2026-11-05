@@ -706,7 +706,7 @@ fun NowPlayingScreen(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             // Direct Local Offline Download Button (Right next to song title)
                             val isCached = isSongCached || song.isLocal || song.contentUri.startsWith("content://") || song.contentUri.startsWith("file://")
@@ -721,23 +721,6 @@ fun NowPlayingScreen(
                                     contentDescription = if (isCached) "Saved Offline" else "Download to Local Storage",
                                     tint = if (isCached) Color(0xFF1ED760) else Color.White.copy(alpha = 0.75f),
                                     modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Share Button (Right next to song title)
-                            IconButton(
-                                onClick = {
-                                    com.example.core.share.ShareHelper.shareTrack(context, song)
-                                },
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .testTag("btn_share_track")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Share,
-                                    contentDescription = "Share",
-                                    tint = Color.White.copy(alpha = 0.75f),
-                                    modifier = Modifier.size(20.dp)
                                 )
                             }
 
@@ -1011,12 +994,12 @@ fun NowPlayingScreen(
                     }
 
                     // Bottom Action Bar:
-                    // [Device Connect icon] [DSP button] [Lyrics pill] [Share icon] [Queue icon]
-                    // Controls Row: Device Picker | DSP | EQ | Lyrics | Share | Queue (Universal Responsive Fixed-Height Bar)
+                    // [Device Connect icon] --- [EQ capsule] [Lyrics capsule] [Share icon] --- [Queue icon]
+                    // Controls Row: Device Picker | EQ | Lyrics | Share | Queue (Universal Responsive Fixed-Height Bar)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 2.dp),
+                            .padding(horizontal = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1033,47 +1016,12 @@ fun NowPlayingScreen(
                             )
                         }
 
-                        // Center Capsules: DSP, EQ, and Lyrics with generous breathing room (never touching)
+                        // Center Capsules & Share: EQ, Lyrics, and Share with generous breathing room
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // Dedicated DSP Sound & Equalizer Pill
-                            Surface(
-                                modifier = Modifier
-                                    .height(36.dp)
-                                    .clip(RoundedCornerShape(18.dp))
-                                    .bouncyClick { onToggleDsp() }
-                                    .testTag("btn_dsp"),
-                                color = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.12f),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.25f)),
-                                shape = RoundedCornerShape(18.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.GraphicEq,
-                                        contentDescription = "DSP Equalizer",
-                                        tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Text(
-                                        text = if (isDspEnabled) "DSP ON" else "DSP",
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp,
-                                            color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
-                                        )
-                                    )
-                                }
-                            }
-
-                            // Dedicated Direct Equalizer Screen Button
+                            // Dedicated Direct Equalizer Screen Button (EQ)
                             Surface(
                                 modifier = Modifier
                                     .height(36.dp)
@@ -1108,7 +1056,7 @@ fun NowPlayingScreen(
                                 }
                             }
 
-                            // Lyrics Pill Button
+                            // Lyrics Pill Button (Lyrics)
                             Surface(
                                 modifier = Modifier
                                     .height(36.dp)
@@ -1141,6 +1089,23 @@ fun NowPlayingScreen(
                                         )
                                     )
                                 }
+                            }
+
+                            // Share Button (Share)
+                            IconButton(
+                                onClick = {
+                                    com.example.core.share.ShareHelper.shareTrack(context, song)
+                                },
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .testTag("btn_share_track")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = "Share",
+                                    tint = Color.White.copy(alpha = 0.70f),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
 

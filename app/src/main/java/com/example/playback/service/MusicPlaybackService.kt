@@ -173,7 +173,34 @@ class MusicPlaybackService : MediaSessionService() {
             Log.e(TAG, "Error handling playback action intent: ${t.message}", t)
         }
         super.onStartCommand(intent, flags, startId)
-        return START_STICKY
+        return START_NOT_STICKY
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        Log.d(TAG, "Application swiped away from recent tasks. Stopping playback and removing service...")
+        try {
+            val playerManager = PlayerManager.getInstance(this)
+            playerManager.exoPlayer.pause()
+            playerManager.exoPlayer.stop()
+            playerManager.exoPlayer.clearMediaItems()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error stopping playback on task removed: ${e.message}")
+        }
+        try {
+            if (wakeLock?.isHeld == true) wakeLock?.release()
+            if (wifiLock?.isHeld == true) wifiLock?.release()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error releasing locks on task removed: ${e.message}")
+        }
+        try {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            notificationManager?.cancel(NOTIFICATION_ID)
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        } catch (e: Exception) {
+            Log.w(TAG, "Error removing foreground notification on task removed: ${e.message}")
+        }
+        stopSelf()
+        super.onTaskRemoved(rootIntent)
     }
 
     private fun promoteToForeground() {
