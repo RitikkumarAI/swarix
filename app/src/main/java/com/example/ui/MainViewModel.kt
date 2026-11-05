@@ -2,6 +2,10 @@ package com.example.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.example.BuildConfig
 import com.example.core.updater.AppUpdateInfo
 import com.example.core.updater.AppUpdateManager
@@ -486,15 +490,58 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun checkForAppUpdates() {
+    fun checkForAppUpdates(isManual: Boolean = false, context: Context? = null) {
+        if (isManual && context != null) {
+            try {
+                android.widget.Toast.makeText(context, "Checking for latest Swarix update...", android.widget.Toast.LENGTH_SHORT).show()
+            } catch (_: Exception) {}
+        }
         viewModelScope.launch {
             try {
                 val info = AppUpdateManager.checkForUpdate(BuildConfig.VERSION_NAME)
                 if (info != null && info.hasUpdate) {
                     _availableUpdate.value = info
+                } else if (isManual && context != null) {
+                    withContext(Dispatchers.Main) {
+                        try {
+                            if (info != null && !info.hasUpdate) {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Swarix is up to date (v${BuildConfig.VERSION_NAME})",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Opening direct downloads page...",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                                val browserIntent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/RitikkumarAI/swarix/releases/latest")
+                                ).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(browserIntent)
+                            }
+                        } catch (_: Exception) {}
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Check updates error", e)
+                if (isManual && context != null) {
+                    withContext(Dispatchers.Main) {
+                        try {
+                            val browserIntent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/RitikkumarAI/swarix/releases/latest")
+                            ).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(browserIntent)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }

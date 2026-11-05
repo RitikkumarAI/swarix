@@ -30,6 +30,7 @@ google-services.json
 firebase_applet_config.xml
 
 # IDE & OS Specific
+.vscode/
 .aistudio/
 .idea/
 .kotlin/

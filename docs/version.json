@@ -1,0 +1,8 @@
+{
+  "versionCode": 16,
+  "versionName": "2.5",
+  "releaseTitle": "Swarix Music Player v2.5",
+  "changelog": "1. Relocated Download and Share buttons next to track title\n2. Generous 10dp spacing between DSP, EQ, and Lyrics capsules\n3. Bass Haptic default OFF with strict audio beat synchronization\n4. Universal zero-squish layout across all mobile devices",
+  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v2.5/swarix.apk",
+  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v2.5"
+}

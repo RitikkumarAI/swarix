@@ -577,7 +577,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         onOpenDiagnostics = {
                             mainViewModel.openSubScreen(SubScreen.DIAGNOSTICS)
                         },
-                        onCheckForUpdates = { mainViewModel.checkForAppUpdates() },
+                        onCheckForUpdates = { mainViewModel.checkForAppUpdates(isManual = true, context = context) },
                         onBackClick = { mainViewModel.selectTab(NavItem.HOME) }
                     )
                 }

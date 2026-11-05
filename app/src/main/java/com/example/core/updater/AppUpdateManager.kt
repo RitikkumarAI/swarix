@@ -25,19 +25,56 @@ data class AppUpdateInfo(
 
 object AppUpdateManager {
     private const val TAG = "AppUpdateManager"
+    private const val PAGES_VERSION_URL = "https://ritikkumarai.github.io/swarix/version.json"
+    private const val RAW_VERSION_URL = "https://raw.githubusercontent.com/RitikkumarAI/swarix/main/docs/version.json"
     private const val RELEASES_API_URL = "https://api.github.com/repos/RitikkumarAI/swarix/releases/latest"
-    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v1.1/Swarix.apk"
+    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v2.5/swarix.apk"
 
     private val client = OkHttpClient.Builder()
         .followRedirects(true)
         .followSslRedirects(true)
         .retryOnConnectionFailure(true)
-        .connectTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(180, TimeUnit.SECONDS)
         .writeTimeout(180, TimeUnit.SECONDS)
         .build()
 
     suspend fun checkForUpdate(currentVersionName: String): AppUpdateInfo? = withContext(Dispatchers.IO) {
+        // Priority 1: Check Fastly CDN / GitHub Pages static version endpoints (Zero rate-limit)
+        val staticEndpoints = listOf(PAGES_VERSION_URL, RAW_VERSION_URL)
+        for (url in staticEndpoints) {
+            try {
+                val req = Request.Builder()
+                    .url(url)
+                    .addHeader("User-Agent", "Swarix-Android-App")
+                    .build()
+                val resp = client.newCall(req).execute()
+                if (resp.isSuccessful) {
+                    val rawBody = resp.body?.string()
+                    if (!rawBody.isNullOrBlank()) {
+                        val json = JSONObject(rawBody)
+                        val vName = json.optString("versionName", "").removePrefix("v").trim()
+                        if (vName.isNotBlank()) {
+                            val releaseTitle = json.optString("releaseTitle", "Swarix v$vName")
+                            val changelog = json.optString("changelog", "Bug fixes & new features.")
+                            val downloadUrl = json.optString("apkUrl", FALLBACK_APK_URL)
+                            val hasUpdate = isVersionNewer(vName, currentVersionName)
+                            return@withContext AppUpdateInfo(
+                                latestVersion = vName,
+                                releaseTitle = releaseTitle,
+                                changelog = changelog,
+                                apkDownloadUrl = downloadUrl,
+                                hasUpdate = hasUpdate
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Static version check failed for $url: ${e.message}")
+            }
+        }
+
+        // Priority 2: Fallback to GitHub Releases REST API
         try {
             val request = Request.Builder()
                 .url(RELEASES_API_URL)
@@ -52,7 +89,7 @@ object AppUpdateManager {
 
             val body = response.body?.string() ?: return@withContext null
             val json = JSONObject(body)
-            val tagName = json.optString("tag_name", "latest").removePrefix("v")
+            val tagName = json.optString("tag_name", "latest").removePrefix("v").trim()
             val releaseTitle = json.optString("name", "New Update")
             val changelog = json.optString("body", "Bug fixes & new features.")
 
@@ -78,7 +115,7 @@ object AppUpdateManager {
                 hasUpdate = hasUpdate
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to check for updates", e)
+            Log.e(TAG, "Failed to check for updates from GitHub API", e)
             null
         }
     }
@@ -159,6 +196,7 @@ object AppUpdateManager {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     context.startActivity(settingsIntent)
+                    return
                 }
             }
 
