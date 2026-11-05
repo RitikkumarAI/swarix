@@ -140,7 +140,7 @@ fun NowPlayingScreen(
     onSetSleepTimer: ((minutes: Int, fadeSeconds: Int, isEndOfTrack: Boolean) -> Unit)? = null,
     onCancelSleepTimer: (() -> Unit)? = null,
     onAddSleepTimerMinutes: ((Int) -> Unit)? = null,
-    bassHapticsEnabled: Boolean = true,
+    bassHapticsEnabled: Boolean = false,
     onToggleBassHaptics: (() -> Unit)? = null,
     onSmartShuffle: (() -> Unit)? = null,
     allSongs: List<Song> = emptyList(),
@@ -704,16 +704,57 @@ fun NowPlayingScreen(
                             }
                         }
 
-                        IconButton(
-                            onClick = { onFavoriteToggle(song) },
-                            modifier = Modifier.size(48.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Icon(
-                                imageVector = if (song.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite",
-                                tint = if (song.isFavorite) colors.primaryAccent else Color.White.copy(alpha = 0.75f),
-                                modifier = Modifier.size(28.dp)
-                            )
+                            // Direct Local Offline Download Button (Right next to song title)
+                            val isCached = isSongCached || song.isLocal || song.contentUri.startsWith("content://") || song.contentUri.startsWith("file://")
+                            IconButton(
+                                onClick = { onToggleDownload?.invoke(song) },
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .testTag("btn_download_offline")
+                            ) {
+                                Icon(
+                                    imageVector = if (isCached) Icons.Default.DownloadDone else Icons.Default.Download,
+                                    contentDescription = if (isCached) "Saved Offline" else "Download to Local Storage",
+                                    tint = if (isCached) Color(0xFF1ED760) else Color.White.copy(alpha = 0.75f),
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            // Share Button (Right next to song title)
+                            IconButton(
+                                onClick = {
+                                    com.example.core.share.ShareHelper.shareTrack(context, song)
+                                },
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .testTag("btn_share_track")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = "Share",
+                                    tint = Color.White.copy(alpha = 0.75f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            // Heart Favorite Button
+                            IconButton(
+                                onClick = { onFavoriteToggle(song) },
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .testTag("btn_favorite")
+                            ) {
+                                Icon(
+                                    imageVector = if (song.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = "Favorite",
+                                    tint = if (song.isFavorite) colors.primaryAccent else Color.White.copy(alpha = 0.75f),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
 
@@ -979,10 +1020,10 @@ fun NowPlayingScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Device Switcher / Connect Icon
+                        // Device Switcher / Connect Icon (Left)
                         IconButton(
                             onClick = { showDevicePicker = true },
-                            modifier = Modifier.size(36.dp).testTag("btn_connect_device")
+                            modifier = Modifier.size(38.dp).testTag("btn_connect_device")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Devices,
@@ -992,146 +1033,121 @@ fun NowPlayingScreen(
                             )
                         }
 
-                        // Dedicated DSP Sound & Equalizer Pill (Fixed 36dp Height, Single-Line)
-                        Surface(
-                            modifier = Modifier
-                                .height(36.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .bouncyClick { onToggleDsp() }
-                                .testTag("btn_dsp"),
-                            color = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.12f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.25f)),
-                            shape = RoundedCornerShape(18.dp)
+                        // Center Capsules: DSP, EQ, and Lyrics with generous breathing room (never touching)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            // Dedicated DSP Sound & Equalizer Pill
+                            Surface(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .bouncyClick { onToggleDsp() }
+                                    .testTag("btn_dsp"),
+                                color = if (isDspEnabled) Color(0xFF4A8B87).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.12f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.25f)),
+                                shape = RoundedCornerShape(18.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.GraphicEq,
-                                    contentDescription = "DSP Equalizer",
-                                    tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = if (isDspEnabled) "DSP ON" else "DSP",
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp,
-                                        color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.GraphicEq,
+                                        contentDescription = "DSP Equalizer",
+                                        tint = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f),
+                                        modifier = Modifier.size(15.dp)
                                     )
-                                )
+                                    Text(
+                                        text = if (isDspEnabled) "DSP ON" else "DSP",
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp,
+                                            color = if (isDspEnabled) Color(0xFF6ED0C9) else Color.White.copy(alpha = 0.70f)
+                                        )
+                                    )
+                                }
                             }
-                        }
 
-                        // Dedicated Direct Equalizer Screen Button (Fixed 36dp Height, Single-Line)
-                        Surface(
-                            modifier = Modifier
-                                .height(36.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .bouncyClick { onOpenEqualizer() }
-                                .testTag("btn_equalizer"),
-                            color = Color(0xFFD7BC83).copy(alpha = 0.20f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD7BC83).copy(alpha = 0.60f)),
-                            shape = RoundedCornerShape(18.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            // Dedicated Direct Equalizer Screen Button
+                            Surface(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .bouncyClick { onOpenEqualizer() }
+                                    .testTag("btn_equalizer"),
+                                color = Color(0xFFD7BC83).copy(alpha = 0.20f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD7BC83).copy(alpha = 0.60f)),
+                                shape = RoundedCornerShape(18.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tune,
-                                    contentDescription = "Open Equalizer",
-                                    tint = Color(0xFFD7BC83),
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = "EQ",
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp,
-                                        color = Color(0xFFD7BC83)
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Tune,
+                                        contentDescription = "Open Equalizer",
+                                        tint = Color(0xFFD7BC83),
+                                        modifier = Modifier.size(15.dp)
                                     )
-                                )
+                                    Text(
+                                        text = "EQ",
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp,
+                                            color = Color(0xFFD7BC83)
+                                        )
+                                    )
+                                }
                             }
-                        }
 
-                        // Lyrics Pill Button (Fixed 36dp Height, Single-Line Non-Wrapping)
-                        Surface(
-                            modifier = Modifier
-                                .height(36.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .bouncyClick { onOpenLyrics() }
-                                .testTag("btn_lyrics"),
-                            color = Color.White.copy(alpha = 0.16f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
-                            shape = RoundedCornerShape(18.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            // Lyrics Pill Button
+                            Surface(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .bouncyClick { onOpenLyrics() }
+                                    .testTag("btn_lyrics"),
+                                color = Color.White.copy(alpha = 0.16f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
+                                shape = RoundedCornerShape(18.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Subtitles,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = "Lyrics",
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp,
-                                        color = Color.White
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Subtitles,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(15.dp)
                                     )
-                                )
+                                    Text(
+                                        text = "Lyrics",
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp,
+                                            color = Color.White
+                                        )
+                                    )
+                                }
                             }
-                        }
-
-                        // Direct Local Offline Download Button (36dp, Single-Touch Storage)
-                        val isCached = isSongCached || song.isLocal || song.contentUri.startsWith("content://") || song.contentUri.startsWith("file://")
-                        IconButton(
-                            onClick = { onToggleDownload?.invoke(song) },
-                            modifier = Modifier
-                                .size(36.dp)
-                                .testTag("btn_download_offline")
-                        ) {
-                            Icon(
-                                imageVector = if (isCached) Icons.Default.DownloadDone else Icons.Default.Download,
-                                contentDescription = if (isCached) "Saved Offline" else "Download to Local Storage",
-                                tint = if (isCached) Color(0xFF1ED760) else Color.White.copy(alpha = 0.70f),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        // Share Button
-                        IconButton(
-                            onClick = {
-                                com.example.core.share.ShareHelper.shareTrack(context, song)
-                            },
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
-                                tint = Color.White.copy(alpha = 0.70f),
-                                modifier = Modifier.size(20.dp)
-                            )
                         }
 
                         // Queue Button (Far Right)
                         IconButton(
                             onClick = onOpenQueue,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(38.dp).testTag("btn_queue")
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.QueueMusic,

@@ -91,7 +91,7 @@ fun SettingsScreen(
     sleepTimerFadeSeconds: Int = 60,
     language: String = "en",
     region: String = "Global",
-    bassHapticsEnabled: Boolean = true,
+    bassHapticsEnabled: Boolean = false,
     bassHapticsIntensity: HapticIntensity = HapticIntensity.MEDIUM,
     onBassHapticsToggle: (Boolean) -> Unit = {},
     onBassHapticsIntensityChange: (HapticIntensity) -> Unit = {},
@@ -549,7 +549,7 @@ fun SettingsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Version 2.4 (Master Release)",
+                        text = "Version 2.5 (Master Release)",
                         style = MaterialTheme.typography.labelLarge.copy(color = colors.primaryAccent)
                     )
                     Text(
@@ -1220,7 +1220,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.SystemUpdate,
                     title = "Check for Updates",
-                    value = "v2.4",
+                    value = "v2.5",
                     onClick = onCheckForUpdates
                 )
             }
@@ -1229,7 +1229,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v2.4",
+                    value = "v2.5",
                     onClick = { showAboutDialog = true }
                 )
             }

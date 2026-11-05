@@ -51,7 +51,7 @@ class BassHapticEngine(private val context: Context) {
         }
     }
 
-    private val _isEnabled = MutableStateFlow(true)
+    private val _isEnabled = MutableStateFlow(false)
     val isEnabled: StateFlow<Boolean> = _isEnabled.asStateFlow()
 
     private val _isBatterySaverSuspended = MutableStateFlow(false)
@@ -193,25 +193,12 @@ class BassHapticEngine(private val context: Context) {
     }
 
     /**
-     * Fallback acoustic beat synchronizer when hardware Visualizer is restricted
-     * by sandbox or on emulators.
+     * Fallback synchronizer disabled to prevent blind or random periodic vibrations.
+     * Tactile pulses fire strictly synchronized to genuine audio frequency energy peaks.
      */
     private fun startRhythmicBassSync(song: Song?) {
-        if (_isBatterySaverSuspended.value) return
         beatJob?.cancel()
-        beatJob = scope.launch {
-            val bpm = estimateBpmFromGenre(song?.genre ?: "")
-            val intervalMs = (60_000L / bpm).coerceIn(380L, 850L)
-
-            while (isActive && isPlaying && _isEnabled.value && !_isBatterySaverSuspended.value) {
-                val now = System.currentTimeMillis()
-                if (now - lastHapticTimeMs >= minHapticIntervalMs) {
-                    lastHapticTimeMs = now
-                    triggerTactilePulse(0.85f)
-                }
-                delay(intervalMs)
-            }
-        }
+        beatJob = null
     }
 
     private fun stopRhythmicBassSync() {

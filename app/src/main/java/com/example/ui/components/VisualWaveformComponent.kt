@@ -17,12 +17,10 @@ import kotlin.math.sin
 @Composable
 fun VisualWaveformComponent(
     isPlaying: Boolean,
-    bassHapticsEnabled: Boolean = true,
+    bassHapticsEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
-    val view = LocalView.current
-    val haptics = rememberHapticFeedback()
 
     val infiniteTransition = rememberInfiniteTransition(label = "waveform_anim")
     val phase by infiniteTransition.animateFloat(
@@ -34,18 +32,6 @@ fun VisualWaveformComponent(
         ),
         label = "phase"
     )
-
-    LaunchedEffect(isPlaying, bassHapticsEnabled) {
-        if (isPlaying && bassHapticsEnabled) {
-            while (true) {
-                delay(180L)
-                val simulatedAmplitude = (0.5f + 0.5f * sin(phase * 3f)).toFloat()
-                if (simulatedAmplitude > 0.70f) {
-                    HapticFeedbackHelper.triggerVolumeChange(view)
-                }
-            }
-        }
-    }
 
     Canvas(modifier = modifier) {
         val barCount = 32
