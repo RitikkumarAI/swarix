@@ -767,7 +767,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Tune,
+                            imageVector = Icons.Default.GraphicEq,
                             contentDescription = null,
                             tint = if (isAudioNormalizationEnabled) colors.primaryAccent else colors.secondaryAccent,
                             modifier = Modifier.size(22.dp)
@@ -814,7 +814,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Radio,
+                            imageVector = Icons.Default.PlayCircle,
                             contentDescription = null,
                             tint = if (isSmartAutoplayEnabled) colors.primaryAccent else colors.secondaryAccent,
                             modifier = Modifier.size(22.dp)

@@ -270,7 +270,7 @@ fun LyricsScreen(
                             com.example.core.share.ShareHelper.shareLyricStoryCard(
                                 context = context,
                                 song = song,
-                                lyricLines = selectedLines,
+                                lines = selectedLines,
                                 theme = selectedStoryTheme
                             )
                             isStorySelectionMode = false

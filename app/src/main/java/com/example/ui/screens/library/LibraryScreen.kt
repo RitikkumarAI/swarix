@@ -921,12 +921,14 @@ fun LibraryScreen(
                         }
                     }
                 } else {
-                    itemsIndexed(deviceStorageSongs) { _, song ->
+                    items(deviceStorageSongs) { song ->
                         SongRowItem(
                             song = song,
                             isPlaying = song.id == currentPlayingSong?.id && isPlaying,
-                            onClick = { onSongClick(song) },
-                            onFavoriteToggle = { onFavoriteToggle(song) }
+                            onSongClick = { onSongClick(song) },
+                            onFavoriteToggle = { onFavoriteToggle(song) },
+                            isCached = true,
+                            onCacheClick = { onCacheToggle(song) }
                         )
                     }
                 }

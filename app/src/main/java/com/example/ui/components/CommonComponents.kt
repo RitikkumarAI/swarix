@@ -362,7 +362,6 @@ fun MiniPlayer(
 ) {
     if (song == null) return
     val colors = LocalSwarixColors.current
-    val haptics = rememberHapticFeedback()
     val view = LocalView.current
     val progress = if (durationMs > 0) (progressMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f) else 0f
     
@@ -420,11 +419,11 @@ fun MiniPlayer(
                             if (!hasTriggeredSwipe) {
                                 if (totalDragX < -45f) {
                                     hasTriggeredSwipe = true
-                                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    HapticFeedbackHelper.triggerToggle(view)
                                     onNextClick()
                                 } else if (totalDragX > 45f) {
                                     hasTriggeredSwipe = true
-                                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    HapticFeedbackHelper.triggerToggle(view)
                                     onPreviousClick()
                                 }
                             }
