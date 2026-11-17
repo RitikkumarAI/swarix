@@ -158,6 +158,7 @@ class MusicPlaybackService : MediaSessionService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val superResult = super.onStartCommand(intent, flags, startId)
         try {
             promoteToForeground()
             val playerManager = PlayerManager.getInstance(this)
@@ -172,17 +173,14 @@ class MusicPlaybackService : MediaSessionService() {
         } catch (t: Throwable) {
             Log.e(TAG, "Error handling playback action intent: ${t.message}", t)
         }
-        super.onStartCommand(intent, flags, startId)
-        return START_NOT_STICKY
+        return superResult
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         Log.d(TAG, "Application swiped away from recent tasks. Stopping playback and removing service...")
         try {
             val playerManager = PlayerManager.getInstance(this)
-            playerManager.exoPlayer.pause()
-            playerManager.exoPlayer.stop()
-            playerManager.exoPlayer.clearMediaItems()
+            playerManager.stopAndClear()
         } catch (e: Exception) {
             Log.w(TAG, "Error stopping playback on task removed: ${e.message}")
         }
@@ -198,6 +196,10 @@ class MusicPlaybackService : MediaSessionService() {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         } catch (e: Exception) {
             Log.w(TAG, "Error removing foreground notification on task removed: ${e.message}")
+        }
+        mediaSession?.run {
+            release()
+            mediaSession = null
         }
         stopSelf()
         super.onTaskRemoved(rootIntent)
@@ -282,8 +284,19 @@ class MusicPlaybackService : MediaSessionService() {
             )
         }
 
-        playerManager.cachedArtworkBitmap?.let { bitmap ->
-            builder.setLargeIcon(bitmap)
+        try {
+            playerManager.cachedArtworkBitmap?.let { bitmap ->
+                if (!bitmap.isRecycled) {
+                    val safeIcon = if (bitmap.width > 256 || bitmap.height > 256) {
+                        android.graphics.Bitmap.createScaledBitmap(bitmap, 256, 256, true)
+                    } else {
+                        bitmap
+                    }
+                    builder.setLargeIcon(safeIcon)
+                }
+            }
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to apply large icon on notification: ${e.message}")
         }
 
         return builder.build()

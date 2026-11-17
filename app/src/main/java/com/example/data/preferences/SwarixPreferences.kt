@@ -37,6 +37,9 @@ class SwarixPreferences(private val context: Context) {
         val KEY_OFFLINE_MODE = booleanPreferencesKey("offline_mode")
         val KEY_USER_NAME = stringPreferencesKey("user_name")
         val KEY_USER_AVATAR = stringPreferencesKey("user_avatar")
+        val KEY_AUDIO_NORMALIZATION = booleanPreferencesKey("audio_normalization")
+        val KEY_CUSTOM_PRESETS = stringPreferencesKey("custom_presets_json")
+        val KEY_SMART_AUTOPLAY = booleanPreferencesKey("smart_autoplay")
     }
 
     val userName: Flow<String> = context.dataStore.data.map { prefs ->
@@ -211,6 +214,36 @@ class SwarixPreferences(private val context: Context) {
     suspend fun setOfflineModeEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_OFFLINE_MODE] = enabled
+        }
+    }
+
+    val audioNormalizationEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_AUDIO_NORMALIZATION] ?: true
+    }
+
+    suspend fun setAudioNormalizationEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AUDIO_NORMALIZATION] = enabled
+        }
+    }
+
+    val customPresetsJson: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_CUSTOM_PRESETS] ?: "{}"
+    }
+
+    suspend fun setCustomPresetsJson(json: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_CUSTOM_PRESETS] = json
+        }
+    }
+
+    val smartAutoplayEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_SMART_AUTOPLAY] ?: true
+    }
+
+    suspend fun setSmartAutoplayEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_SMART_AUTOPLAY] = enabled
         }
     }
 }

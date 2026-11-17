@@ -42,6 +42,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
@@ -118,6 +124,11 @@ fun EqualizerScreen(
     onStateChange: (EqualizerState) -> Unit,
     onTriggerVoiceCommand: (() -> Unit)? = null,
     onBackClick: () -> Unit,
+    isAudioNormalizationEnabled: Boolean = true,
+    onToggleAudioNormalization: (Boolean) -> Unit = {},
+    customPresets: Map<String, EqualizerPresets.PresetDefinition> = emptyMap(),
+    onSaveCustomPreset: ((name: String, bandLevels: List<Int>, bassBoost: Int, virtualizer: Int) -> Unit)? = null,
+    onDeleteCustomPreset: ((name: String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
@@ -126,6 +137,8 @@ fun EqualizerScreen(
     var isAnalyzingAi by remember { mutableStateOf(false) }
     var aiSuggestion by remember { mutableStateOf<AiEqualizerSuggestion?>(null) }
     var hasAppliedSuggestion by remember { mutableStateOf(false) }
+    var showSavePresetDialog by remember { mutableStateOf(false) }
+    var newPresetName by remember { mutableStateOf("") }
 
     fun runAiAnalysis(song: Song) {
         isAnalyzingAi = true
@@ -356,10 +369,11 @@ fun EqualizerScreen(
                 }
             )
 
-            // Preset Selection Carousel
+            // Preset Selection Carousel (Built-in + Custom Presets)
             PresetSelectorRow(
                 selectedPreset = equalizerState.presetName,
                 isEnabled = equalizerState.isEnabled,
+                customPresets = customPresets,
                 onSelectPreset = { presetDef ->
                     onStateChange(
                         equalizerState.copy(
@@ -370,8 +384,69 @@ fun EqualizerScreen(
                             isAutoGenreEnabled = false // Manual preset selection overrides auto
                         )
                     )
-                }
+                },
+                onAddNewPreset = { showSavePresetDialog = true },
+                onDeleteCustomPreset = onDeleteCustomPreset
             )
+
+            // Auto Volume Normalization (Loudness Equalizer)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = colors.elevatedSurface,
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.divider)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Loudness Normalizer",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.primaryText,
+                                    fontSize = 15.sp
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = colors.primaryAccent.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "AUTO GAIN",
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = colors.primaryAccent,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 9.sp
+                                    )
+                                )
+                            }
+                        }
+                        Text(
+                            text = "Balances loud and quiet tracks seamlessly for consistent listening volume",
+                            style = MaterialTheme.typography.bodySmall.copy(color = colors.secondaryText, fontSize = 12.sp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Switch(
+                        checked = isAudioNormalizationEnabled,
+                        onCheckedChange = onToggleAudioNormalization,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = colors.mainBackground,
+                            checkedTrackColor = colors.primaryAccent
+                        )
+                    )
+                }
+            }
 
             // Real-Time Frequency Response Curve Visualizer
             FrequencyCurveVisualizer(
@@ -528,6 +603,63 @@ fun EqualizerScreen(
                 }
             }
         }
+    }
+
+    if (showSavePresetDialog) {
+        AlertDialog(
+            onDismissRequest = { showSavePresetDialog = false },
+            title = {
+                Text(
+                    text = "Save Custom Preset",
+                    style = MaterialTheme.typography.titleMedium.copy(color = colors.primaryText, fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Save current 10-band EQ, bass boost (${equalizerState.bassBoost}%), and 3D virtualizer (${equalizerState.virtualizer}%) as a named preset.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = colors.secondaryText)
+                    )
+                    OutlinedTextField(
+                        value = newPresetName,
+                        onValueChange = { newPresetName = it },
+                        label = { Text("Preset Name (e.g. Bass Heavy 2.0)") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colors.primaryAccent,
+                            cursorColor = colors.primaryAccent
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val name = newPresetName.trim()
+                        if (name.isNotBlank()) {
+                            onSaveCustomPreset?.invoke(
+                                name,
+                                bandLevels,
+                                equalizerState.bassBoost,
+                                equalizerState.virtualizer
+                            )
+                            onStateChange(equalizerState.copy(presetName = name))
+                            newPresetName = ""
+                            showSavePresetDialog = false
+                        }
+                    }
+                ) {
+                    Text("Save", color = colors.primaryAccent, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSavePresetDialog = false }) {
+                    Text("Cancel", color = colors.secondaryText)
+                }
+            },
+            containerColor = colors.elevatedSurface
+        )
     }
 }
 
@@ -910,7 +1042,10 @@ private fun AiGenreAutoTuneCard(
 private fun PresetSelectorRow(
     selectedPreset: String,
     isEnabled: Boolean,
-    onSelectPreset: (EqualizerPresets.PresetDefinition) -> Unit
+    customPresets: Map<String, EqualizerPresets.PresetDefinition> = emptyMap(),
+    onSelectPreset: (EqualizerPresets.PresetDefinition) -> Unit,
+    onAddNewPreset: () -> Unit = {},
+    onDeleteCustomPreset: ((String) -> Unit)? = null
 ) {
     val colors = LocalSwarixColors.current
     val presets = EqualizerPresets.PRESETS
@@ -921,8 +1056,10 @@ private fun PresetSelectorRow(
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Built-in studio presets
             presets.values.forEach { preset ->
                 val isSelected = selectedPreset == preset.name
                 FilterChip(
@@ -960,10 +1097,95 @@ private fun PresetSelectorRow(
                     modifier = Modifier.testTag("preset_${preset.name.lowercase().replace(" ", "_")}")
                 )
             }
+
+            // User-created Custom Presets
+            customPresets.values.forEach { customPreset ->
+                val isSelected = selectedPreset == customPreset.name
+                FilterChip(
+                    selected = isSelected,
+                    onClick = {
+                        if (isEnabled) {
+                            onSelectPreset(customPreset)
+                        }
+                    },
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = customPreset.iconEmoji, fontSize = 13.sp)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = customPreset.name,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            )
+                        }
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { onDeleteCustomPreset?.invoke(customPreset.name) },
+                            modifier = Modifier.size(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Delete Preset",
+                                tint = if (isSelected) colors.mainBackground else colors.mutedText,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color(0xFFE5C07B),
+                        selectedLabelColor = Color(0xFF121513),
+                        containerColor = colors.elevatedSurface,
+                        labelColor = colors.primaryText
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = isEnabled,
+                        selected = isSelected,
+                        borderColor = if (isSelected) Color(0xFFE5C07B) else colors.divider
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    enabled = isEnabled
+                )
+            }
+
+            // Save Custom Preset Button
+            FilterChip(
+                selected = false,
+                onClick = onAddNewPreset,
+                label = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = colors.primaryAccent,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Save Preset",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = colors.primaryAccent
+                            )
+                        )
+                    }
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = colors.primaryAccent.copy(alpha = 0.12f)
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = false,
+                    borderColor = colors.primaryAccent.copy(alpha = 0.4f)
+                ),
+                shape = RoundedCornerShape(20.dp),
+                enabled = isEnabled
+            )
         }
 
         // Active Preset Description Tagline
-        val currentDef = presets[selectedPreset]
+        val currentDef = presets[selectedPreset] ?: customPresets[selectedPreset]
         if (currentDef != null && currentDef.description.isNotBlank()) {
             Text(
                 text = currentDef.description,

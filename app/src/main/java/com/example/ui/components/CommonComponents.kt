@@ -356,6 +356,7 @@ fun MiniPlayer(
     durationMs: Long,
     onPlayPauseClick: () -> Unit,
     onNextClick: () -> Unit,
+    onPreviousClick: () -> Unit = {},
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -366,6 +367,8 @@ fun MiniPlayer(
     val progress = if (durationMs > 0) (progressMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f) else 0f
     
     var showPreview by remember { mutableStateOf(false) }
+    var totalDragX by remember { mutableFloatStateOf(0f) }
+    var hasTriggeredSwipe by remember { mutableStateOf(false) }
 
     Column {
         if (showPreview && nextSong != null) {
@@ -394,14 +397,36 @@ fun MiniPlayer(
                 .clip(RoundedCornerShape(16.dp))
                 .pointerInput(Unit) {
                     detectDragGestures(
+                        onDragStart = {
+                            totalDragX = 0f
+                            hasTriggeredSwipe = false
+                        },
+                        onDragEnd = {
+                            totalDragX = 0f
+                            hasTriggeredSwipe = false
+                        },
+                        onDragCancel = {
+                            totalDragX = 0f
+                            hasTriggeredSwipe = false
+                        },
                         onDrag = { change, dragAmount ->
                             change.consume()
-                            if (dragAmount.y < -10) {
+                            if (dragAmount.y < -15) {
                                 showPreview = true
-                            } else if (dragAmount.y > 10) {
+                            } else if (dragAmount.y > 15) {
                                 showPreview = false
-                            } else if (Math.abs(dragAmount.x) > 20) {
-                                if (dragAmount.x > 0) onNextClick() else onNextClick()
+                            }
+                            totalDragX += dragAmount.x
+                            if (!hasTriggeredSwipe) {
+                                if (totalDragX < -45f) {
+                                    hasTriggeredSwipe = true
+                                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    onNextClick()
+                                } else if (totalDragX > 45f) {
+                                    hasTriggeredSwipe = true
+                                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    onPreviousClick()
+                                }
                             }
                         }
                     )

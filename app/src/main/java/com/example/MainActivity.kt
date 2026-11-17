@@ -249,6 +249,11 @@ fun SwarixApp(mainViewModel: MainViewModel) {
     val updateDownloadProgress by mainViewModel.updateDownloadProgress.collectAsStateWithLifecycle()
     val cachedSongs by mainViewModel.cachedSongs.collectAsStateWithLifecycle()
     val cachedSongIds by mainViewModel.cachedSongIds.collectAsStateWithLifecycle()
+    val audioNormalizationEnabled by mainViewModel.audioNormalizationEnabled.collectAsStateWithLifecycle()
+    val customPresets by mainViewModel.customPresets.collectAsStateWithLifecycle()
+    val smartAutoplayEnabled by mainViewModel.smartAutoplayEnabled.collectAsStateWithLifecycle()
+    val isBatchDownloading by mainViewModel.isBatchDownloading.collectAsStateWithLifecycle()
+    val batchDownloadProgress by mainViewModel.batchDownloadProgress.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     var showVoiceCommandSheet by remember { mutableStateOf(false) }
@@ -310,6 +315,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                             durationMs = durationMs,
                             onPlayPauseClick = { mainViewModel.togglePlayPause() },
                             onNextClick = { mainViewModel.playNext() },
+                            onPreviousClick = { mainViewModel.playPrevious() },
                             onClick = { mainViewModel.openSubScreen(SubScreen.NOW_PLAYING) }
                         )
                     }
@@ -577,6 +583,10 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         onOpenDiagnostics = {
                             mainViewModel.openSubScreen(SubScreen.DIAGNOSTICS)
                         },
+                        isAudioNormalizationEnabled = audioNormalizationEnabled,
+                        onToggleAudioNormalization = { mainViewModel.setAudioNormalizationEnabled(it) },
+                        isSmartAutoplayEnabled = smartAutoplayEnabled,
+                        onToggleSmartAutoplay = { mainViewModel.setSmartAutoplayEnabled(it) },
                         onCheckForUpdates = { mainViewModel.checkForAppUpdates(isManual = true, context = context) },
                         onBackClick = { mainViewModel.selectTab(NavItem.HOME) }
                     )
@@ -689,6 +699,9 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         }
                     },
                     isSmartShuffling = isSmartShuffling,
+                    isAutoplayEnabled = smartAutoplayEnabled,
+                    onToggleAutoplay = { mainViewModel.setSmartAutoplayEnabled(it) },
+                    onReorderQueue = { from, to -> mainViewModel.reorderQueue(from, to) },
                     onBackClick = { mainViewModel.closeSubScreen() }
                 )
             }
@@ -719,7 +732,12 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                     currentSong = currentSong,
                     onStateChange = { mainViewModel.updateEqualizer(it) },
                     onTriggerVoiceCommand = { showVoiceCommandSheet = true },
-                    onBackClick = { mainViewModel.closeSubScreen() }
+                    onBackClick = { mainViewModel.closeSubScreen() },
+                    isAudioNormalizationEnabled = audioNormalizationEnabled,
+                    onToggleAudioNormalization = { mainViewModel.setAudioNormalizationEnabled(it) },
+                    customPresets = customPresets,
+                    onSaveCustomPreset = { name, bands, bass, virt -> mainViewModel.saveCustomPreset(name, bands, bass, virt) },
+                    onDeleteCustomPreset = { name -> mainViewModel.deleteCustomPreset(name) }
                 )
             }
 
@@ -776,6 +794,14 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         },
                         onFavoriteToggle = { mainViewModel.toggleFavorite(it) },
                         onBackClick = { mainViewModel.closeSubScreen() },
+                        onDownloadAll = { songsToDownload ->
+                            mainViewModel.downloadSongsBatch(songsToDownload)
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Downloading ${songsToDownload.size} songs for offline listening...")
+                            }
+                        },
+                        isBatchDownloading = isBatchDownloading,
+                        batchProgress = batchDownloadProgress,
                         onDeletePlaylist = {
                             mainViewModel.deletePlaylist(playlist.id)
                             mainViewModel.closeSubScreen()
@@ -882,6 +908,14 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                             if (shf.isNotEmpty()) mainViewModel.playSong(shf.first(), shf)
                         },
                         onRelatedArtistClick = { name, art -> mainViewModel.openArtistProfile(name, art) },
+                        onDownloadAll = { tracks ->
+                            mainViewModel.downloadSongsBatch(tracks)
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Downloading ${tracks.size} songs by ${artist.first} offline...")
+                            }
+                        },
+                        isBatchDownloading = isBatchDownloading,
+                        batchProgress = batchDownloadProgress,
                         onBackClick = { mainViewModel.closeSubScreen() }
                     )
                 }

@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Button
@@ -78,11 +80,13 @@ fun PlayQueueScreen(
     onShuffleQueue: () -> Unit,
     onSmartShuffle: (() -> Unit)? = null,
     isSmartShuffling: Boolean = false,
+    isAutoplayEnabled: Boolean = true,
+    onToggleAutoplay: ((Boolean) -> Unit)? = null,
+    onReorderQueue: ((fromIndex: Int, toIndex: Int) -> Unit)? = null,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
-    var isAutoplayEnabled by remember { mutableStateOf(true) }
 
     val totalDurationMs = queue.sumOf { it.durationMs }
     val totalHours = totalDurationMs / 3600000
@@ -338,7 +342,7 @@ fun PlayQueueScreen(
 
                         Switch(
                             checked = isAutoplayEnabled,
-                            onCheckedChange = { isAutoplayEnabled = it },
+                            onCheckedChange = { onToggleAutoplay?.invoke(it) },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = colors.mainBackground,
                                 checkedTrackColor = colors.primaryAccent,
@@ -420,6 +424,35 @@ fun PlayQueueScreen(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (index > 0) {
+                                        IconButton(
+                                            onClick = { onReorderQueue?.invoke(index, index - 1) },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowUp,
+                                                contentDescription = "Move Up",
+                                                tint = colors.secondaryText,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
+                                    if (index < queue.size - 1) {
+                                        IconButton(
+                                            onClick = { onReorderQueue?.invoke(index, index + 1) },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowDown,
+                                                contentDescription = "Move Down",
+                                                tint = colors.secondaryText,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
                                 }
 
                                 IconButton(

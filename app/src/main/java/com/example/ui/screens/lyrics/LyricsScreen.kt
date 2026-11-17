@@ -13,6 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +40,12 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -119,6 +125,11 @@ fun LyricsScreen(
     var currentLanguage by remember { mutableStateOf<String?>(null) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var isTranslating by remember { mutableStateOf(false) }
+
+    var isStorySelectionMode by remember { mutableStateOf(false) }
+    var selectedLyricIndices by remember { mutableStateOf(setOf<Int>()) }
+    var showStoryThemeDialog by remember { mutableStateOf(false) }
+    var selectedStoryTheme by remember { mutableStateOf("Obsidian Gold") }
 
     fun formatTime(ms: Long): String {
         val totalSec = ms / 1000
@@ -205,6 +216,74 @@ fun LyricsScreen(
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) {
                     Text("Close", color = colors.primaryAccent)
+                }
+            },
+            containerColor = colors.elevatedSurface
+        )
+    }
+
+    if (showStoryThemeDialog) {
+        val themes = listOf("Obsidian Gold", "Emerald Beats", "Neon Sunset", "Sapphire Night")
+        AlertDialog(
+            onDismissRequest = { showStoryThemeDialog = false },
+            title = {
+                Text(
+                    text = "Choose Story Card Theme",
+                    style = MaterialTheme.typography.titleMedium.copy(color = colors.primaryText, fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Card with ${selectedLyricIndices.size} selected lyrics lines will be rendered for Instagram Story / WhatsApp Status.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = colors.secondaryText)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    themes.forEach { theme ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { selectedStoryTheme = theme }
+                                .padding(vertical = 8.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedStoryTheme == theme,
+                                onClick = { selectedStoryTheme = theme },
+                                colors = RadioButtonDefaults.colors(selectedColor = colors.primaryAccent)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = theme, color = colors.primaryText, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showStoryThemeDialog = false
+                        val selectedLines = selectedLyricIndices.sorted().mapNotNull { idx ->
+                            syncedLines.getOrNull(idx)?.text
+                        }
+                        if (selectedLines.isNotEmpty()) {
+                            com.example.core.share.ShareHelper.shareLyricStoryCard(
+                                context = context,
+                                song = song,
+                                lyricLines = selectedLines,
+                                theme = selectedStoryTheme
+                            )
+                            isStorySelectionMode = false
+                            selectedLyricIndices = emptySet()
+                        }
+                    }
+                ) {
+                    Text("Share Story", color = colors.primaryAccent, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStoryThemeDialog = false }) {
+                    Text("Cancel", color = colors.secondaryText)
                 }
             },
             containerColor = colors.elevatedSurface
@@ -372,6 +451,23 @@ fun LyricsScreen(
                 )
             }
 
+            // Story Card Generator Button
+            IconButton(
+                onClick = {
+                    isStorySelectionMode = !isStorySelectionMode
+                    if (!isStorySelectionMode) {
+                        selectedLyricIndices = emptySet()
+                    }
+                },
+                modifier = Modifier.testTag("story_card_button")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Style,
+                    contentDescription = "Story Card Generator",
+                    tint = if (isStorySelectionMode) colors.primaryAccent else colors.secondaryText
+                )
+            }
+
             // Share Lyrics button
             IconButton(
                 onClick = {
@@ -389,6 +485,56 @@ fun LyricsScreen(
                     contentDescription = "Share",
                     tint = colors.secondaryText
                 )
+            }
+        }
+
+        // Story Selection Floating Bar
+        if (isStorySelectionMode) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = colors.primaryAccent.copy(alpha = 0.20f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.primaryAccent.copy(alpha = 0.6f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = "Story Card Mode",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = colors.primaryAccent)
+                        )
+                        Text(
+                            text = "${selectedLyricIndices.size}/4 lines selected",
+                            style = MaterialTheme.typography.labelSmall.copy(color = colors.primaryText)
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(
+                            onClick = {
+                                isStorySelectionMode = false
+                                selectedLyricIndices = emptySet()
+                            }
+                        ) {
+                            Text("Cancel", color = colors.secondaryText, fontSize = 12.sp)
+                        }
+                        Button(
+                            onClick = { showStoryThemeDialog = true },
+                            enabled = selectedLyricIndices.isNotEmpty(),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.primaryAccent, contentColor = Color.Black),
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text("Create Card", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+                }
             }
         }
 
@@ -667,6 +813,8 @@ fun LyricsScreen(
                             null
                         }
 
+                        val isSelectedForStory = isStorySelectionMode && selectedLyricIndices.contains(index)
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -676,10 +824,26 @@ fun LyricsScreen(
                                 }
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(
-                                    if (isCurrent) colors.elevatedSurface.copy(alpha = 0.65f)
-                                    else Color.Transparent
+                                    when {
+                                        isSelectedForStory -> colors.primaryAccent.copy(alpha = 0.25f)
+                                        isCurrent -> colors.elevatedSurface.copy(alpha = 0.65f)
+                                        else -> Color.Transparent
+                                    }
                                 )
-                                .clickable { onSeek(lyricLine.timeMs) }
+                                .then(
+                                    if (isSelectedForStory) Modifier.border(1.dp, colors.primaryAccent, RoundedCornerShape(12.dp))
+                                    else Modifier
+                                )
+                                .clickable {
+                                    if (isStorySelectionMode) {
+                                        val next = selectedLyricIndices.toMutableSet()
+                                        if (next.contains(index)) next.remove(index)
+                                        else if (next.size < 4) next.add(index)
+                                        selectedLyricIndices = next
+                                    } else {
+                                        onSeek(lyricLine.timeMs)
+                                    }
+                                }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                                 .testTag(if (isCurrent) "active_lyric_line" else "lyric_line_$index"),
                             verticalAlignment = Alignment.CenterVertically

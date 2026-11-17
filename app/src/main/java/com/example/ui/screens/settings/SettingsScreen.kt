@@ -122,6 +122,10 @@ fun SettingsScreen(
     playbackRecoveryCount: Int = 0,
     onResetPlayer: () -> Unit = {},
     onOpenDiagnostics: () -> Unit = {},
+    isAudioNormalizationEnabled: Boolean = true,
+    onToggleAudioNormalization: (Boolean) -> Unit = {},
+    isSmartAutoplayEnabled: Boolean = true,
+    onToggleSmartAutoplay: (Boolean) -> Unit = {},
     userName: String = "Ritik Kumar",
     userAvatar: String = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
     onUpdateProfile: (String, String) -> Unit = { _, _ -> },
@@ -549,7 +553,7 @@ fun SettingsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Version 2.6 (Master Release)",
+                        text = "Version 2.7 (Audiophile Edition)",
                         style = MaterialTheme.typography.labelLarge.copy(color = colors.primaryAccent)
                     )
                     Text(
@@ -747,6 +751,100 @@ fun SettingsScreen(
                     value = if (crossfadeEnabled && crossfadeSeconds > 0) "${crossfadeSeconds}s" else "Off",
                     onClick = onOpenCrossfade
                 )
+            }
+
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp)),
+                    color = colors.surface
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = null,
+                            tint = if (isAudioNormalizationEnabled) colors.primaryAccent else colors.secondaryAccent,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Loudness Normalizer",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = colors.primaryText
+                                )
+                            )
+                            Text(
+                                text = "Even volume levels across all tracks",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = colors.mutedText
+                                )
+                            )
+                        }
+                        Switch(
+                            checked = isAudioNormalizationEnabled,
+                            onCheckedChange = onToggleAudioNormalization,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = colors.mainBackground,
+                                checkedTrackColor = colors.primaryAccent
+                            )
+                        )
+                    }
+                }
+            }
+
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp)),
+                    color = colors.surface
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Radio,
+                            contentDescription = null,
+                            tint = if (isSmartAutoplayEnabled) colors.primaryAccent else colors.secondaryAccent,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Smart Autoplay / Infinite Radio",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = colors.primaryText
+                                )
+                            )
+                            Text(
+                                text = "Continuously plays similar songs when queue ends",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = colors.mutedText
+                                )
+                            )
+                        }
+                        Switch(
+                            checked = isSmartAutoplayEnabled,
+                            onCheckedChange = onToggleSmartAutoplay,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = colors.mainBackground,
+                                checkedTrackColor = colors.primaryAccent
+                            )
+                        )
+                    }
+                }
             }
 
             item {
@@ -1220,7 +1318,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.SystemUpdate,
                     title = "Check for Updates",
-                    value = "v2.6",
+                    value = "v2.7",
                     onClick = onCheckForUpdates
                 )
             }
@@ -1229,7 +1327,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v2.6",
+                    value = "v2.7",
                     onClick = { showAboutDialog = true }
                 )
             }

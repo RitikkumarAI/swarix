@@ -22,12 +22,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +72,9 @@ fun PlaylistDetailScreen(
     onFavoriteToggle: (Song) -> Unit,
     onBackClick: () -> Unit,
     onDeletePlaylist: (() -> Unit)? = null,
+    onDownloadAll: ((List<Song>) -> Unit)? = null,
+    isBatchDownloading: Boolean = false,
+    batchProgress: Pair<Int, Int> = 0 to 0,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -249,6 +254,31 @@ fun PlaylistDetailScreen(
                         Icon(Icons.Default.Shuffle, contentDescription = null, tint = colors.primaryAccent)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Shuffle", fontWeight = FontWeight.Bold)
+                    }
+
+                    IconButton(
+                        onClick = { onDownloadAll?.invoke(songs) },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(colors.elevatedSurface)
+                            .testTag("btn_download_playlist_all")
+                    ) {
+                        if (isBatchDownloading) {
+                            CircularProgressIndicator(
+                                progress = { if (batchProgress.second > 0) batchProgress.first.toFloat() / batchProgress.second.toFloat() else 0f },
+                                color = colors.primaryAccent,
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = "Download All Songs Offline",
+                                tint = colors.primaryAccent,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
                 }
             }

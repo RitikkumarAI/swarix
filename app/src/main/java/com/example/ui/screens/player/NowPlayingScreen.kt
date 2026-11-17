@@ -365,18 +365,18 @@ fun NowPlayingScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 3. Dynamic Smooth Parrot Green + Luxury Gold + OLED Black Gradient Overlay
+        // 3. Dynamic Smooth Parrot Green + Luxury Gold + OLED Black Gradient Overlay (Subtle Ambient Glow)
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF040E08), // OLED Emerald Dark
-                            Color(0xFF0B2417).copy(alpha = 0.88f), // Deep Parrot Green Tint
-                            Color(0xFF1D2816).copy(alpha = 0.72f), // Golden Acoustic Transition
-                            Color(0xFF0A0C0A).copy(alpha = 0.94f), // Deep OLED Surface
-                            Color(0xFF050505)  // Pure OLED Black
+                            Color(0xFF040E08).copy(alpha = 0.30f), // OLED Emerald Dark
+                            Color(0xFF0B2417).copy(alpha = 0.40f), // Deep Parrot Green Tint
+                            Color(0xFF1D2816).copy(alpha = 0.35f), // Golden Acoustic Transition
+                            Color(0xFF0A0C0A).copy(alpha = 0.70f), // Deep OLED Surface
+                            Color(0xFF050505).copy(alpha = 0.90f)  // Pure OLED Black
                         )
                     )
                 )
@@ -430,14 +430,57 @@ fun NowPlayingScreen(
                     )
                 }
 
-                Box {
-                    IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Options",
-                            tint = Color.White
-                        )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val isTimerActive = sleepTimerSecondsRemaining > 0
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { showSleepTimer = true }
+                            .testTag("btn_quick_sleep_timer"),
+                        color = if (isTimerActive) Color(0xFFD7BC83).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isTimerActive) Color(0xFFD7BC83).copy(alpha = 0.65f) else Color.White.copy(alpha = 0.18f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Bedtime,
+                                contentDescription = "Sleep Timer",
+                                tint = if (isTimerActive) Color(0xFFD7BC83) else Color.White.copy(alpha = 0.85f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            if (isTimerActive) {
+                                val mins = (sleepTimerSecondsRemaining + 59) / 60
+                                Text(
+                                    text = "${mins}m",
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFFD7BC83),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                )
+                            }
+                        }
                     }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Box {
+                        IconButton(onClick = { showMenu = !showMenu }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Options",
+                                tint = Color.White
+                            )
+                        }
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
@@ -497,6 +540,7 @@ fun NowPlayingScreen(
                         )
                     }
                 }
+            }
             }
 
             Spacer(modifier = Modifier.height(6.dp))

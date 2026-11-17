@@ -138,6 +138,14 @@ class PlayerManager private constructor(private val context: Context) {
     private var crossfadeJob: Job? = null
     private var isFadingOut = false
 
+    private val _smartAutoplayEnabled = MutableStateFlow(true)
+    val smartAutoplayEnabled: StateFlow<Boolean> = _smartAutoplayEnabled.asStateFlow()
+    var onAutoplayNeeded: (suspend (Song) -> List<Song>)? = null
+
+    fun setSmartAutoplayEnabled(enabled: Boolean) {
+        _smartAutoplayEnabled.value = enabled
+    }
+
     private val _isKaraokeModeActive = MutableStateFlow(false)
     val isKaraokeModeActive: StateFlow<Boolean> = _isKaraokeModeActive.asStateFlow()
 
@@ -347,8 +355,14 @@ class PlayerManager private constructor(private val context: Context) {
                 val bitmap = (result as? BitmapDrawable)?.bitmap
                 if (bitmap != null) {
                     cachedArtworkBitmap = bitmap
+                    // Safe small thumbnail for MediaMetadata to avoid Binder TransactionTooLargeException
+                    val thumb = try {
+                        Bitmap.createScaledBitmap(bitmap, 96, 96, true)
+                    } catch (e: Throwable) {
+                        bitmap
+                    }
                     val stream = ByteArrayOutputStream()
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 85, stream)
+                    thumb.compress(Bitmap.CompressFormat.JPEG, 70, stream)
                     val bytes = stream.toByteArray()
                     withContext(Dispatchers.Main) {
                         if (_currentSong.value?.id == song.id) {
@@ -554,18 +568,68 @@ class PlayerManager private constructor(private val context: Context) {
                 exoPlayer.seekToNextMediaItem()
             } else if (_repeatMode.value == RepeatMode.ALL) {
                 exoPlayer.seekToDefaultPosition(0)
+            } else if (_smartAutoplayEnabled.value) {
+                triggerSmartAutoplay(q)
             }
         } else {
             var nextIndex = _queueIndex.value + 1
             if (nextIndex >= q.size) {
                 if (_repeatMode.value == RepeatMode.ALL) {
                     nextIndex = 0
+                } else if (_smartAutoplayEnabled.value) {
+                    triggerSmartAutoplay(q)
+                    return
                 } else {
                     return
                 }
             }
             if (nextIndex in q.indices) {
                 playSong(q[nextIndex], q)
+            }
+        }
+    }
+
+    private fun triggerSmartAutoplay(currentQueue: List<Song>) {
+        val lastSong = _currentSong.value ?: currentQueue.lastOrNull() ?: return
+        scope.launch {
+            try {
+                val recommendations = onAutoplayNeeded?.invoke(lastSong) ?: emptyList()
+                val unplayed = recommendations.filter { rec -> currentQueue.none { it.id == rec.id } }
+                if (unplayed.isNotEmpty()) {
+                    val nextToPlay = unplayed.first()
+                    addToQueue(nextToPlay)
+                    unplayed.drop(1).take(5).forEach { addToQueue(it) }
+                    playSong(nextToPlay, _queue.value)
+                }
+            } catch (e: Exception) {
+                Log.w("PlayerManager", "Failed to trigger smart autoplay: ${e.message}")
+            }
+        }
+    }
+
+    fun reorderQueue(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == toIndex) return
+        val currentList = _queue.value.toMutableList()
+        if (fromIndex in currentList.indices && toIndex in currentList.indices) {
+            val moved = currentList.removeAt(fromIndex)
+            currentList.add(toIndex, moved)
+            _queue.value = currentList
+
+            val currentIdx = _queueIndex.value
+            if (currentIdx == fromIndex) {
+                _queueIndex.value = toIndex
+            } else if (fromIndex < currentIdx && toIndex >= currentIdx) {
+                _queueIndex.value = currentIdx - 1
+            } else if (fromIndex > currentIdx && toIndex <= currentIdx) {
+                _queueIndex.value = currentIdx + 1
+            }
+
+            if (_gaplessPlayback.value) {
+                try {
+                    exoPlayer.moveMediaItem(fromIndex, toIndex)
+                } catch (e: Exception) {
+                    Log.w("PlayerManager", "Failed to move media item in ExoPlayer: ${e.message}")
+                }
             }
         }
     }
@@ -686,6 +750,19 @@ class PlayerManager private constructor(private val context: Context) {
         exoPlayer.stop()
         _isPlaying.value = false
         _currentSong.value = null
+    }
+
+    fun stopAndClear() {
+        try {
+            exoPlayer.pause()
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+            _isPlaying.value = false
+            _currentSong.value = null
+            stopProgressTracking()
+        } catch (e: Exception) {
+            Log.w("PlayerManager", "Error stopping player: ${e.message}")
+        }
     }
 
     /**

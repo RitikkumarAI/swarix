@@ -49,6 +49,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import android.util.Log
 import org.json.JSONArray
+import org.json.JSONObject
 
 enum class SubScreen {
     NONE,
@@ -225,6 +226,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val userMoods: StateFlow<Set<String>> = preferences.userMoods
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf("Chill", "Romance", "Focus"))
 
+    val audioNormalizationEnabled: StateFlow<Boolean> = preferences.audioNormalizationEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val smartAutoplayEnabled: StateFlow<Boolean> = preferences.smartAutoplayEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val customPresetsJson: StateFlow<String> = preferences.customPresetsJson
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "{}")
+
+    val customPresets: StateFlow<Map<String, com.example.core.equalizer.EqualizerPresets.PresetDefinition>> = customPresetsJson.map { json ->
+        deserializeCustomPresets(json)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    private val _isBatchDownloading = MutableStateFlow(false)
+    val isBatchDownloading: StateFlow<Boolean> = _isBatchDownloading.asStateFlow()
+
+    private val _batchDownloadProgress = MutableStateFlow<Pair<Int, Int>>(0 to 0)
+    val batchDownloadProgress: StateFlow<Pair<Int, Int>> = _batchDownloadProgress.asStateFlow()
+
     private val _dailyMixes = MutableStateFlow<List<DailyMix>>(emptyList())
     val dailyMixes: StateFlow<List<DailyMix>> = _dailyMixes.asStateFlow()
 
@@ -239,6 +259,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         playerManager.onSongPlaybackCompleted = { song ->
             viewModelScope.launch {
                 repository.recordPlayback(song.id)
+            }
+        }
+
+        playerManager.onAutoplayNeeded = { lastSong ->
+            val songs = allSongs.value
+            val matches = songs.filter { 
+                it.artist.contains(lastSong.artist, ignoreCase = true) || 
+                (it.genre.isNotBlank() && it.genre.equals(lastSong.genre, ignoreCase = true)) 
+            }.filter { it.id != lastSong.id }
+            if (matches.isNotEmpty()) matches.shuffled().take(8) else songs.shuffled().take(8)
+        }
+
+        viewModelScope.launch {
+            preferences.smartAutoplayEnabled.collect { enabled ->
+                playerManager.setSmartAutoplayEnabled(enabled)
             }
         }
 
@@ -977,6 +1012,109 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             is com.example.speech.VoiceCommandResult.Unrecognized -> {}
+        }
+    }
+
+    fun setAudioNormalizationEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferences.setAudioNormalizationEnabled(enabled)
+        }
+    }
+
+    fun setSmartAutoplayEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferences.setSmartAutoplayEnabled(enabled)
+            playerManager.setSmartAutoplayEnabled(enabled)
+        }
+    }
+
+    fun saveCustomPreset(name: String, bandLevels: List<Int>, bassBoost: Int, virtualizer: Int) {
+        viewModelScope.launch {
+            val currentMap = customPresets.value.toMutableMap()
+            currentMap[name] = com.example.core.equalizer.EqualizerPresets.PresetDefinition(
+                name = name,
+                bandLevels = bandLevels,
+                bassBoost = bassBoost,
+                virtualizer = virtualizer,
+                recommendedGenres = listOf("Custom"),
+                description = "Custom tuned preset: $name",
+                iconEmoji = "🎚️"
+            )
+            preferences.setCustomPresetsJson(serializeCustomPresets(currentMap))
+        }
+    }
+
+    fun deleteCustomPreset(name: String) {
+        viewModelScope.launch {
+            val currentMap = customPresets.value.toMutableMap()
+            currentMap.remove(name)
+            preferences.setCustomPresetsJson(serializeCustomPresets(currentMap))
+        }
+    }
+
+    private fun deserializeCustomPresets(json: String): Map<String, com.example.core.equalizer.EqualizerPresets.PresetDefinition> {
+        val map = mutableMapOf<String, com.example.core.equalizer.EqualizerPresets.PresetDefinition>()
+        try {
+            if (json.isNotBlank() && json != "{}") {
+                val root = JSONObject(json)
+                val keys = root.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    val obj = root.getJSONObject(key)
+                    val bandsArray = obj.getJSONArray("bandLevels")
+                    val bands = mutableListOf<Int>()
+                    for (i in 0 until bandsArray.length()) {
+                        bands.add(bandsArray.getInt(i))
+                    }
+                    map[key] = com.example.core.equalizer.EqualizerPresets.PresetDefinition(
+                        name = obj.getString("name"),
+                        bandLevels = bands,
+                        bassBoost = obj.optInt("bassBoost", 50),
+                        virtualizer = obj.optInt("virtualizer", 30),
+                        recommendedGenres = listOf("Custom"),
+                        description = obj.optString("description", "Custom user preset"),
+                        iconEmoji = obj.optString("iconEmoji", "🎚️")
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("MainViewModel", "Error deserializing custom presets: ${e.message}")
+        }
+        return map
+    }
+
+    private fun serializeCustomPresets(map: Map<String, com.example.core.equalizer.EqualizerPresets.PresetDefinition>): String {
+        val root = JSONObject()
+        map.forEach { (key, preset) ->
+            val obj = JSONObject().apply {
+                put("name", preset.name)
+                val bandsArray = JSONArray()
+                preset.bandLevels.forEach { bandsArray.put(it) }
+                put("bandLevels", bandsArray)
+                put("bassBoost", preset.bassBoost)
+                put("virtualizer", preset.virtualizer)
+                put("description", preset.description)
+                put("iconEmoji", preset.iconEmoji)
+            }
+            root.put(key, obj)
+        }
+        return root.toString()
+    }
+
+    fun reorderQueue(fromIndex: Int, toIndex: Int) {
+        playerManager.reorderQueue(fromIndex, toIndex)
+    }
+
+    fun downloadSongsBatch(songs: List<Song>) {
+        if (songs.isEmpty()) return
+        viewModelScope.launch {
+            _isBatchDownloading.value = true
+            cacheManager.cacheSongsBatch(songs) { current, total ->
+                _batchDownloadProgress.value = current to total
+                if (current >= total) {
+                    _isBatchDownloading.value = false
+                }
+            }
         }
     }
 

@@ -223,6 +223,22 @@ class LocalStorageCacheManager private constructor(private val context: Context)
     }
 
     /**
+     * Batch downloads multiple songs in sequence/parallel for offline listening.
+     */
+    fun cacheSongsBatch(songs: List<Song>, onProgress: ((Int, Int) -> Unit)? = null) {
+        scope.launch {
+            val total = songs.size
+            songs.forEachIndexed { index, song ->
+                onProgress?.invoke(index, total)
+                if (!isSongCached(song.id)) {
+                    downloadAndCacheSong(song, isPinned = true)
+                }
+            }
+            onProgress?.invoke(total, total)
+        }
+    }
+
+    /**
      * Removes a specific song from offline storage.
      */
     fun removeCachedSong(songId: String) {

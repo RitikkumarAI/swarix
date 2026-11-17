@@ -102,7 +102,11 @@ fun LibraryScreen(
     var selectedTab by remember { mutableStateOf("Playlists") }
     var playlistToDelete by remember { mutableStateOf<Playlist?>(null) }
     var activeMenuPlaylistId by remember { mutableStateOf<Long?>(null) }
-    val tabs = listOf("Playlists", "Smart Folders", "Songs", "Artists", "Albums", "Offline Music")
+    val tabs = listOf("Playlists", "Device Storage", "Smart Folders", "Songs", "Artists", "Albums", "Offline Music")
+
+    val deviceStorageSongs = remember(allSongs) {
+        allSongs.filter { it.isLocal || it.contentUri.startsWith("content://") || it.contentUri.startsWith("file://") }
+    }
 
     val smartFolders = remember(allSongs) {
         allSongs.groupBy { song ->
@@ -827,6 +831,103 @@ fun LibraryScreen(
                                 )
                             )
                         }
+                    }
+                }
+            }
+
+            "Device Storage" -> {
+                item {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color(0xFF1B2E23),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1ED760).copy(alpha = 0.4f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Device Storage Music",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "${deviceStorageSongs.size} tracks found on phone storage",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = Color(0xFF1ED760)
+                                    )
+                                )
+                            }
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable { onRescanLibrary() },
+                                color = Color(0xFF1ED760),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text(
+                                    text = "Scan Music",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (deviceStorageSongs.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp, vertical = 40.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MusicNote,
+                                contentDescription = null,
+                                tint = colors.secondaryText,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "No local audio files detected",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.primaryText
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Tap 'Scan Music' above to auto-detect MP3 and FLAC audio stored on your phone (/Music, /Download, SD card).",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = colors.secondaryText,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            )
+                        }
+                    }
+                } else {
+                    itemsIndexed(deviceStorageSongs) { _, song ->
+                        SongRowItem(
+                            song = song,
+                            isPlaying = song.id == currentPlayingSong?.id && isPlaying,
+                            onClick = { onSongClick(song) },
+                            onFavoriteToggle = { onFavoriteToggle(song) }
+                        )
                     }
                 }
             }

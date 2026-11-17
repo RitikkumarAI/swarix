@@ -34,14 +34,32 @@ object EqualizerPresets {
             description = "Pristine 8K Ultra studio acoustic mastering with crystal highs, punchy sub-bass, and wide 3D binaural soundstage.",
             iconEmoji = "💎"
         ),
-        "Bass Boost" to PresetDefinition(
-            name = "Bass Boost",
-            bandLevels = listOf(8, 7, 5, 2, 0, -1, 0, 1, 2, 3),
-            bassBoost = 85,
-            virtualizer = 35,
-            recommendedGenres = listOf("Workout", "Party", "EDM", "Dance", "Electronic", "Club"),
-            description = "Sub-bass excitation and heavy low-end punch for electronic drops and workout beats.",
+        "Bass Heavy" to PresetDefinition(
+            name = "Bass Heavy",
+            bandLevels = listOf(9, 8, 6, 3, 1, -1, 0, 1, 2, 3),
+            bassBoost = 90,
+            virtualizer = 40,
+            recommendedGenres = listOf("Workout", "Party", "EDM", "Club", "Bass Boost"),
+            description = "Deep sub-bass excitation and heavy low-end punch for electronic drops and workout beats.",
             iconEmoji = "🔊"
+        ),
+        "Pure Vocals" to PresetDefinition(
+            name = "Pure Vocals",
+            bandLevels = listOf(-3, -2, 0, 3, 7, 8, 6, 4, 2, 0),
+            bassBoost = 15,
+            virtualizer = 25,
+            recommendedGenres = listOf("Romance", "Bollywood Romance", "Podcast", "Soul", "Ghazal", "Sad"),
+            description = "Pushes 1kHz-4kHz speech and singing formant frequencies front and center with pristine clarity.",
+            iconEmoji = "🎤"
+        ),
+        "EDM Party" to PresetDefinition(
+            name = "EDM Party",
+            bandLevels = listOf(8, 7, 5, 2, -1, 2, 5, 7, 8, 7),
+            bassBoost = 85,
+            virtualizer = 50,
+            recommendedGenres = listOf("House", "Techno", "Dance", "Electronic", "Party"),
+            description = "Elevated sub-bass and ultra-high air for dance drops, synthesizers, and energetic club rhythms.",
+            iconEmoji = "🎛️"
         ),
         "Acoustic" to PresetDefinition(
             name = "Acoustic",
@@ -52,14 +70,23 @@ object EqualizerPresets {
             description = "Warm resonance and crisp string articulation for organic acoustic instruments.",
             iconEmoji = "🎸"
         ),
-        "Vocal" to PresetDefinition(
-            name = "Vocal",
-            bandLevels = listOf(-3, -2, 0, 3, 6, 7, 5, 3, 1, -1),
-            bassBoost = 15,
-            virtualizer = 25,
-            recommendedGenres = listOf("Romance", "Bollywood Romance", "Podcast", "Soul", "Ghazal", "Sad"),
-            description = "Pushes 1kHz-4kHz speech and singing formant frequencies front and center.",
-            iconEmoji = "🎤"
+        "Rock" to PresetDefinition(
+            name = "Rock",
+            bandLevels = listOf(6, 5, 3, -1, -2, 1, 4, 6, 7, 7),
+            bassBoost = 60,
+            virtualizer = 35,
+            recommendedGenres = listOf("Rock", "Alternative", "Metal", "Hard Rock", "Punk"),
+            description = "Aggressive upper-mid guitars, driving kick drum thump, and shimmering cymbals.",
+            iconEmoji = "⚡"
+        ),
+        "Treble Boost" to PresetDefinition(
+            name = "Treble Boost",
+            bandLevels = listOf(-2, -1, 0, 1, 2, 4, 6, 8, 9, 10),
+            bassBoost = 20,
+            virtualizer = 45,
+            recommendedGenres = listOf("Acoustic", "Classical", "Live", "Hi-Res"),
+            description = "Amplifies high-frequency harmonics, crisp cymbals, air, and delicate instrumental nuances.",
+            iconEmoji = "✨"
         ),
         "Pop" to PresetDefinition(
             name = "Pop",
@@ -68,16 +95,7 @@ object EqualizerPresets {
             virtualizer = 30,
             recommendedGenres = listOf("Pop", "Bollywood", "Commercial", "Dance Pop"),
             description = "Vibrant, forward modern mastering response for sparkling radio and streaming hooks.",
-            iconEmoji = "✨"
-        ),
-        "Rock" to PresetDefinition(
-            name = "Rock",
-            bandLevels = listOf(5, 4, 2, -1, -2, 1, 3, 5, 6, 6),
-            bassBoost = 55,
-            virtualizer = 35,
-            recommendedGenres = listOf("Rock", "Alternative", "Metal", "Hard Rock", "Punk"),
-            description = "Aggressive upper-mid guitars, driving kick drum thump, and shimmering cymbals.",
-            iconEmoji = "⚡"
+            iconEmoji = "🌟"
         ),
         "Classical" to PresetDefinition(
             name = "Classical",
@@ -88,15 +106,6 @@ object EqualizerPresets {
             description = "Concert hall acoustic space with lush stereo width and delicate dynamic range.",
             iconEmoji = "🎻"
         ),
-        "Electronic" to PresetDefinition(
-            name = "Electronic",
-            bandLevels = listOf(7, 6, 4, 1, -1, 2, 4, 6, 7, 6),
-            bassBoost = 75,
-            virtualizer = 45,
-            recommendedGenres = listOf("House", "Techno", "Synthwave", "Trance"),
-            description = "Elevated sub-bass and ultra-high air for synthesizers and crisp hi-hat rhythms.",
-            iconEmoji = "🎛️"
-        ),
         "Hip Hop" to PresetDefinition(
             name = "Hip Hop",
             bandLevels = listOf(8, 7, 4, 1, 2, 1, 2, 3, 4, 4),
@@ -105,15 +114,6 @@ object EqualizerPresets {
             recommendedGenres = listOf("Hip Hop", "Rap", "Trap", "R&B"),
             description = "Thumping 808 sub-bass accompanied by sharp snare cracks and transparent vocals.",
             iconEmoji = "🎧"
-        ),
-        "Jazz" to PresetDefinition(
-            name = "Jazz",
-            bandLevels = listOf(3, 2, 1, 2, -1, -1, 0, 2, 3, 3),
-            bassBoost = 35,
-            virtualizer = 35,
-            recommendedGenres = listOf("Jazz", "Blues", "Soul", "Lounge"),
-            description = "Warm upright bass tone, velvety brass textures, and mellow brushed snare sounds.",
-            iconEmoji = "🎷"
         ),
         "Flat" to PresetDefinition(
             name = "Flat",
@@ -141,30 +141,29 @@ object EqualizerPresets {
     fun getPresetForGenre(genre: String, mood: String = ""): PresetDefinition {
         val query = "$genre $mood".lowercase()
         return when {
-            query.contains("workout") || query.contains("party") || query.contains("edm") ||
-            query.contains("club") -> PRESETS["Bass Boost"]!!
+            query.contains("workout") || query.contains("party") || query.contains("club") -> PRESETS["Bass Heavy"] ?: PRESETS.values.first()
 
             query.contains("electronic") || query.contains("dance") || query.contains("synth") ||
-            query.contains("house") || query.contains("techno") -> PRESETS["Electronic"]!!
+            query.contains("house") || query.contains("techno") || query.contains("edm") -> PRESETS["EDM Party"] ?: PRESETS.values.first()
 
             query.contains("acoustic") || query.contains("indie") || query.contains("folk") ||
-            query.contains("unplugged") || query.contains("chill") || query.contains("focus") -> PRESETS["Acoustic"]!!
+            query.contains("unplugged") || query.contains("chill") || query.contains("focus") -> PRESETS["Acoustic"] ?: PRESETS.values.first()
 
             query.contains("romance") || query.contains("vocal") || query.contains("love") ||
-            query.contains("ghazal") || query.contains("podcast") || query.contains("sad") -> PRESETS["Vocal"]!!
+            query.contains("ghazal") || query.contains("podcast") || query.contains("sad") -> PRESETS["Pure Vocals"] ?: PRESETS.values.first()
 
             query.contains("rock") || query.contains("metal") || query.contains("alternative") ||
-            query.contains("grunge") || query.contains("punk") -> PRESETS["Rock"]!!
+            query.contains("grunge") || query.contains("punk") -> PRESETS["Rock"] ?: PRESETS.values.first()
 
             query.contains("classical") || query.contains("devotional") || query.contains("sufi") ||
-            query.contains("spiritual") || query.contains("ambient") -> PRESETS["Classical"]!!
+            query.contains("spiritual") || query.contains("ambient") -> PRESETS["Classical"] ?: PRESETS.values.first()
 
             query.contains("hip hop") || query.contains("rap") || query.contains("trap") ||
-            query.contains("r&b") -> PRESETS["Hip Hop"]!!
+            query.contains("r&b") -> PRESETS["Hip Hop"] ?: PRESETS.values.first()
 
-            query.contains("jazz") || query.contains("blues") || query.contains("soul") -> PRESETS["Jazz"]!!
+            query.contains("treble") || query.contains("live") || query.contains("crisp") -> PRESETS["Treble Boost"] ?: PRESETS.values.first()
 
-            else -> PRESETS["Pop"]!!
+            else -> PRESETS["Pop"] ?: PRESETS.values.first()
         }
     }
 

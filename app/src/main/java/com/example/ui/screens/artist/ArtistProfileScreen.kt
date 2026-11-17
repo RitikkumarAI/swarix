@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.*
@@ -49,6 +50,9 @@ fun ArtistProfileScreen(
     onPlayAll: (List<Song>) -> Unit = {},
     onShuffleAll: (List<Song>) -> Unit = {},
     onRelatedArtistClick: (String, String) -> Unit = { _, _ -> },
+    onDownloadAll: ((List<Song>) -> Unit)? = null,
+    isBatchDownloading: Boolean = false,
+    batchProgress: Pair<Int, Int> = 0 to 0,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -248,6 +252,33 @@ fun ArtistProfileScreen(
                                     color = colors.primaryText,
                                     fontWeight = FontWeight.SemiBold
                                 )
+                            )
+                        }
+                    }
+
+                    // 1-Tap Batch Download Button
+                    IconButton(
+                        onClick = { onDownloadAll?.invoke(artistSongs) },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(colors.elevatedSurface)
+                            .border(1.2.dp, colors.divider, RoundedCornerShape(24.dp))
+                            .testTag("btn_download_artist_all")
+                    ) {
+                        if (isBatchDownloading) {
+                            CircularProgressIndicator(
+                                progress = { if (batchProgress.second > 0) batchProgress.first.toFloat() / batchProgress.second.toFloat() else 0f },
+                                color = Color(0xFF1ED760),
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = "Download All Songs by $artistName",
+                                tint = Color(0xFF1ED760),
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     }

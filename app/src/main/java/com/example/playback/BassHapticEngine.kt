@@ -99,10 +99,15 @@ class BassHapticEngine(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.Default)
 
     fun initSession(audioSessionId: Int) {
-        if (audioSessionId == 0 || audioSessionId == currentSessionId) return
-        releaseVisualizer()
+        if (audioSessionId == 0) return
         currentSessionId = audioSessionId
+        if (_isEnabled.value) {
+            attachVisualizer(audioSessionId)
+        }
+    }
 
+    private fun attachVisualizer(audioSessionId: Int) {
+        releaseVisualizer()
         try {
             val captureRange = Visualizer.getCaptureSizeRange()
             val captureSize = 128.coerceIn(captureRange[0], captureRange[1])
@@ -121,8 +126,8 @@ class BassHapticEngine(private val context: Context) {
                 enabled = true
             }
             Log.d(TAG, "Hardware Visualizer attached to audio session: $audioSessionId")
-        } catch (e: Exception) {
-            Log.w(TAG, "Visualizer initialization bypassed (using acoustic beat sync): ${e.message}")
+        } catch (e: Throwable) {
+            Log.w(TAG, "Visualizer initialization bypassed: ${e.message}")
             visualizer = null
         }
     }
@@ -132,8 +137,7 @@ class BassHapticEngine(private val context: Context) {
         this.currentSong = song
 
         if (playing) {
-            // If hardware visualizer couldn't initialize or yields silence on this platform, start rhythm pulse
-            if (visualizer == null) {
+            if (_isEnabled.value && visualizer == null) {
                 startRhythmicBassSync(song)
             }
         } else {
@@ -145,8 +149,14 @@ class BassHapticEngine(private val context: Context) {
         _isEnabled.value = enabled
         if (!enabled) {
             stopRhythmicBassSync()
-        } else if (isPlaying && visualizer == null) {
-            startRhythmicBassSync(currentSong)
+            releaseVisualizer()
+        } else {
+            if (currentSessionId != 0 && visualizer == null) {
+                attachVisualizer(currentSessionId)
+            }
+            if (isPlaying && visualizer == null) {
+                startRhythmicBassSync(currentSong)
+            }
         }
     }
 
