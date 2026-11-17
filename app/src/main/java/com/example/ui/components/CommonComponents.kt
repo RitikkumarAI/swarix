@@ -397,7 +397,7 @@ fun MiniPlayer(
                 .clip(RoundedCornerShape(16.dp))
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = {
+                        onDragStart = { _ ->
                             totalDragX = 0f
                             hasTriggeredSwipe = false
                         },

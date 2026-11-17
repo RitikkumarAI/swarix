@@ -278,6 +278,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
+            preferences.audioNormalizationEnabled.collect { enabled ->
+                playerManager.setAudioNormalizationEnabled(enabled)
+            }
+        }
+
+        viewModelScope.launch {
             crossfadeEnabled.collect { enabled ->
                 playerManager.setCrossfade(enabled, crossfadeSeconds.value)
             }
@@ -588,7 +594,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isKaraokeModeActive: StateFlow<Boolean> = playerManager.isKaraokeModeActive
     fun setKaraokeMode(enabled: Boolean) = playerManager.setKaraokeMode(enabled)
     val isAudioNormalizationEnabled: StateFlow<Boolean> = playerManager.isAudioNormalizationEnabled
-    fun setAudioNormalizationEnabled(enabled: Boolean) = playerManager.setAudioNormalizationEnabled(enabled)
+    fun setAudioNormalizationEnabled(enabled: Boolean) {
+        playerManager.setAudioNormalizationEnabled(enabled)
+        viewModelScope.launch {
+            preferences.setAudioNormalizationEnabled(enabled)
+        }
+    }
     val playbackHealthStatus: StateFlow<String> = playerManager.playbackHealthManager.healthStatus
     val playbackRecoveryCount: StateFlow<Int> = playerManager.playbackHealthManager.recoveryCount
     fun resetPlayer() = playerManager.resetPlayer()
@@ -1012,12 +1023,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             is com.example.speech.VoiceCommandResult.Unrecognized -> {}
-        }
-    }
-
-    fun setAudioNormalizationEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            preferences.setAudioNormalizationEnabled(enabled)
         }
     }
 
