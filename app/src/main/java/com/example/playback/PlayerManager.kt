@@ -607,33 +607,6 @@ class PlayerManager private constructor(private val context: Context) {
         }
     }
 
-    fun reorderQueue(fromIndex: Int, toIndex: Int) {
-        if (fromIndex == toIndex) return
-        val currentList = _queue.value.toMutableList()
-        if (fromIndex in currentList.indices && toIndex in currentList.indices) {
-            val moved = currentList.removeAt(fromIndex)
-            currentList.add(toIndex, moved)
-            _queue.value = currentList
-
-            val currentIdx = _queueIndex.value
-            if (currentIdx == fromIndex) {
-                _queueIndex.value = toIndex
-            } else if (fromIndex < currentIdx && toIndex >= currentIdx) {
-                _queueIndex.value = currentIdx - 1
-            } else if (fromIndex > currentIdx && toIndex <= currentIdx) {
-                _queueIndex.value = currentIdx + 1
-            }
-
-            if (_gaplessPlayback.value) {
-                try {
-                    exoPlayer.moveMediaItem(fromIndex, toIndex)
-                } catch (e: Exception) {
-                    Log.w("PlayerManager", "Failed to move media item in ExoPlayer: ${e.message}")
-                }
-            }
-        }
-    }
-
     fun playPrevious() {
         val q = _queue.value
         if (q.isEmpty()) return
@@ -725,13 +698,18 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun reorderQueue(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == toIndex) return
         val currentList = _queue.value.toMutableList()
         if (fromIndex in currentList.indices && toIndex in currentList.indices) {
             val moved = currentList.removeAt(fromIndex)
             currentList.add(toIndex, moved)
             _queue.value = currentList
             if (_gaplessPlayback.value && fromIndex in 0 until exoPlayer.mediaItemCount && toIndex in 0 until exoPlayer.mediaItemCount) {
-                exoPlayer.moveMediaItem(fromIndex, toIndex)
+                try {
+                    exoPlayer.moveMediaItem(fromIndex, toIndex)
+                } catch (e: Exception) {
+                    Log.w("PlayerManager", "Failed to move media item in ExoPlayer: ${e.message}")
+                }
             }
             if (_queueIndex.value == fromIndex) {
                 _queueIndex.value = toIndex
