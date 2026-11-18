@@ -1,8 +1,8 @@
 {
-  "versionCode": 16,
-  "versionName": "2.5",
-  "releaseTitle": "Swarix Music Player v2.5",
-  "changelog": "1. Relocated Download and Share buttons next to track title\n2. Generous 10dp spacing between DSP, EQ, and Lyrics capsules\n3. Bass Haptic default OFF with strict audio beat synchronization\n4. Universal zero-squish layout across all mobile devices",
-  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v2.5/swarix.apk",
-  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v2.5"
+  "versionCode": 19,
+  "versionName": "2.8",
+  "releaseTitle": "Swarix Music Player v2.8",
+  "changelog": "1. YouTube Music & Spotify Premium Hybrid Recommendation Engine\n2. Real-time song radio and acoustic clustering\n3. YouTube Music Quick Filter Pills: All, Familiar, Discover, Similar Vibe\n4. Live 320kbps JioSaavn radio track discovery\n5. Smart Autoplay / Infinite Queue without awkward gaps or random shuffling\n6. Spotify-style 'Recommended for You' Search row",
+  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.apk",
+  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v2.8"
 }

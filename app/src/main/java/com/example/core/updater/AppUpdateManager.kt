@@ -28,7 +28,7 @@ object AppUpdateManager {
     private const val PAGES_VERSION_URL = "https://ritikkumarai.github.io/swarix/version.json"
     private const val RAW_VERSION_URL = "https://raw.githubusercontent.com/RitikkumarAI/swarix/main/docs/version.json"
     private const val RELEASES_API_URL = "https://api.github.com/repos/RitikkumarAI/swarix/releases/latest"
-    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v2.5/swarix.apk"
+    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.apk"
 
     private val client = OkHttpClient.Builder()
         .followRedirects(true)

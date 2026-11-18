@@ -29,6 +29,24 @@ def main():
         with open(notes_file, "r") as f:
             body = f.read()
 
+    # Update docs/version.json for OTA in-app auto-update
+    version_clean = tag.lstrip("v")
+    try:
+        os.makedirs("docs", exist_ok=True)
+        v_data = {
+            "versionCode": 19,
+            "versionName": version_clean,
+            "releaseTitle": f"Swarix Music Player {tag}",
+            "changelog": "1. YouTube Music & Spotify Premium Hybrid Recommendation Engine\n2. Real-time song radio and acoustic clustering\n3. YouTube Music Quick Filter Pills: All, Familiar, Discover, Similar Vibe\n4. Live 320kbps JioSaavn radio track discovery\n5. Smart Autoplay / Infinite Queue without awkward gaps or random shuffling\n6. Spotify-style 'Recommended for You' Search row",
+            "apkUrl": f"https://github.com/{repo}/releases/download/{tag}/swarix.apk",
+            "releasePageUrl": f"https://github.com/{repo}/releases/tag/{tag}"
+        }
+        with open("docs/version.json", "w") as f:
+            json.dump(v_data, f, indent=2)
+        print(f"Updated docs/version.json for OTA version {version_clean}")
+    except Exception as e:
+        print(f"Failed to write version.json: {e}")
+
     # 2. Check and delete existing release with this tag if it exists
     print(f"Checking existing release for tag {tag} in {repo}...")
     get_rel_url = f"https://api.github.com/repos/{repo}/releases/tags/{tag}"
