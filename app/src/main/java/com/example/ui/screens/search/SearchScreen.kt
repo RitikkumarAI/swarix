@@ -191,6 +191,20 @@ fun SearchScreen(
         allSongs.take(8)
     }
 
+    val recommendedSongs = remember(allSongs) {
+        val anchor = allSongs.firstOrNull()
+        if (anchor != null) {
+            SmartRecommendationEngine.getRankedRecommendations(
+                baseSong = anchor,
+                pool = allSongs,
+                filter = RecommendationFilter.ALL,
+                limit = 8
+            )
+        } else {
+            emptyList()
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -343,17 +357,8 @@ fun SearchScreen(
         }
 
         // Spotify-style "Recommended for You • Based on your listening"
-        if (searchQuery.isBlank() && allSongs.isNotEmpty()) {
-            val anchorSong = recentlyPlayed.firstOrNull() ?: allSongs.first()
-            val recommendations = remember(anchorSong, allSongs) {
-                SmartRecommendationEngine.getRankedRecommendations(
-                    baseSong = anchorSong,
-                    pool = allSongs,
-                    filter = RecommendationFilter.ALL,
-                    limit = 8
-                )
-            }
-            if (recommendations.isNotEmpty()) {
+        if (searchQuery.isBlank() && recommendedSongs.isNotEmpty()) {
+            val anchorSong = allSongs.firstOrNull()
                 item {
                     Spacer(modifier = Modifier.height(14.dp))
                     Row(
@@ -395,12 +400,12 @@ fun SearchScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(recommendations) { recSong ->
+                        items(recommendedSongs) { recSong ->
                             Surface(
                                 modifier = Modifier
                                     .width(136.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable { onSongClick(recSong, recommendations) }
+                                    .clickable { onSongClick(recSong, recommendedSongs) }
                                     .testTag("rec_song_${recSong.id}"),
                                 color = colors.elevatedSurface
                             ) {
