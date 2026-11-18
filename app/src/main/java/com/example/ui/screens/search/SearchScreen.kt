@@ -359,29 +359,30 @@ fun SearchScreen(
         // Spotify-style "Recommended for You • Based on your listening"
         if (searchQuery.isBlank() && recommendedSongs.isNotEmpty()) {
             val anchorSong = allSongs.firstOrNull()
-                item {
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = colors.primaryAccent,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Column {
-                            Text(
-                                text = "Recommended for You",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.primaryText
-                                )
+            item {
+                Spacer(modifier = Modifier.height(14.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = colors.primaryAccent,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Column {
+                        Text(
+                            text = "Recommended for You",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = colors.primaryText
                             )
+                        )
+                        if (anchorSong != null) {
                             Text(
                                 text = "Similar vibe to '${anchorSong.title}' by ${anchorSong.artist}",
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -394,56 +395,56 @@ fun SearchScreen(
                         }
                     }
                 }
+            }
 
-                item {
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(recommendedSongs) { recSong ->
-                            Surface(
-                                modifier = Modifier
-                                    .width(136.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .clickable { onSongClick(recSong, recommendedSongs) }
-                                    .testTag("rec_song_${recSong.id}"),
-                                color = colors.elevatedSurface
-                            ) {
-                                Column(modifier = Modifier.padding(8.dp)) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(120.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(colors.surface)
-                                    ) {
-                                        AsyncImage(
-                                            model = recSong.artworkUri,
-                                            contentDescription = recSong.title,
-                                            contentScale = ContentScale.Crop,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = recSong.title,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = colors.primaryText,
-                                            fontSize = 12.sp
-                                        ),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = recSong.artist,
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = colors.secondaryText,
-                                            fontSize = 11.sp
-                                        ),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+            item {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(recommendedSongs) { recSong ->
+                        Surface(
+                            modifier = Modifier
+                                .width(136.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { onSongClick(recSong, recommendedSongs) }
+                                .testTag("rec_song_${recSong.id}"),
+                            color = colors.elevatedSurface
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(120.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(colors.surface)
+                                ) {
+                                    AsyncImage(
+                                        model = recSong.artworkUri,
+                                        contentDescription = recSong.title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = recSong.title,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.primaryText,
+                                        fontSize = 12.sp
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = recSong.artist,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = colors.secondaryText,
+                                        fontSize = 11.sp
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }
