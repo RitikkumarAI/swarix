@@ -3,7 +3,7 @@ import os
 
 def main():
     os.makedirs("dist", exist_ok=True)
-    notes = """## 🎵 Swarix Music Player v2.7 (Audiophile Edition - Multi-Platform Master Release)
+    notes = """## 🎵 Swarix Music Player v2.8 (YouTube Music & Spotify Premium Recommendation Engine)
 
 Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
@@ -13,17 +13,23 @@ Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
 | Platform | Download Link | File Type | Description |
 | :--- | :--- | :--- | :--- |
-| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v2.7/swarix.apk) | `.apk` | Official installable production APK |
-| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v2.7/swarix.dmg) | `.dmg` | Native Apple macOS Disk Image (Swarix.app + Drag-to-Applications) |
-| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v2.7/swarix.exe) | `.exe` | Self-extracting Windows installer |
-| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v2.7/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
-| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.7/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle with Swarix.app |
-| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.7/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
+| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.apk) | `.apk` | Official installable production APK |
+| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.dmg) | `.dmg` | Native Apple macOS Disk Image (Swarix.app + Drag-to-Applications) |
+| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.exe) | `.exe` | Self-extracting Windows installer |
+| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
+| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle with Swarix.app |
+| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
 | 🌐 **Web Player (Any OS)** | [**Open Web Player**](https://ritikkumarai.github.io/swarix/) | Web / PWA | Instant browser playback & PWA |
 
 ---
 
-### ✨ What's New in v2.7:
+### ✨ What's New in v2.8:
+1. 🎧 **YouTube Music & Spotify Premium Hybrid Recommendation Engine**:
+   - **Track Radio & Sonic Neighbors**: Acoustic knowledge graph matching songs by primary artist, co-artists, mood, cultural clusters, and genre resonance with zero unrelated genre bleeds.
+   - **Dynamic YouTube Music Quick Filters**: Four 1-tap filter pills directly on the Now Playing screen: `All (✨)`, `Familiar (❤️)`, `Discover (🚀)`, and `Similar Vibe (🎵)`.
+   - **Real-Time Online Radio Fetching**: Live fetching of top hits and track radio stations via JioSaavn 320kbps streams + 500x500 HD artwork.
+   - **Smart Autoplay / Infinite Queue**: When a playlist finishes, the next track is selected using Spotify-style scoring so playback continues endlessly with perfect musical vibe continuity.
+   - **Spotify Search Recommendations**: Dedicated "Recommended for You" row in Search based on recent listening history with 1-tap playback.
 1. 🎧 **Audio & Sound Enhancements (Audiophile Experience)**:
    - **Crossfade & Gapless Playback**: 2s–6s smooth crossfade slider with seamless transitions to eliminate silence between tracks.
    - **Auto Volume Normalization (Loudness Equalizer)**: Equalizes track loudness to prevent sudden volume spikes.

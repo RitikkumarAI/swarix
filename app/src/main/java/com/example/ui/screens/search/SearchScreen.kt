@@ -1,5 +1,7 @@
 package com.example.ui.screens.search
 
+import com.example.core.recommendation.SmartRecommendationEngine
+import com.example.core.recommendation.RecommendationFilter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -335,6 +337,110 @@ fun SearchScreen(
                             tint = if (song.isFavorite) Color(0xFF1ED760) else colors.mutedText,
                             modifier = Modifier.size(20.dp)
                         )
+                    }
+                }
+            }
+        }
+
+        // Spotify-style "Recommended for You • Based on your listening"
+        if (searchQuery.isBlank() && allSongs.isNotEmpty()) {
+            val anchorSong = recentlyPlayed.firstOrNull() ?: allSongs.first()
+            val recommendations = remember(anchorSong, allSongs) {
+                SmartRecommendationEngine.getRankedRecommendations(
+                    baseSong = anchorSong,
+                    pool = allSongs,
+                    filter = RecommendationFilter.ALL,
+                    limit = 8
+                )
+            }
+            if (recommendations.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = colors.primaryAccent,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Column {
+                            Text(
+                                text = "Recommended for You",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.primaryText
+                                )
+                            )
+                            Text(
+                                text = "Similar vibe to '${anchorSong.title}' by ${anchorSong.artist}",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = colors.secondaryText,
+                                    fontSize = 11.sp
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(recommendations) { recSong ->
+                            Surface(
+                                modifier = Modifier
+                                    .width(136.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { onSongClick(recSong, recommendations) }
+                                    .testTag("rec_song_${recSong.id}"),
+                                color = colors.elevatedSurface
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(120.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(colors.surface)
+                                    ) {
+                                        AsyncImage(
+                                            model = recSong.artworkUri,
+                                            contentDescription = recSong.title,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = recSong.title,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = colors.primaryText,
+                                            fontSize = 12.sp
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = recSong.artist,
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = colors.secondaryText,
+                                            fontSize = 11.sp
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

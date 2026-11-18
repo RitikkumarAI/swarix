@@ -553,7 +553,7 @@ fun SettingsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Version 2.7 (Audiophile Edition)",
+                        text = "Version 2.8 (Smart Recommendations Edition)",
                         style = MaterialTheme.typography.labelLarge.copy(color = colors.primaryAccent)
                     )
                     Text(
@@ -1318,7 +1318,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.SystemUpdate,
                     title = "Check for Updates",
-                    value = "v2.7",
+                    value = "v2.8",
                     onClick = onCheckForUpdates
                 )
             }
@@ -1327,7 +1327,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v2.7",
+                    value = "v2.8",
                     onClick = { showAboutDialog = true }
                 )
             }

@@ -231,6 +231,13 @@ class MusicRepository(
         }
     }
 
+    suspend fun insertSongs(songs: List<Song>) {
+        withContext(Dispatchers.IO) {
+            val entities = songs.map { it.toEntity() }
+            musicDao.insertSongs(entities)
+        }
+    }
+
     suspend fun initializeCatalogIfEmpty() {
         withContext(Dispatchers.IO) {
             val existing = musicDao.getAllSongs().first()

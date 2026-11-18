@@ -506,7 +506,7 @@ fun HomeScreen(
 
         item {
             val newMusicList = remember(allSongs) {
-                if (allSongs.isNotEmpty()) allSongs.shuffled().take(6) else emptyList()
+                if (allSongs.isNotEmpty()) allSongs.sortedByDescending { it.dateAdded }.take(8) else emptyList()
             }
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),

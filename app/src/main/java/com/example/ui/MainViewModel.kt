@@ -28,6 +28,8 @@ import com.example.core.model.FriendActivity
 import com.example.core.model.ListeningStats
 import com.example.core.smartplaylist.DailyMix
 import com.example.core.smartplaylist.SmartPlaylistGenerator
+import com.example.core.recommendation.SmartRecommendationEngine
+import com.example.core.recommendation.RecommendationFilter
 import com.example.data.local.SearchQueryEntity
 import com.example.data.repository.MockFriendActivityRepository
 import com.example.playback.HapticIntensity
@@ -263,12 +265,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         playerManager.onAutoplayNeeded = { lastSong ->
-            val songs = allSongs.value
-            val matches = songs.filter { 
-                it.artist.contains(lastSong.artist, ignoreCase = true) || 
-                (it.genre.isNotBlank() && it.genre.equals(lastSong.genre, ignoreCase = true)) 
-            }.filter { it.id != lastSong.id }
-            if (matches.isNotEmpty()) matches.shuffled().take(8) else songs.shuffled().take(8)
+            val localSongs = allSongs.value
+            val localMatches = SmartRecommendationEngine.getRankedRecommendations(
+                baseSong = lastSong,
+                pool = localSongs,
+                filter = RecommendationFilter.ALL,
+                limit = 8
+            )
+            if (localMatches.size >= 4) {
+                localMatches
+            } else {
+                try {
+                    val onlineRadio = SmartRecommendationEngine.fetchOnlineRadio(lastSong, limit = 10)
+                    if (onlineRadio.isNotEmpty()) {
+                        repository.insertSongs(onlineRadio)
+                        (localMatches + onlineRadio).distinctBy { it.id }.take(8)
+                    } else {
+                        localMatches
+                    }
+                } catch (e: Exception) {
+                    localMatches
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -373,6 +391,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         com.example.workers.ProactiveSyncWorker.schedule(application)
         com.example.workers.RoomToFirestoreSyncWorker.schedule(application)
         com.example.workers.PlaylistCleanupWorker.schedule(application)
+    }
+
+    suspend fun getSongRadioRecommendations(
+        song: Song,
+        filter: RecommendationFilter = RecommendationFilter.ALL
+    ): List<Song> {
+        val local = allSongs.value
+        val rankedLocal = SmartRecommendationEngine.getRankedRecommendations(song, local, filter, limit = 8)
+        return if (rankedLocal.size >= 4) {
+            rankedLocal
+        } else {
+            try {
+                val online = SmartRecommendationEngine.fetchOnlineRadio(song, limit = 12)
+                if (online.isNotEmpty()) {
+                    repository.insertSongs(online)
+                    (rankedLocal + online).distinctBy { it.id }.take(8)
+                } else {
+                    rankedLocal
+                }
+            } catch (e: Exception) {
+                rankedLocal
+            }
+        }
     }
 
     fun selectTab(tab: NavItem) {

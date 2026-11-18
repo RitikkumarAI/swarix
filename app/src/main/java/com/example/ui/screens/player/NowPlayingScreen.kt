@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import com.example.core.recommendation.SmartRecommendationEngine
+import com.example.core.recommendation.RecommendationFilter
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.runtime.LaunchedEffect
@@ -167,58 +169,44 @@ fun NowPlayingScreen(
     var showListenTogetherDialog by remember { mutableStateOf(false) }
     var activeListenSessionId by remember { mutableStateOf<String?>(null) }
 
-    // Gemini AI Recommendations state
-    var aiRecommendations by remember(song.id) { mutableStateOf<List<Song>>(emptyList()) }
+    // Spotify & YouTube Music Smart Recommendations State
+    var selectedRecFilter by remember { mutableStateOf(RecommendationFilter.ALL) }
+    var onlineRadioSongs by remember(song.id) { mutableStateOf<List<Song>>(emptyList()) }
     var isLoadingRecommendations by remember(song.id) { mutableStateOf(false) }
 
     var testQualityMode by remember { mutableStateOf("24-bit Lossless Master") }
     var isTestingAudio by remember { mutableStateOf(false) }
 
-    val displayRecommendations = remember(aiRecommendations, song.id, allSongs) {
-        if (aiRecommendations.isNotEmpty()) {
-            aiRecommendations
-        } else {
-            val sameArtist = allSongs.filter { it.id != song.id && it.artist.equals(song.artist, ignoreCase = true) }
-            val sameGenre = allSongs.filter { it.id != song.id && it.genre.isNotBlank() && it.genre.equals(song.genre, ignoreCase = true) }
-            val pool = (sameArtist + sameGenre + allSongs.filter { it.id != song.id }).distinctBy { it.id }
-            pool.take(5)
-        }
+    // Instant local ranked recommendations based on YouTube Music & Spotify acoustic scoring
+    val localRecommendations = remember(song.id, allSongs, selectedRecFilter) {
+        SmartRecommendationEngine.getRankedRecommendations(
+            baseSong = song,
+            pool = allSongs,
+            filter = selectedRecFilter,
+            limit = 6
+        )
+    }
+
+    val displayRecommendations = remember(localRecommendations, onlineRadioSongs, selectedRecFilter) {
+        val merged = (localRecommendations + onlineRadioSongs).distinctBy { it.id }
+        SmartRecommendationEngine.getRankedRecommendations(
+            baseSong = song,
+            pool = merged,
+            filter = selectedRecFilter,
+            limit = 6
+        )
     }
 
     LaunchedEffect(song.id) {
-        if (allSongs.isNotEmpty()) {
-            isLoadingRecommendations = true
-            try {
-                val model = Firebase.ai.generativeModel("gemini-3.8-flash")
-                val librarySnippet = allSongs.take(25).map { "${it.id}: '${it.title}' by ${it.artist} (${it.genre}, mood: ${it.mood})" }.joinToString("\n")
-                val prompt = """
-                    Current song: '${song.title}' by ${song.artist} (Genre: '${song.genre}', Mood: '${song.mood}').
-                    From the following local library, pick EXACTLY 3 song IDs that match the sonic characteristics and mood of the current song.
-                    Return ONLY a valid JSON array of 3 string IDs, e.g. ["id1", "id2", "id3"]:
-                    $librarySnippet
-                """.trimIndent()
-
-                val response = withContext(Dispatchers.IO) {
-                    model.generateContent(prompt)
-                }
-                val text = response.text ?: ""
-                val jsonStart = text.indexOf('[')
-                val jsonEnd = text.lastIndexOf(']')
-                if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
-                    val jsonArray = JSONArray(text.substring(jsonStart, jsonEnd + 1))
-                    val ids = mutableListOf<String>()
-                    for (i in 0 until jsonArray.length()) {
-                        ids.add(jsonArray.getString(i))
-                    }
-                    val matched = allSongs.filter { ids.contains(it.id) && it.id != song.id }
-                    aiRecommendations = if (matched.isNotEmpty()) matched.take(3) else allSongs.filter { it.id != song.id }.shuffled().take(3)
-                } else {
-                    aiRecommendations = allSongs.filter { it.id != song.id }.shuffled().take(3)
-                }
-            } catch (e: Exception) {
-                android.util.Log.w("NowPlayingAI", "Gemini recommendations failed: ${e.message}")
-                aiRecommendations = allSongs.filter { it.id != song.id }.shuffled().take(3)
+        isLoadingRecommendations = true
+        try {
+            val fetched = SmartRecommendationEngine.fetchOnlineRadio(song, limit = 12)
+            if (fetched.isNotEmpty()) {
+                onlineRadioSongs = fetched
             }
+        } catch (e: Exception) {
+            android.util.Log.w("NowPlayingRadio", "Failed to fetch online radio: ${e.message}")
+        } finally {
             isLoadingRecommendations = false
         }
     }
@@ -1185,33 +1173,86 @@ fun NowPlayingScreen(
                                     .padding(14.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.AutoAwesome,
+                                            contentDescription = null,
+                                            tint = colors.primaryAccent,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = "Song Radio • Up Next",
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.primaryAccent,
+                                                fontSize = 13.sp,
+                                                letterSpacing = 0.5.sp
+                                            )
+                                        )
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        Surface(
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = colors.primaryAccent.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "Smart Match",
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    color = colors.primaryAccent,
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.SemiBold
+                                                ),
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = "Based on ${song.artist} • ${song.title}",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color.White.copy(alpha = 0.6f),
+                                            fontSize = 11.sp
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                // YouTube Music Quick Filters (All, Familiar, Discover, Similar Vibe)
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = colors.primaryAccent,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Text(
-                                        text = "AI Sonic Recommendations",
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = colors.primaryAccent,
-                                            fontSize = 12.sp,
-                                            letterSpacing = 0.5.sp
-                                        )
-                                    )
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    Text(
-                                        text = "Smart Match",
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            color = Color.White.copy(alpha = 0.5f),
-                                            fontSize = 10.sp
-                                        )
-                                    )
+                                    RecommendationFilter.entries.forEach { filter ->
+                                        val isSelected = filter == selectedRecFilter
+                                        Surface(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .clickable { selectedRecFilter = filter },
+                                            color = if (isSelected) colors.primaryAccent else Color.White.copy(alpha = 0.08f),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Text(text = filter.badge, fontSize = 11.sp)
+                                                Text(
+                                                    text = filter.displayName,
+                                                    style = MaterialTheme.typography.labelSmall.copy(
+                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                        color = if (isSelected) Color.Black else Color.White,
+                                                        fontSize = 11.sp
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
 
                                 if (isLoadingRecommendations && displayRecommendations.isEmpty()) {
@@ -1228,7 +1269,7 @@ fun NowPlayingScreen(
                                         )
                                     }
                                 } else {
-                                    displayRecommendations.take(4).forEach { recSong ->
+                                    displayRecommendations.take(5).forEach { recSong ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
