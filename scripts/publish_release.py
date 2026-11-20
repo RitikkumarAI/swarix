@@ -9,7 +9,7 @@ import urllib.error
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY", "RitikkumarAI/swarix")
-    tag = os.environ.get("RELEASE_TAG", "v2.8")
+    tag = os.environ.get("RELEASE_TAG", "v2.9")
     name = f"Swarix Music Player {tag} (Official Multi-Platform)"
     
     if not token:
@@ -33,14 +33,15 @@ def main():
     version_clean = tag.lstrip("v")
     try:
         os.makedirs("docs", exist_ok=True)
-        v_data = {
-            "versionCode": 19,
-            "versionName": version_clean,
-            "releaseTitle": f"Swarix Music Player {tag}",
-            "changelog": "1. YouTube Music & Spotify Premium Hybrid Recommendation Engine\n2. Real-time song radio and acoustic clustering\n3. YouTube Music Quick Filter Pills: All, Familiar, Discover, Similar Vibe\n4. Live 320kbps JioSaavn radio track discovery\n5. Smart Autoplay / Infinite Queue without awkward gaps or random shuffling\n6. Spotify-style 'Recommended for You' Search row",
-            "apkUrl": f"https://github.com/{repo}/releases/download/{tag}/swarix.apk",
-            "releasePageUrl": f"https://github.com/{repo}/releases/tag/{tag}"
-        }
+        v_data = {}
+        if os.path.exists("docs/version.json"):
+            with open("docs/version.json", "r") as f:
+                v_data = json.load(f)
+        v_data["versionCode"] = 20
+        v_data["versionName"] = version_clean
+        v_data["releaseTitle"] = f"SOREX / Swarix {tag} – AI Recommendation, Smart Typo & Lyrics Search, Voice Search"
+        v_data["apkUrl"] = f"https://github.com/{repo}/releases/download/{tag}/swarix.apk"
+        v_data["releasePageUrl"] = f"https://github.com/{repo}/releases/tag/{tag}"
         with open("docs/version.json", "w") as f:
             json.dump(v_data, f, indent=2)
         print(f"Updated docs/version.json for OTA version {version_clean}")

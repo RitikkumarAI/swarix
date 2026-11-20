@@ -3,7 +3,7 @@ import os
 
 def main():
     os.makedirs("dist", exist_ok=True)
-    notes = """## 🎵 Swarix Music Player v2.8 (YouTube Music & Spotify Premium Recommendation Engine)
+    notes = """## 🎵 SOREX / Swarix Music Player v2.9 (AI Hybrid Recommendation Engine, Smart Typo & Lyrics Search, Voice Search)
 
 Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
@@ -13,39 +13,35 @@ Developed & Maintained by **[Ritik Kumar](https://ritikkumarai.vercel.app/)**
 
 | Platform | Download Link | File Type | Description |
 | :--- | :--- | :--- | :--- |
-| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.apk) | `.apk` | Official installable production APK |
-| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.dmg) | `.dmg` | Native Apple macOS Disk Image (Swarix.app + Drag-to-Applications) |
-| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.exe) | `.exe` | Self-extracting Windows installer |
-| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
-| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle with Swarix.app |
-| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.8/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
+| 📱 **Android** | [**swarix.apk**](https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix.apk) | `.apk` | Official installable production APK |
+| 💻 **Mac (macOS)** | [**swarix.dmg**](https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix.dmg) | `.dmg` | Native Apple macOS Disk Image (Swarix.app + Drag-to-Applications) |
+| 🖥️ **Windows** | [**swarix.exe**](https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix.exe) | `.exe` | Self-extracting Windows installer |
+| 🍏 **iOS (iPhone/iPad)** | [**swarix-ios.mobileconfig**](https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix-ios.mobileconfig) | `.mobileconfig` | Apple WebClip configuration profile |
+| 📦 **Mac Archive** | [**Swarix-for-Mac.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.9/Swarix-for-Mac.zip) | `.zip` | Portable Mac bundle with Swarix.app |
+| 📦 **Windows Archive** | [**Swarix-for-Windows.zip**](https://github.com/RitikkumarAI/swarix/releases/download/v2.9/Swarix-for-Windows.zip) | `.zip` | Portable Windows bundle |
 | 🌐 **Web Player (Any OS)** | [**Open Web Player**](https://ritikkumarai.github.io/swarix/) | Web / PWA | Instant browser playback & PWA |
 
 ---
 
-### ✨ What's New in v2.8:
-1. 🎧 **YouTube Music & Spotify Premium Hybrid Recommendation Engine**:
-   - **Track Radio & Sonic Neighbors**: Acoustic knowledge graph matching songs by primary artist, co-artists, mood, cultural clusters, and genre resonance with zero unrelated genre bleeds.
-   - **Dynamic YouTube Music Quick Filters**: Four 1-tap filter pills directly on the Now Playing screen: `All (✨)`, `Familiar (❤️)`, `Discover (🚀)`, and `Similar Vibe (🎵)`.
-   - **Real-Time Online Radio Fetching**: Live fetching of top hits and track radio stations via JioSaavn 320kbps streams + 500x500 HD artwork.
-   - **Smart Autoplay / Infinite Queue**: When a playlist finishes, the next track is selected using Spotify-style scoring so playback continues endlessly with perfect musical vibe continuity.
-   - **Spotify Search Recommendations**: Dedicated "Recommended for You" row in Search based on recent listening history with 1-tap playback.
-1. 🎧 **Audio & Sound Enhancements (Audiophile Experience)**:
-   - **Crossfade & Gapless Playback**: 2s–6s smooth crossfade slider with seamless transitions to eliminate silence between tracks.
-   - **Auto Volume Normalization (Loudness Equalizer)**: Equalizes track loudness to prevent sudden volume spikes.
-   - **Custom EQ Presets (Save & Load)**: Save and delete user custom EQ presets with names, plus new presets: *Bass Heavy*, *Pure Vocals*, *EDM Party*, *Acoustic*, *Rock*, and *Treble Boost*.
-2. 🎵 **Playback & Discovery (Smart Features)**:
-   - **Infinite Radio / Smart Autoplay**: When the queue finishes, automatically finds and plays matching top hits by the same singer or genre seamlessly.
-   - **Lyric Story Card Generator**: Select 1–4 lyric lines and export an aesthetic album-art + quotes card directly to Instagram Stories / WhatsApp Status with 4 luxury themes.
-   - **Quick Sleep Timer on Player**: 1-tap sleep timer button on Now Playing top bar with live countdown badge (`🌙 24m`).
-3. 💾 **Library & Offline Management**:
-   - **1-Tap Batch Playlist & Album Download**: One-click offline download button in playlist and artist screens with real-time progress.
-   - **Phone Local Music Auto-Scanner**: Dedicated "Device Storage" category in Library to auto-detect and play MP3/FLAC files stored on your phone with a quick "Scan Music" button.
-   - **Tactile Queue Reordering**: Easily reorder upcoming tracks in the play queue with move up/down controls.
-4. 🎨 **UI & Visual Delight**:
-   - **Dynamic Ambient Blur (Mesh Gradient)**: Subtle animated glowing aura extracted from the album artwork dominant colors behind the Now Playing screen.
-   - **Mini Player Swipe Gestures**: Smooth horizontal swipe left/right on MiniPlayer to skip to next/previous song with tactile haptics.
-   - **Lock Screen & MIUI Background Fix**: Safe thumbnail encoding to prevent Binder TransactionTooLargeException and background crashes on Xiaomi/MIUI lock screen.
+### ✨ What's New in v2.9:
+1. 🧠 **Advanced Hybrid AI Music Recommendation Engine**:
+   - Multi-signal scoring: Musical similarity (25%), Language compatibility (20%), Genre (15%), Mood (15%), User taste profile (15%), Artist/Album (5%), Session context (5%).
+   - Strict Language & Mood Consistency guards (Hindi Romantic stays Hindi Romantic; prevents sudden genre jumps).
+   - Personalized User Taste Profile with skip penalty (-30), liked boost (+35), and completion boost (+20).
+   - Sequential next-track prediction (`predictNextTrack`) avoiding session repetition.
+2. 🔍 **Fix Listening History Separation**:
+   - Strict decoupling: Search results never pollute listening history or recents.
+   - Query history displayed under "Recent Searches"; only songs actually played appear under "Recently Played".
+   - Playback metrics tracking: timestamp, duration listened, completion %, and skip detection.
+3. 📜 **Multilingual Lyrics-Based Search Engine**:
+   - Full & partial lyric search supporting Devanagari transliteration and Hinglish phonetic equivalence.
+   - Real-time matched lyric snippets displayed on search results.
+4. ⚡ **Typo-Tolerant Smart Search**:
+   - Levenshtein distance typo tolerance (e.g., "arijt sing" resolves to Arijit Singh).
+5. 🎙️ **Upgraded Microphone Voice Search & Extensible Humming**:
+   - Integrated `RECORD_AUDIO` permission request flow with animated waveform.
+   - Multilingual recognition supporting Hindi (`hi-IN`), Indian English (`en-IN`), and English (`en-US`).
+   - Clean extensible `HummingRecognitionProvider` interface.
 """
     with open("dist/RELEASE_NOTES.md", "w") as f:
         f.write(notes)

@@ -28,7 +28,7 @@ object AppUpdateManager {
     private const val PAGES_VERSION_URL = "https://ritikkumarai.github.io/swarix/version.json"
     private const val RAW_VERSION_URL = "https://raw.githubusercontent.com/RitikkumarAI/swarix/main/docs/version.json"
     private const val RELEASES_API_URL = "https://api.github.com/repos/RitikkumarAI/swarix/releases/latest"
-    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.apk"
+    private const val FALLBACK_APK_URL = "https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix.apk"
 
     private val client = OkHttpClient.Builder()
         .followRedirects(true)
@@ -40,8 +40,9 @@ object AppUpdateManager {
         .build()
 
     suspend fun checkForUpdate(currentVersionName: String): AppUpdateInfo? = withContext(Dispatchers.IO) {
-        // Priority 1: Check Fastly CDN / GitHub Pages static version endpoints (Zero rate-limit)
-        val staticEndpoints = listOf(PAGES_VERSION_URL, RAW_VERSION_URL)
+        // Priority 1: Check Raw GitHub & GitHub Pages static version endpoints (Zero rate-limit)
+        val staticEndpoints = listOf(RAW_VERSION_URL, PAGES_VERSION_URL)
+        var bestUpdateInfo: AppUpdateInfo? = null
         for (url in staticEndpoints) {
             try {
                 val req = Request.Builder()
@@ -59,19 +60,25 @@ object AppUpdateManager {
                             val changelog = json.optString("changelog", "Bug fixes & new features.")
                             val downloadUrl = json.optString("apkUrl", FALLBACK_APK_URL)
                             val hasUpdate = isVersionNewer(vName, currentVersionName)
-                            return@withContext AppUpdateInfo(
+                            val info = AppUpdateInfo(
                                 latestVersion = vName,
                                 releaseTitle = releaseTitle,
                                 changelog = changelog,
                                 apkDownloadUrl = downloadUrl,
                                 hasUpdate = hasUpdate
                             )
+                            if (bestUpdateInfo == null || isVersionNewer(info.latestVersion, bestUpdateInfo.latestVersion)) {
+                                bestUpdateInfo = info
+                            }
                         }
                     }
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Static version check failed for $url: ${e.message}")
             }
+        }
+        if (bestUpdateInfo != null) {
+            return@withContext bestUpdateInfo
         }
 
         // Priority 2: Fallback to GitHub Releases REST API
