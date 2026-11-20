@@ -317,7 +317,7 @@ fun SearchScreen(
                                 },
                             color = colors.elevatedSurface,
                             shape = RoundedCornerShape(20.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.border.copy(alpha = 0.5f))
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.divider.copy(alpha = 0.5f))
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
