@@ -403,6 +403,7 @@ fun SwarixApp(mainViewModel: MainViewModel) {
                         isPlaying = isPlaying,
                         playlists = playlists,
                         recentSearches = mainViewModel.recentSearches.collectAsStateWithLifecycle().value,
+                        recentlyPlayed = recentlyPlayed,
                         onlineResults = mainViewModel.onlineSearchResults.collectAsStateWithLifecycle().value,
                         isSearchingOnline = mainViewModel.isSearchingOnline.collectAsStateWithLifecycle().value,
                         onSongClick = { song, queue -> mainViewModel.playSong(song, queue) },

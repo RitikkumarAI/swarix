@@ -88,6 +88,7 @@ fun SearchScreen(
     isPlaying: Boolean,
     playlists: List<Playlist> = emptyList(),
     recentSearches: List<String> = emptyList(),
+    recentlyPlayed: List<Song> = emptyList(),
     onlineResults: List<Song> = emptyList(),
     isSearchingOnline: Boolean = false,
     onSongClick: (Song, List<Song>) -> Unit,
@@ -187,8 +188,8 @@ fun SearchScreen(
         }
     }
 
-    val recentDisplaySongs = remember(allSongs, recentSearches) {
-        allSongs.take(8)
+    val recentDisplaySongs = remember(recentlyPlayed) {
+        recentlyPlayed.take(8)
     }
 
     val recommendedSongs = remember(allSongs) {
@@ -278,8 +279,8 @@ fun SearchScreen(
                 singleLine = true
             )
         }
-        // Recent Searches (Spotify Image 2 Style)
-        if (searchQuery.isBlank() && (recentSearches.isNotEmpty() || allSongs.isNotEmpty())) {
+        // 1. Search Query History (Recent Searches)
+        if (searchQuery.isBlank() && recentSearches.isNotEmpty()) {
             item {
                 Row(
                     modifier = Modifier
@@ -289,17 +290,77 @@ fun SearchScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Recents",
+                        text = "Recent Searches",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = colors.primaryText
                         )
                     )
-                    if (recentSearches.isNotEmpty()) {
-                        TextButton(onClick = onClearRecentSearches) {
-                            Text("Clear all", color = colors.secondaryText)
+                    TextButton(onClick = onClearRecentSearches) {
+                        Text("Clear all", color = colors.secondaryText)
+                    }
+                }
+            }
+
+            item {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(recentSearches) { query ->
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable {
+                                    searchQuery = query
+                                    onSearch(query)
+                                },
+                            color = colors.elevatedSurface,
+                            shape = RoundedCornerShape(20.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.border.copy(alpha = 0.5f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = colors.secondaryText,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = query,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = colors.primaryText,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
                         }
                     }
+                }
+            }
+        }
+
+        // 2. Listening History / Recently Played (Only tracks actually played by the user)
+        if (searchQuery.isBlank() && recentDisplaySongs.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Recently Played",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.primaryText
+                        )
+                    )
                 }
             }
 
@@ -646,8 +707,18 @@ fun SearchScreen(
             }
         }
 
+        val rankedMatches = remember(searchQuery, onlineResults, allSongs) {
+            if (searchQuery.isBlank()) emptyList()
+            else {
+                val pool = (onlineResults + allSongs).distinctBy { it.id }
+                com.example.core.search.SmartSearchEngine.rankSongsForQuery(searchQuery, pool)
+            }
+        }
+
         val displaySongs = if (voiceSearchResult != null && selectedFilter == "All" && voiceSearchResult!!.matchedSongs.isNotEmpty()) {
             voiceSearchResult!!.matchedSongs
+        } else if (rankedMatches.isNotEmpty()) {
+            rankedMatches.map { it.song }
         } else if (onlineResults.isNotEmpty()) {
             (onlineResults + filteredSongs).distinctBy { it.id }
         } else {
@@ -1132,6 +1203,7 @@ fun SearchScreen(
             onDismiss = { showVoiceDialog = false },
             onVoiceResult = { query ->
                 searchQuery = query
+                onSearch(query)
                 val result = VoiceSearchEngine.processVoiceQuery(query, allSongs, playlists)
                 voiceSearchResult = result
                 showVoiceDialog = false

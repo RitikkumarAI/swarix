@@ -56,7 +56,11 @@ data class PlaylistSongCrossRef(
 data class PlaybackHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val songId: String,
-    val playedAt: Long = System.currentTimeMillis()
+    val playedAt: Long = System.currentTimeMillis(),
+    val durationListenedMs: Long = 0L,
+    val completionPercent: Float = 0f,
+    val isSkipped: Boolean = false,
+    val source: String = "DIRECT"
 )
 
 @Entity(tableName = "equalizer_presets")

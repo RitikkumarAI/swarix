@@ -186,6 +186,20 @@ class PlayerManager private constructor(private val context: Context) {
 
     // Callbacks for statistics and DB history
     var onSongPlaybackCompleted: ((Song) -> Unit)? = null
+    var onPlaybackEventRecorded: ((song: Song, durationListenedMs: Long, completionPercent: Float, isSkipped: Boolean, source: String) -> Unit)? = null
+    var currentPlaybackSource: String = "DIRECT"
+
+    fun recordTrackEnd(song: Song?, isNaturalEnd: Boolean = false) {
+        val s = song ?: _currentSong.value ?: return
+        val currentPos = exoPlayer.currentPosition.coerceAtLeast(0L)
+        val totalDur = if (s.durationMs > 0) s.durationMs else exoPlayer.duration.coerceAtLeast(1L)
+        val completion = if (totalDur > 0) (currentPos.toFloat() / totalDur.toFloat()).coerceIn(0f, 1f) else 0f
+        val isSkipped = !isNaturalEnd && completion < 0.35f && currentPos < 35_000L
+        val effectiveCompletion = if (isNaturalEnd) 1.0f else completion
+
+        onPlaybackEventRecorded?.invoke(s, currentPos, effectiveCompletion, isSkipped, currentPlaybackSource)
+        onSongPlaybackCompleted?.invoke(s)
+    }
 
     fun resetPlayer() {
         playbackHealthManager.resetPlayer()
@@ -219,7 +233,7 @@ class PlayerManager private constructor(private val context: Context) {
                     equalizerHelper.initSession(exoPlayer.audioSessionId)
                     bassHapticEngine.initSession(exoPlayer.audioSessionId)
                 } else if (playbackState == Player.STATE_ENDED) {
-                    _currentSong.value?.let { onSongPlaybackCompleted?.invoke(it) }
+                    _currentSong.value?.let { recordTrackEnd(it, isNaturalEnd = true) }
                     handleTrackEnded()
                 }
             }
@@ -236,7 +250,7 @@ class PlayerManager private constructor(private val context: Context) {
                 if (newIndex in q.indices) {
                     val previousSong = _currentSong.value
                     if (previousSong != null && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
-                        onSongPlaybackCompleted?.invoke(previousSong)
+                        recordTrackEnd(previousSong, isNaturalEnd = true)
                     }
 
                     val nextSong = q[newIndex]
@@ -553,6 +567,7 @@ class PlayerManager private constructor(private val context: Context) {
     fun playNext() {
         val q = _queue.value
         if (q.isEmpty()) return
+        recordTrackEnd(_currentSong.value, isNaturalEnd = false)
 
         if (_isShuffle.value) {
             val nextIndex = getSmartNextIndex(q, _queueIndex.value)

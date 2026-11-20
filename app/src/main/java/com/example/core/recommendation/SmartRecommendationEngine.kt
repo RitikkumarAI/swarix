@@ -14,22 +14,51 @@ enum class RecommendationFilter(val displayName: String, val badge: String) {
     SIMILAR_VIBE("Similar Vibe", "🎵")
 }
 
+data class RecommendationWeights(
+    val musicalSimilarity: Double = 0.25,
+    val languageCompatibility: Double = 0.20,
+    val genreCompatibility: Double = 0.15,
+    val moodCompatibility: Double = 0.15,
+    val userTasteProfile: Double = 0.15,
+    val artistAlbumRelevance: Double = 0.05,
+    val sessionContext: Double = 0.05
+)
+
+data class UserTasteProfile(
+    val topArtists: Set<String> = emptySet(),
+    val topGenres: Set<String> = emptySet(),
+    val preferredLanguages: Set<String> = emptySet(),
+    val favoriteMoods: Set<String> = emptySet(),
+    val likedSongIds: Set<String> = emptySet(),
+    val skippedSongIds: Set<String> = emptySet(),
+    val completedSongIds: Set<String> = emptySet()
+)
+
 data class SonicCluster(
     val name: String,
+    val language: String,
     val artists: Set<String>,
     val genres: Set<String>,
     val moods: Set<String>,
     val clashClusterNames: Set<String> = emptySet()
 )
 
+/**
+ * SOREX Advanced Hybrid AI Music Recommendation Engine.
+ * Combines Content-Based Filtering, Collaborative Filtering Knowledge Graph,
+ * User Taste Profiles, Session Context Consistency, and Sequential Next-Track Prediction.
+ */
 object SmartRecommendationEngine {
 
     private const val TAG = "SmartRecommendation"
 
-    // Spotify & YouTube Music Sonic Knowledge Graph
-    private val CLUSTERS = listOf(
+    var configWeights = RecommendationWeights()
+
+    // SOREX Multi-Language & Multi-Genre Sonic Knowledge Graph
+    val CLUSTERS = listOf(
         SonicCluster(
             name = "BOLLYWOOD_ROMANTIC",
+            language = "Hindi",
             artists = setOf(
                 "arijit singh", "pritam", "atif aslam", "shreya ghoshal", "kk", "mohit chauhan",
                 "jubin nautiyal", "sachin-jigar", "mithoon", "vishal-shekhar", "jasleen royal",
@@ -43,26 +72,11 @@ object SmartRecommendationEngine {
                 "bollywood melodies", "bollywood pop", "romantic", "bollywood"
             ),
             moods = setOf("Love", "Romantic", "Chill", "Emotional"),
-            clashClusterNames = setOf("PUNJABI_HIPHOP_PARTY", "HARYANVI_FOLK", "HARD_EDM")
-        ),
-        SonicCluster(
-            name = "PUNJABI_HIPHOP_PARTY",
-            artists = setOf(
-                "sidhu moose wala", "diljit dosanjh", "karan aujla", "ap dhillon", "shubh",
-                "badshah", "yo yo honey singh", "imran khan", "guru randhawa", "jassie gill",
-                "ammy virk", "harrdy sandhu", "garry sandhu", "mankirt aulakh", "b praak",
-                "jaani", "ikky", "byg byrd", "the prophec", "sukhe", "mickey singh", "bohemia",
-                "gurinder gill", "gurnam bhullar", "wazir patar", "cheema y", "bally sagoo"
-            ),
-            genres = setOf(
-                "punjabi pop", "punjabi hip-hop", "bhangra", "desi hip-hop",
-                "party", "gangsta rap", "punjabi party", "punjabi"
-            ),
-            moods = setOf("Happy", "Party", "Workout", "High Energy"),
-            clashClusterNames = setOf("LOFI_FOCUS_AMBIENT", "CLASSICAL_INSTRUMENTAL")
+            clashClusterNames = setOf("PUNJABI_HIPHOP_PARTY", "GLOBAL_POP_HOLLYWOOD", "HARYANVI_FOLK", "HARD_EDM")
         ),
         SonicCluster(
             name = "BOLLYWOOD_SAD_HEARTBREAK",
+            language = "Hindi",
             artists = setOf(
                 "arijit singh", "atif aslam", "kk", "b praak", "mustafa zahid",
                 "rahat fateh ali khan", "jagjit singh", "sonu nigam", "mohit chauhan",
@@ -70,10 +84,39 @@ object SmartRecommendationEngine {
             ),
             genres = setOf("sad romantic", "heartbreak", "emotional", "sufi", "sad"),
             moods = setOf("Sad", "Heartbreak", "Melancholy", "Emotional"),
-            clashClusterNames = setOf("PUNJABI_HIPHOP_PARTY", "HARD_EDM")
+            clashClusterNames = setOf("PUNJABI_HIPHOP_PARTY", "HARD_EDM", "GLOBAL_POP_HOLLYWOOD")
+        ),
+        SonicCluster(
+            name = "PUNJABI_ROMANTIC_ACOUSTIC",
+            language = "Punjabi",
+            artists = setOf(
+                "b praak", "ammy virk", "gurnam bhullar", "diljit dosanjh", "jassie gill",
+                "harrdy sandhu", "jaani", "maninder buttar", "akhil", "sunanda sharma", "prabh gill"
+            ),
+            genres = setOf("punjabi romantic", "punjabi acoustic", "punjabi sad", "punjabi love"),
+            moods = setOf("Love", "Romantic", "Sad", "Emotional"),
+            clashClusterNames = setOf("GLOBAL_POP_HOLLYWOOD", "HARD_EDM")
+        ),
+        SonicCluster(
+            name = "PUNJABI_HIPHOP_PARTY",
+            language = "Punjabi",
+            artists = setOf(
+                "sidhu moose wala", "diljit dosanjh", "karan aujla", "ap dhillon", "shubh",
+                "badshah", "yo yo honey singh", "imran khan", "guru randhawa", "jassie gill",
+                "ammy virk", "harrdy sandhu", "garry sandhu", "mankirt aulakh",
+                "ikky", "byg byrd", "the prophec", "sukhe", "mickey singh", "bohemia",
+                "gurinder gill", "wazir patar", "cheema y", "bally sagoo"
+            ),
+            genres = setOf(
+                "punjabi pop", "punjabi hip-hop", "bhangra", "desi hip-hop",
+                "party", "gangsta rap", "punjabi party", "punjabi"
+            ),
+            moods = setOf("Happy", "Party", "Workout", "High Energy"),
+            clashClusterNames = setOf("BOLLYWOOD_SAD_HEARTBREAK", "LOFI_FOCUS_AMBIENT", "CLASSICAL_INSTRUMENTAL")
         ),
         SonicCluster(
             name = "GLOBAL_POP_HOLLYWOOD",
+            language = "English",
             artists = setOf(
                 "the weeknd", "taylor swift", "ed sheeran", "bruno mars", "post malone",
                 "dua lipa", "justin bieber", "drake", "billie eilish", "ariana grande",
@@ -83,10 +126,11 @@ object SmartRecommendationEngine {
             ),
             genres = setOf("pop", "r&b", "synthwave", "dance pop", "alternative pop", "hip-hop", "hollywood"),
             moods = setOf("Happy", "Chill", "Night Drive", "Focus"),
-            clashClusterNames = setOf("HARYANVI_FOLK")
+            clashClusterNames = setOf("BOLLYWOOD_ROMANTIC", "HARYANVI_FOLK")
         ),
         SonicCluster(
             name = "LOFI_FOCUS_AMBIENT",
+            language = "Instrumental",
             artists = setOf(
                 "lofi fruits music", "chilledcow", "kavv", "ludovico einaudi",
                 "yiruma", "hans zimmer", "max richter", "ambient collective"
@@ -96,6 +140,31 @@ object SmartRecommendationEngine {
             clashClusterNames = setOf("PUNJABI_HIPHOP_PARTY", "HARD_EDM")
         )
     )
+
+    /**
+     * Determines primary language of a song through artist metadata, genre, and acoustic tags.
+     */
+    fun inferLanguage(song: Song): String {
+        val lowerArtist = song.artist.lowercase()
+        val lowerGenre = song.genre.lowercase()
+        val lowerTitle = song.title.lowercase()
+
+        // 1. Direct cluster match
+        val cluster = findMatchingCluster(song)
+        if (cluster != null) return cluster.language
+
+        // 2. Genre detection
+        if (lowerGenre.contains("punjabi") || lowerGenre.contains("bhangra")) return "Punjabi"
+        if (lowerGenre.contains("hindi") || lowerGenre.contains("bollywood")) return "Hindi"
+        if (lowerGenre.contains("english") || lowerGenre.contains("pop") || lowerGenre.contains("hollywood")) return "English"
+
+        // 3. Known artist mapping
+        if (listOf("arijit", "pritam", "shreya", "atif", "sonu", "jubin", "kk", "neha").any { lowerArtist.contains(it) }) return "Hindi"
+        if (listOf("sidhu", "diljit", "karan aujla", "ap dhillon", "shubh", "ammy").any { lowerArtist.contains(it) }) return "Punjabi"
+        if (listOf("weeknd", "taylor", "sheeran", "bruno", "drake", "bieber").any { lowerArtist.contains(it) }) return "English"
+
+        return "Hindi" // Default baseline
+    }
 
     fun findMatchingCluster(song: Song): SonicCluster? {
         val lowerArtist = song.artist.lowercase()
@@ -112,23 +181,32 @@ object SmartRecommendationEngine {
             cluster.genres.any { lowerGenre.contains(it) || it.contains(lowerGenre) }
         }?.let { return it }
 
-        // 3. Mood fallback match
+        // 3. Mood match with language alignment
         return CLUSTERS.firstOrNull { cluster ->
             cluster.moods.any { lowerMood.contains(it.lowercase()) }
         }
     }
 
     /**
-     * Scores a candidate song against the base playing track using Spotify & YouTube Music
-     * collaborative and acoustic affinity weighting.
+     * Comprehensive multi-signal ranking function implementing Spotify & YouTube Music
+     * recommendation mathematics with configurable scoring weights.
      */
-    fun scoreSongMatch(candidate: Song, baseSong: Song, filter: RecommendationFilter): Double {
+    fun scoreSongMatch(
+        candidate: Song,
+        baseSong: Song,
+        filter: RecommendationFilter = RecommendationFilter.ALL,
+        userProfile: UserTasteProfile? = null,
+        sessionHistory: List<Song> = emptyList()
+    ): Double {
         if (candidate.id == baseSong.id) return -999.0
+
+        val baseLanguage = inferLanguage(baseSong)
+        val candLanguage = inferLanguage(candidate)
 
         val baseCluster = findMatchingCluster(baseSong)
         val candCluster = findMatchingCluster(candidate)
 
-        // Strict clash check: never recommend clashing cultures (e.g. Haryanvi into Bollywood romantic)
+        // Strict clash check: clashing sonic clusters or abrupt culture change
         if (baseCluster != null && candCluster != null) {
             if (baseCluster.clashClusterNames.contains(candCluster.name) ||
                 candCluster.clashClusterNames.contains(baseCluster.name)) {
@@ -136,78 +214,148 @@ object SmartRecommendationEngine {
             }
         }
 
-        var score = 0.0
+        // Language Clash Penalty: Hindi Romantic must never jump into English Rock or Punjabi Party
+        val isLanguageSame = baseLanguage.equals(candLanguage, ignoreCase = true)
+        if (!isLanguageSame && baseLanguage != "Instrumental" && candLanguage != "Instrumental") {
+            // Strong negative penalty prevents abrupt cross-lingual hopping unless explicit user preference
+            if (userProfile == null || !userProfile.preferredLanguages.contains(candLanguage)) {
+                return -350.0
+            }
+        }
+
+        var musicalSimilarityScore = 0.0
+        var languageCompatScore = 0.0
+        var genreCompatScore = 0.0
+        var moodCompatScore = 0.0
+        var userPreferenceScore = 0.0
+        var artistAlbumScore = 0.0
+        var contextSessionScore = 0.0
 
         val baseArtist = baseSong.artist.lowercase().trim()
         val candArtist = candidate.artist.lowercase().trim()
-
         val isExactArtist = baseArtist.equals(candArtist, ignoreCase = true)
-        val isCoArtist = baseArtist.contains(candArtist, ignoreCase = true) ||
-                         candArtist.contains(baseArtist, ignoreCase = true)
+        val isCoArtist = baseArtist.contains(candArtist, ignoreCase = true) || candArtist.contains(baseArtist, ignoreCase = true)
 
-        // 1. Artist Affinity
-        if (isExactArtist) {
-            score += 65.0
-        } else if (isCoArtist) {
-            score += 45.0
-        }
-
-        // 2. Cluster Affinity (Fans Also Like)
+        // 1. Musical Similarity (Weight: 25%)
         if (baseCluster != null && candCluster != null && baseCluster.name == candCluster.name) {
-            score += 40.0
+            musicalSimilarityScore += 70.0
+        }
+        val durationDiff = kotlin.math.abs(baseSong.durationMs - candidate.durationMs)
+        if (durationDiff < 60_000) musicalSimilarityScore += 30.0
+
+        // 2. Language Compatibility (Weight: 20%)
+        if (isLanguageSame) {
+            languageCompatScore += 100.0
+        } else if (candLanguage == "Instrumental") {
+            languageCompatScore += 70.0
         }
 
-        // 3. Mood Alignment
-        if (baseSong.mood.isNotBlank() && candidate.mood.isNotBlank() &&
-            baseSong.mood.equals(candidate.mood, ignoreCase = true)) {
-            score += 30.0
-        }
-
-        // 4. Genre Alignment
+        // 3. Genre Compatibility (Weight: 15%)
         if (baseSong.genre.isNotBlank() && candidate.genre.isNotBlank()) {
             if (baseSong.genre.equals(candidate.genre, ignoreCase = true)) {
-                score += 25.0
+                genreCompatScore += 100.0
             } else if (baseSong.genre.contains(candidate.genre, ignoreCase = true) ||
                        candidate.genre.contains(baseSong.genre, ignoreCase = true)) {
-                score += 15.0
+                genreCompatScore += 65.0
             }
         }
 
-        // 5. Album Affinity
-        if (baseSong.album.isNotBlank() && candidate.album.isNotBlank() &&
-            baseSong.album.equals(candidate.album, ignoreCase = true)) {
-            score += 20.0
+        // 4. Mood Compatibility (Weight: 15%)
+        if (baseSong.mood.isNotBlank() && candidate.mood.isNotBlank()) {
+            if (baseSong.mood.equals(candidate.mood, ignoreCase = true)) {
+                moodCompatScore += 100.0
+            } else if (isCompatibleMood(baseSong.mood, candidate.mood)) {
+                moodCompatScore += 60.0
+            } else {
+                moodCompatScore -= 80.0 // Clashing mood penalty (e.g. Sad vs Party)
+            }
         }
 
-        // 6. User Affinity Modifiers based on YouTube Music Filter
+        // 5. User Listening Preferences & Taste Profile (Weight: 15%)
+        if (userProfile != null) {
+            if (userProfile.topArtists.contains(candArtist)) userPreferenceScore += 40.0
+            if (userProfile.favoriteMoods.contains(candidate.mood)) userPreferenceScore += 30.0
+            if (userProfile.topGenres.contains(candidate.genre)) userPreferenceScore += 30.0
+        } else {
+            if (candidate.isFavorite) userPreferenceScore += 40.0
+            userPreferenceScore += (candidate.playCount.coerceAtMost(15) * 4.0)
+        }
+
+        // 6. Artist and Album Relevance (Weight: 5%)
+        if (isExactArtist) {
+            artistAlbumScore += 70.0
+        } else if (isCoArtist) {
+            artistAlbumScore += 45.0
+        }
+        if (baseSong.album.isNotBlank() && baseSong.album.equals(candidate.album, ignoreCase = true)) {
+            artistAlbumScore += 30.0
+        }
+
+        // 7. Listening Context / Session Continuity (Weight: 5%)
+        if (sessionHistory.isNotEmpty()) {
+            val lastTrack = sessionHistory.last()
+            if (inferLanguage(lastTrack) == candLanguage) contextSessionScore += 50.0
+            if (lastTrack.mood.equals(candidate.mood, ignoreCase = true)) contextSessionScore += 50.0
+        }
+
+        // Apply configurable scoring weights
+        val w = configWeights
+        var finalScore = (
+            (musicalSimilarityScore * w.musicalSimilarity) +
+            (languageCompatScore * w.languageCompatibility) +
+            (genreCompatScore * w.genreCompatibility) +
+            (moodCompatScore * w.moodCompatibility) +
+            (userPreferenceScore * w.userTasteProfile) +
+            (artistAlbumScore * w.artistAlbumRelevance) +
+            (contextSessionScore * w.sessionContext)
+        )
+
+        // Behavioral Adjustments
+        if (userProfile != null) {
+            if (userProfile.skippedSongIds.contains(candidate.id)) {
+                finalScore -= 30.0 // Skipped penalty
+            }
+            if (userProfile.likedSongIds.contains(candidate.id) || candidate.isFavorite) {
+                finalScore += 35.0 // Liked boost
+            }
+            if (userProfile.completedSongIds.contains(candidate.id)) {
+                finalScore += 20.0 // Completion boost
+            }
+        }
+
+        // Session Repetition Penalty: do not repeat songs recently played in current session
+        if (sessionHistory.takeLast(10).any { it.id == candidate.id }) {
+            finalScore -= 100.0
+        }
+
+        // Quick filter pills modulation
         when (filter) {
-            RecommendationFilter.ALL -> {
-                // Balanced Spotify 70/30: reward slight familiarity but encourage variety
-                if (candidate.isFavorite) score += 15.0
-                score += (candidate.playCount.coerceAtMost(10) * 1.5)
-            }
+            RecommendationFilter.ALL -> { /* standard */ }
             RecommendationFilter.FAMILIAR -> {
-                // High emphasis on same artist & user's liked tracks
-                if (isExactArtist) score += 50.0
-                if (candidate.isFavorite) score += 40.0
-                score += (candidate.playCount.coerceAtMost(25) * 3.0)
+                if (isExactArtist) finalScore += 30.0
+                if (candidate.isFavorite) finalScore += 25.0
             }
             RecommendationFilter.DISCOVER -> {
-                // Reward tracks by similar artists in the cluster that user hasn't overplayed
-                if (!isExactArtist && baseCluster != null && candCluster?.name == baseCluster.name) {
-                    score += 55.0
-                }
-                if (isExactArtist) score -= 25.0
-                if (candidate.playCount == 0) score += 30.0
+                if (!isExactArtist) finalScore += 35.0
+                if (candidate.playCount == 0) finalScore += 25.0
             }
             RecommendationFilter.SIMILAR_VIBE -> {
-                // Heavily weight mood & acoustic genre
-                if (baseSong.mood.equals(candidate.mood, ignoreCase = true)) score += 50.0
-                if (baseSong.genre.equals(candidate.genre, ignoreCase = true)) score += 40.0
+                if (baseSong.mood.equals(candidate.mood, ignoreCase = true)) finalScore += 35.0
+                if (isLanguageSame) finalScore += 25.0
             }
         }
 
-        return score
+        return finalScore
+    }
+
+    private fun isCompatibleMood(mood1: String, mood2: String): Boolean {
+        val m1 = mood1.lowercase()
+        val m2 = mood2.lowercase()
+        if (m1 == m2) return true
+        if ((m1.contains("love") || m1.contains("romantic")) && (m2.contains("love") || m2.contains("romantic") || m2.contains("chill"))) return true
+        if ((m1.contains("party") || m1.contains("dance")) && (m2.contains("party") || m2.contains("workout") || m2.contains("happy"))) return true
+        if (m1.contains("sad") && (m2.contains("sad") || m2.contains("heartbreak") || m2.contains("emotional"))) return true
+        return false
     }
 
     /**
@@ -217,22 +365,23 @@ object SmartRecommendationEngine {
         baseSong: Song,
         pool: List<Song>,
         filter: RecommendationFilter = RecommendationFilter.ALL,
-        limit: Int = 10
+        limit: Int = 10,
+        userProfile: UserTasteProfile? = null,
+        sessionHistory: List<Song> = emptyList()
     ): List<Song> {
         val scored = pool.filter { it.id != baseSong.id }
-            .map { song -> Pair(song, scoreSongMatch(song, baseSong, filter)) }
-            .filter { it.second > 10.0 } // Discard low-affinity / clashing tracks
+            .map { song -> Pair(song, scoreSongMatch(song, baseSong, filter, userProfile, sessionHistory)) }
+            .filter { it.second > 10.0 }
             .sortedByDescending { it.second }
 
         val result = scored.map { it.first }.distinctBy { it.id }.take(limit)
-
-        // If high-affinity matches are available, return them directly
         if (result.isNotEmpty()) return result
 
-        // Fallback: strictly same artist or same cluster only (never random shuffle)
+        // Fallback: strictly same language and compatible cluster only
+        val baseLang = inferLanguage(baseSong)
         val baseCluster = findMatchingCluster(baseSong)
         val clusterMatches = pool.filter { s ->
-            s.id != baseSong.id && (
+            s.id != baseSong.id && inferLanguage(s) == baseLang && (
                 s.artist.contains(baseSong.artist, ignoreCase = true) ||
                 (baseCluster != null && findMatchingCluster(s)?.name == baseCluster.name)
             )
@@ -241,19 +390,41 @@ object SmartRecommendationEngine {
     }
 
     /**
-     * Dynamic Cloud Radio: Fetches authentic, high-fidelity online radio tracks from JioSaavn
-     * tailored to the playing artist, genre, and mood.
+     * Sequential Next-Track Prediction:
+     * Predicts the single most optimal next song for continuous autoplay without jarring transitions.
+     */
+    fun predictNextTrack(
+        currentSong: Song,
+        pool: List<Song>,
+        sessionHistory: List<Song> = emptyList(),
+        userProfile: UserTasteProfile? = null
+    ): Song? {
+        val candidates = pool.filter { cand ->
+            cand.id != currentSong.id && sessionHistory.takeLast(8).none { it.id == cand.id }
+        }
+        val ranked = getRankedRecommendations(
+            baseSong = currentSong,
+            pool = candidates,
+            filter = RecommendationFilter.ALL,
+            limit = 5,
+            userProfile = userProfile,
+            sessionHistory = sessionHistory
+        )
+        return ranked.firstOrNull()
+    }
+
+    /**
+     * Dynamic Cloud Radio: Fetches authentic online radio tracks from JioSaavn
+     * tailored to the playing artist, genre, language, and mood.
      */
     suspend fun fetchOnlineRadio(baseSong: Song, limit: Int = 20): List<Song> = withContext(Dispatchers.IO) {
         val cluster = findMatchingCluster(baseSong)
         val queries = mutableListOf<String>()
 
-        // 1. Direct artist radio
         val cleanArtist = baseSong.artist.split(",", "&", "feat.", "ft.").firstOrNull()?.trim() ?: baseSong.artist
         queries.add("$cleanArtist top hits")
         queries.add("$cleanArtist radio")
 
-        // 2. Genre / cluster specific query
         when (cluster?.name) {
             "BOLLYWOOD_ROMANTIC" -> {
                 queries.add("$cleanArtist romantic hits")
@@ -262,6 +433,9 @@ object SmartRecommendationEngine {
             "PUNJABI_HIPHOP_PARTY" -> {
                 queries.add("$cleanArtist punjabi songs")
                 queries.add("punjabi party hits")
+            }
+            "PUNJABI_ROMANTIC_ACOUSTIC" -> {
+                queries.add("$cleanArtist punjabi romantic acoustic")
             }
             "BOLLYWOOD_SAD_HEARTBREAK" -> {
                 queries.add("$cleanArtist sad songs")
@@ -287,7 +461,6 @@ object SmartRecommendationEngine {
                 val results = JioSaavnService.searchSongs(q, limit = limit)
                 for (res in results) {
                     if (fetchedEntities.none { it.id == res.id || it.title.equals(res.title, ignoreCase = true) }) {
-                        // Tag with base song's mood and genre if blank
                         val updated = res.copy(
                             mood = if (res.mood.isBlank() || res.mood == "Trending") baseSong.mood else res.mood,
                             genre = if (res.genre.isBlank() || res.genre == "Bollywood / Pop") baseSong.genre else res.genre
@@ -300,7 +473,6 @@ object SmartRecommendationEngine {
             }
         }
 
-        // Convert to domain songs and apply strict ranking
         val domainSongs = fetchedEntities.map { entity ->
             Song(
                 id = entity.id,

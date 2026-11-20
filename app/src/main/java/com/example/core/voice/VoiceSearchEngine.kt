@@ -37,9 +37,11 @@ object VoiceSearchEngine {
         val trimmed = query.trim()
         val lower = trimmed.lowercase()
 
-        // Strip common voice command prefixes
-        val cleaned = lower
-            .replace(Regex("^(play|can you play|please play|listen to|search for|find me|look up|find|show me|put on)\\s+"), "")
+        // Strip common voice command prefixes in English and Hindi / Hinglish
+        var cleaned = lower
+            .replace(Regex("^(play|can you play|please play|listen to|search for|find me|look up|find|show me|put on|bajao|lagao|chalao|sunao)\\s+"), "")
+            .replace(Regex("\\s+(play karo|bajao|lagao|chalao|sunao|gaana|gaane|ke gaane|songs)$"), "")
+            .replace(Regex("\\s+ke\\s+"), " ")
             .trim()
 
         // 1. Direct Song Exact/Fuzzy Match

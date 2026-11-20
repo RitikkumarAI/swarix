@@ -1,8 +1,8 @@
 {
-  "versionCode": 19,
-  "versionName": "2.8",
-  "releaseTitle": "Swarix Music Player v2.8",
-  "changelog": "1. YouTube Music & Spotify Premium Hybrid Recommendation Engine\n2. Real-time song radio and acoustic clustering\n3. YouTube Music Quick Filter Pills: All, Familiar, Discover, Similar Vibe\n4. Live 320kbps JioSaavn radio track discovery\n5. Smart Autoplay / Infinite Queue without awkward gaps or random shuffling\n6. Spotify-style 'Recommended for You' Search row",
-  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v2.8/swarix.apk",
-  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v2.8"
+  "versionCode": 20,
+  "versionName": "2.9",
+  "releaseTitle": "SOREX / Swarix v2.9 – AI Recommendation, Smart Typo & Lyrics Search, Voice Search",
+  "changelog": "1. Advanced Hybrid AI Music Recommendation Engine (Content-Based + Collaborative + User Taste Profile + Session Context)\n2. Strict Language & Mood Consistency (Hindi Romantic -> Hindi Romantic, never abruptly jumping to clashing genres)\n3. Fixed Listening History & Search Separation: typing/displaying search results never creates history records; only actual playback records ID, duration, completion %, and skip status\n4. Multilingual & Devanagari Lyrics-Based Search Engine with matched lyric snippet display\n5. Typo-Tolerant Smart Search Engine (Levenshtein distance <= 2)\n6. Upgraded Microphone Voice Search with RECORD_AUDIO permission and Hindi/English speech recognition\n7. Extensible Query-by-Humming / Audio Fingerprint Provider Interface",
+  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix.apk",
+  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v2.9"
 }

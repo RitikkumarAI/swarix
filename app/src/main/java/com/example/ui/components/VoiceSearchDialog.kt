@@ -2,9 +2,11 @@ package com.example.ui.components
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -95,7 +97,10 @@ fun VoiceSearchDialog(
         try {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to search songs, artists, or playlists...")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en-IN")
+                putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", arrayOf("hi-IN", "en-US", "pa-IN"))
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak song or artist name (Hindi / English)...")
             }
             speechLauncher.launch(intent)
         } catch (e: Exception) {
@@ -104,8 +109,25 @@ fun VoiceSearchDialog(
         }
     }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            startSystemSpeechRecognition()
+        }
+    }
+
     LaunchedEffect(Unit) {
-        startSystemSpeechRecognition()
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            startSystemSpeechRecognition()
+        } else {
+            permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+        }
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "voice_wave_pulse")

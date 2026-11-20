@@ -258,9 +258,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             com.example.workers.MetadataEnrichmentWorker.enqueueImmediate(application)
         }
 
+        playerManager.onPlaybackEventRecorded = { song, durationMs, completionPercent, isSkipped, source ->
+            viewModelScope.launch {
+                repository.recordPlayback(
+                    songId = song.id,
+                    durationListenedMs = durationMs,
+                    completionPercent = completionPercent,
+                    isSkipped = isSkipped,
+                    source = source
+                )
+            }
+        }
+
         playerManager.onSongPlaybackCompleted = { song ->
             viewModelScope.launch {
-                repository.recordPlayback(song.id)
+                repository.recordPlayback(song.id, completionPercent = 1.0f)
             }
         }
 
@@ -527,14 +539,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun playSong(song: Song, customQueue: List<Song>? = null) {
-        val q = customQueue ?: if (_onlineSearchResults.value.any { it.id == song.id }) {
+        val isFromSearch = _onlineSearchResults.value.any { it.id == song.id }
+        val q = customQueue ?: if (isFromSearch) {
             _onlineSearchResults.value
         } else {
             allSongs.value
         }
+        playerManager.currentPlaybackSource = if (isFromSearch) "SEARCH" else "DIRECT"
         viewModelScope.launch {
             repository.insertSong(song)
-            repository.recordPlayback(song.id)
+            repository.recordPlayback(song.id, source = playerManager.currentPlaybackSource)
         }
         playerManager.playSong(song, q)
     }

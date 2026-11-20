@@ -102,8 +102,18 @@ interface MusicDao {
             ORDER BY maxPlayed DESC
             LIMIT 20
         ) h ON s.id = h.songId
+        ORDER BY h.maxPlayed DESC
     """)
     fun getRecentlyPlayed(): Flow<List<SongEntity>>
+
+    @Query("SELECT * FROM playback_history ORDER BY playedAt DESC LIMIT :limit")
+    suspend fun getRecentHistoryEntities(limit: Int = 100): List<PlaybackHistoryEntity>
+
+    @Query("SELECT songId FROM playback_history WHERE isSkipped = 1 GROUP BY songId HAVING COUNT(*) >= 2")
+    suspend fun getRepeatedlySkippedSongIds(): List<String>
+
+    @Query("SELECT songId FROM playback_history WHERE completionPercent >= 0.85 GROUP BY songId HAVING COUNT(*) >= 2")
+    suspend fun getFrequentlyCompletedSongIds(): List<String>
 
     @Query("SELECT * FROM songs ORDER BY playCount DESC LIMIT 20")
     fun getMostPlayed(): Flow<List<SongEntity>>

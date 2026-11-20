@@ -160,11 +160,38 @@ class MusicRepository(
         }
     }
 
-    suspend fun recordPlayback(songId: String) {
+    suspend fun recordPlayback(
+        songId: String,
+        durationListenedMs: Long = 0L,
+        completionPercent: Float = 0f,
+        isSkipped: Boolean = false,
+        source: String = "DIRECT"
+    ) {
         withContext(Dispatchers.IO) {
             musicDao.incrementPlayCount(songId)
-            musicDao.insertHistory(PlaybackHistoryEntity(songId = songId))
+            musicDao.insertHistory(
+                PlaybackHistoryEntity(
+                    songId = songId,
+                    playedAt = System.currentTimeMillis(),
+                    durationListenedMs = durationListenedMs,
+                    completionPercent = completionPercent,
+                    isSkipped = isSkipped,
+                    source = source
+                )
+            )
         }
+    }
+
+    suspend fun getRepeatedlySkippedSongIds(): List<String> = withContext(Dispatchers.IO) {
+        musicDao.getRepeatedlySkippedSongIds()
+    }
+
+    suspend fun getFrequentlyCompletedSongIds(): List<String> = withContext(Dispatchers.IO) {
+        musicDao.getFrequentlyCompletedSongIds()
+    }
+
+    suspend fun getRecentPlaybackEntities(limit: Int = 100): List<PlaybackHistoryEntity> = withContext(Dispatchers.IO) {
+        musicDao.getRecentHistoryEntities(limit)
     }
 
     suspend fun createPlaylist(name: String, description: String, coverUri: String = ""): Long {
@@ -217,9 +244,6 @@ class MusicRepository(
             if (entities.size < 15 && query.isNotBlank()) {
                 val extraHits = com.example.data.remote.JioSaavnService.searchSongs("$query songs", limit = 40)
                 entities.addAll(extraHits.filter { extra -> entities.none { it.id == extra.id } })
-            }
-            if (entities.isNotEmpty()) {
-                musicDao.insertSongs(entities)
             }
             entities.map { it.toDomain() }
         }
