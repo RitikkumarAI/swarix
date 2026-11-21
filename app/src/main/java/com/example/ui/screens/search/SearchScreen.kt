@@ -206,6 +206,24 @@ fun SearchScreen(
         }
     }
 
+    val rankedMatches = remember(searchQuery, onlineResults, allSongs) {
+        if (searchQuery.isBlank()) emptyList()
+        else {
+            val pool = (onlineResults + allSongs).distinctBy { it.id }
+            com.example.core.search.SmartSearchEngine.rankSongsForQuery(searchQuery, pool)
+        }
+    }
+
+    val displaySongs = if (voiceSearchResult != null && selectedFilter == "All" && voiceSearchResult!!.matchedSongs.isNotEmpty()) {
+        voiceSearchResult!!.matchedSongs
+    } else if (rankedMatches.isNotEmpty()) {
+        rankedMatches.map { it.song }
+    } else if (onlineResults.isNotEmpty()) {
+        (onlineResults + filteredSongs).distinctBy { it.id }
+    } else {
+        filteredSongs
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -705,24 +723,6 @@ fun SearchScreen(
                     }
                 }
             }
-        }
-
-        val rankedMatches = remember(searchQuery, onlineResults, allSongs) {
-            if (searchQuery.isBlank()) emptyList()
-            else {
-                val pool = (onlineResults + allSongs).distinctBy { it.id }
-                com.example.core.search.SmartSearchEngine.rankSongsForQuery(searchQuery, pool)
-            }
-        }
-
-        val displaySongs = if (voiceSearchResult != null && selectedFilter == "All" && voiceSearchResult!!.matchedSongs.isNotEmpty()) {
-            voiceSearchResult!!.matchedSongs
-        } else if (rankedMatches.isNotEmpty()) {
-            rankedMatches.map { it.song }
-        } else if (onlineResults.isNotEmpty()) {
-            (onlineResults + filteredSongs).distinctBy { it.id }
-        } else {
-            filteredSongs
         }
 
         if (searchQuery.isNotBlank()) {
