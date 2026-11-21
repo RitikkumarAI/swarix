@@ -1,8 +1,8 @@
 {
-  "versionCode": 20,
-  "versionName": "2.9",
-  "releaseTitle": "SOREX / Swarix v2.9 – Dolby Atmos & Concert DSP, AI Recommendation, Smart Typo & Lyrics Search",
-  "changelog": "1. Dolby Atmos 3D Spatial & Concert Hall Live Arena DSP Modes in Equalizer\n2. Advanced Hybrid AI Music Recommendation Engine (Content-Based + Collaborative + User Taste Profile + Session Context)\n3. Strict Language & Mood Consistency (Hindi Romantic -> Hindi Romantic, never abruptly jumping to clashing genres)\n4. Fixed Listening History & Search Separation: typing/displaying search results never creates history records; only actual playback records ID, duration, completion %, and skip status\n5. Multilingual & Devanagari Lyrics-Based Search Engine with matched lyric snippet display\n6. Typo-Tolerant Smart Search Engine (Levenshtein distance <= 2)\n7. Upgraded Microphone Voice Search with RECORD_AUDIO permission and Hindi/English speech recognition\n8. Extensible Query-by-Humming / Audio Fingerprint Provider Interface",
-  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v2.9/swarix.apk",
-  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v2.9"
+  "versionCode": 21,
+  "versionName": "3.0",
+  "releaseTitle": "SOREX / Swarix v3.0 – Liquid Glass Navbar, Mini Player Skip Controls & Dolby Atmos DSP",
+  "changelog": "1. Liquid Glass Bottom Navigation Bar with specular light refraction and frosted translucency\n2. Mini Player Previous Track Control Button (⏮ / Skip Previous) alongside Play/Pause and Next\n3. Dynamic In-App Version Tracking in Settings & About dialog\n4. Dolby Atmos 3D Spatial & Concert Hall Live Arena DSP Modes in Equalizer & Soundstage\n5. Advanced Hybrid AI Music Recommendation Engine (Content-Based + Collaborative + User Taste Profile + Session Context)\n6. Strict Language & Mood Consistency guards (Hindi Romantic -> Hindi Romantic, never abruptly jumping to clashing genres)\n7. Fixed Listening History & Search Separation: typing/displaying search results never creates history records; only actual playback records ID, duration, completion %, and skip status\n8. Multilingual Devanagari/Hindi Lyrics Search and Typo-Tolerant Search",
+  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v3.0/swarix.apk",
+  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v3.0"
 }

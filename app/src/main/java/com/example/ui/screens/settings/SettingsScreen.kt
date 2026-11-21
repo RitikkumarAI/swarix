@@ -1,5 +1,6 @@
 package com.example.ui.screens.settings
 
+import com.example.BuildConfig
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -553,7 +554,7 @@ fun SettingsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Version 2.8 (Smart Recommendations Edition)",
+                        text = "Version ${BuildConfig.VERSION_NAME} (Liquid Glass & Dolby Atmos Edition)",
                         style = MaterialTheme.typography.labelLarge.copy(color = colors.primaryAccent)
                     )
                     Text(
@@ -1318,7 +1319,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.SystemUpdate,
                     title = "Check for Updates",
-                    value = "v2.8",
+                    value = "v${BuildConfig.VERSION_NAME}",
                     onClick = onCheckForUpdates
                 )
             }
@@ -1327,7 +1328,7 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = "About Swarix",
-                    value = "v2.8",
+                    value = "v${BuildConfig.VERSION_NAME}",
                     onClick = { showAboutDialog = true }
                 )
             }

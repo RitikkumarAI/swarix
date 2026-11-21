@@ -9,7 +9,7 @@ import urllib.error
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY", "RitikkumarAI/swarix")
-    tag = os.environ.get("RELEASE_TAG", "v2.9")
+    tag = os.environ.get("RELEASE_TAG", "v3.0")
     name = f"Swarix Music Player {tag} (Official Multi-Platform)"
     
     if not token:
@@ -37,9 +37,9 @@ def main():
         if os.path.exists("docs/version.json"):
             with open("docs/version.json", "r") as f:
                 v_data = json.load(f)
-        v_data["versionCode"] = 20
+        v_data["versionCode"] = 21
         v_data["versionName"] = version_clean
-        v_data["releaseTitle"] = f"SOREX / Swarix {tag} – AI Recommendation, Smart Typo & Lyrics Search, Voice Search"
+        v_data["releaseTitle"] = f"SOREX / Swarix {tag} – Liquid Glass Navbar, Mini Player Skip Controls & Dolby Atmos DSP"
         v_data["apkUrl"] = f"https://github.com/{repo}/releases/download/{tag}/swarix.apk"
         v_data["releasePageUrl"] = f"https://github.com/{repo}/releases/tag/{tag}"
         with open("docs/version.json", "w") as f:

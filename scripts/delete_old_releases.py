@@ -8,7 +8,7 @@ import urllib.error
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY", "RitikkumarAI/swarix")
-    current_tag = os.environ.get("CURRENT_RELEASE_TAG", "v2.9")
+    current_tag = os.environ.get("CURRENT_RELEASE_TAG", "v3.0")
     
     if not token:
         print("No GITHUB_TOKEN found; skipping remote cleanup.")
