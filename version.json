@@ -1,0 +1,8 @@
+{
+  "versionCode": 21,
+  "versionName": "3.0",
+  "releaseTitle": "SOREX / Swarix v3.0 \u2013 Liquid Glass Navbar, Mini Player Skip Controls & Dolby Atmos DSP",
+  "changelog": "1. Liquid Glass Bottom Navigation Bar with specular light refraction and frosted translucency\n2. Mini Player Previous Track Control Button (\u23ee / Skip Previous) alongside Play/Pause and Next\n3. Dynamic In-App Version Tracking in Settings & About dialog\n4. Dolby Atmos 3D Spatial & Concert Hall Live Arena DSP Modes in Equalizer & Soundstage\n5. Advanced Hybrid AI Music Recommendation Engine (Content-Based + Collaborative + User Taste Profile + Session Context)\n6. Strict Language & Mood Consistency guards (Hindi Romantic -> Hindi Romantic, never abruptly jumping to clashing genres)\n7. Fixed Listening History & Search Separation: typing/displaying search results never creates history records; only actual playback records ID, duration, completion %, and skip status\n8. Multilingual Devanagari/Hindi Lyrics Search and Typo-Tolerant Search",
+  "apkUrl": "https://github.com/RitikkumarAI/swarix/releases/download/v3.0/swarix.apk",
+  "releasePageUrl": "https://github.com/RitikkumarAI/swarix/releases/tag/v3.0"
+}
