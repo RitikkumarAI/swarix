@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -39,6 +40,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
@@ -66,6 +68,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -183,40 +186,111 @@ fun SwarixBottomNavigation(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalSwarixColors.current
+    val isDark = colors.mainBackground.luminance() < 0.5f
 
-    NavigationBar(
-        modifier = modifier.navigationBarsPadding(),
-        containerColor = colors.mainBackground,
-        tonalElevation = 8.dp
-    ) {
-        NavItem.entries.forEach { item ->
-            val isSelected = item == selectedItem
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = { onItemSelected(item) },
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = colors.mainBackground,
-                    selectedTextColor = colors.primaryAccent,
-                    indicatorColor = colors.primaryAccent,
-                    unselectedIconColor = colors.mutedText,
-                    unselectedTextColor = colors.mutedText
-                ),
-                modifier = Modifier.testTag("nav_${item.name.lowercase()}")
+    val glassShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+
+    // Liquid Glass frosted background with layered translucent refraction
+    val glassBackground = Brush.verticalGradient(
+        colors = if (isDark) {
+            listOf(
+                colors.elevatedSurface.copy(alpha = 0.85f),
+                colors.mainBackground.copy(alpha = 0.76f),
+                colors.mainBackground.copy(alpha = 0.92f)
             )
+        } else {
+            listOf(
+                Color.White.copy(alpha = 0.92f),
+                colors.mainBackground.copy(alpha = 0.82f),
+                colors.elevatedSurface.copy(alpha = 0.88f)
+            )
+        }
+    )
+
+    // Specular light reflection rim along the top edge
+    val glassBorderBrush = Brush.verticalGradient(
+        colors = if (isDark) {
+            listOf(
+                Color.White.copy(alpha = 0.32f),
+                colors.primaryAccent.copy(alpha = 0.25f),
+                Color.Transparent
+            )
+        } else {
+            listOf(
+                Color.White.copy(alpha = 0.95f),
+                colors.primaryAccent.copy(alpha = 0.35f),
+                Color.White.copy(alpha = 0.20f)
+            )
+        }
+    )
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(glassShape)
+            .border(width = 1.dp, brush = glassBorderBrush, shape = glassShape),
+        color = Color.Transparent,
+        shape = glassShape,
+        tonalElevation = 0.dp
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(glassBackground)
+        ) {
+            // Liquid gloss refraction hairline at top rim
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.5.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                if (isDark) Color.White.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.90f),
+                                colors.primaryAccent.copy(alpha = 0.60f),
+                                if (isDark) Color.White.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.90f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+
+            NavigationBar(
+                modifier = Modifier.navigationBarsPadding(),
+                containerColor = Color.Transparent,
+                tonalElevation = 0.dp
+            ) {
+                NavItem.entries.forEach { item ->
+                    val isSelected = item == selectedItem
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = { onItemSelected(item) },
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = item.label,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = if (isDark) colors.mainBackground else Color.White,
+                            selectedTextColor = colors.primaryAccent,
+                            indicatorColor = colors.primaryAccent,
+                            unselectedIconColor = colors.mutedText,
+                            unselectedTextColor = colors.mutedText
+                        ),
+                        modifier = Modifier.testTag("nav_${item.name.lowercase()}")
+                    )
+                }
+            }
         }
     }
 }
@@ -369,6 +443,35 @@ fun MiniPlayer(
     var totalDragX by remember { mutableFloatStateOf(0f) }
     var hasTriggeredSwipe by remember { mutableStateOf(false) }
 
+    val isDark = colors.mainBackground.luminance() < 0.5f
+    val miniPlayerShape = RoundedCornerShape(18.dp)
+    val miniPlayerGlassBg = Brush.verticalGradient(
+        colors = if (isDark) {
+            listOf(
+                colors.elevatedSurface.copy(alpha = 0.94f),
+                colors.surface.copy(alpha = 0.88f)
+            )
+        } else {
+            listOf(
+                Color.White.copy(alpha = 0.95f),
+                colors.elevatedSurface.copy(alpha = 0.90f)
+            )
+        }
+    )
+    val miniPlayerBorder = Brush.verticalGradient(
+        colors = if (isDark) {
+            listOf(
+                Color.White.copy(alpha = 0.22f),
+                colors.divider.copy(alpha = 0.40f)
+            )
+        } else {
+            listOf(
+                Color.White,
+                colors.divider.copy(alpha = 0.60f)
+            )
+        }
+    )
+
     Column {
         if (showPreview && nextSong != null) {
             Surface(
@@ -393,7 +496,8 @@ fun MiniPlayer(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(miniPlayerShape)
+                .border(width = 1.dp, brush = miniPlayerBorder, shape = miniPlayerShape)
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { _ ->
@@ -432,133 +536,157 @@ fun MiniPlayer(
                 }
                 .clickable(onClick = onClick)
                 .testTag("mini_player"),
-            color = colors.elevatedSurface,
-            tonalElevation = 6.dp
+            color = Color.Transparent,
+            shape = miniPlayerShape,
+            tonalElevation = 0.dp
         ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Album artwork thumbnail
-                    val artScale by animateFloatAsState(targetValue = 1f, animationSpec = tween(500), label = "art_scale")
-                    Box(
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(miniPlayerGlassBg)
+            ) {
+                Column {
+                    Row(
                         modifier = Modifier
-                            .size(46.dp)
-                            .graphicsLayer {
-                                scaleX = artScale
-                                scaleY = artScale
-                            }
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(colors.surface)
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (song.artworkUri.isNotEmpty()) {
-                            AsyncImage(
-                                model = song.artworkUri,
-                                contentDescription = song.title,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
+                        // Album artwork thumbnail
+                        val artScale by animateFloatAsState(targetValue = 1f, animationSpec = tween(500), label = "art_scale")
+                        Box(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .graphicsLayer {
+                                    scaleX = artScale
+                                    scaleY = artScale
+                                }
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(colors.surface)
+                        ) {
+                            if (song.artworkUri.isNotEmpty()) {
+                                AsyncImage(
+                                    model = song.artworkUri,
+                                    contentDescription = song.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(colors.primaryAccent),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = song.title.take(1).uppercase(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.mainBackground
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        // Song Info
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = song.title,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.primaryText
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(colors.primaryAccent),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = song.title.take(1).uppercase(),
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.mainBackground
+                                    text = song.artist,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = colors.secondaryText
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                PlaybackSourceStatusIndicator(
+                                    isLocallyCached = song.isLocal || song.contentUri.startsWith("content://") || song.contentUri.startsWith("file://"),
+                                    songId = song.id,
+                                    compact = true,
+                                    showLabel = false
                                 )
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    // Song Info
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = song.title,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.primaryText
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        // Controls
+                        IconButton(
+                            onClick = {
+                                HapticFeedbackHelper.triggerClick(view)
+                                onPreviousClick()
+                            },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("mini_player_previous")
                         ) {
-                            Text(
-                                text = song.artist,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = colors.secondaryText
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false)
+                            Icon(
+                                imageVector = Icons.Default.SkipPrevious,
+                                contentDescription = "Previous",
+                                tint = colors.secondaryText,
+                                modifier = Modifier.size(24.dp)
                             )
-                            PlaybackSourceStatusIndicator(
-                                isLocallyCached = song.isLocal || song.contentUri.startsWith("content://") || song.contentUri.startsWith("file://"),
-                                songId = song.id,
-                                compact = true,
-                                showLabel = false
+                        }
+
+                        IconButton(
+                            onClick = {
+                                HapticFeedbackHelper.triggerClick(view)
+                                onPlayPauseClick()
+                            },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .testTag("mini_player_play_pause")
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                tint = colors.primaryText,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                HapticFeedbackHelper.triggerClick(view)
+                                onNextClick()
+                            },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("mini_player_next")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SkipNext,
+                                contentDescription = "Next",
+                                tint = colors.secondaryText,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
 
-                    // Controls
-                    IconButton(
-                        onClick = {
-                            HapticFeedbackHelper.triggerClick(view)
-                            onPlayPauseClick()
-                        },
+                    // Fine progress bar
+                    LinearProgressIndicator(
+                        progress = { progress },
                         modifier = Modifier
-                            .size(38.dp)
-                            .testTag("mini_player_play_pause")
-                    ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pause" else "Play",
-                            tint = colors.primaryText,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            HapticFeedbackHelper.triggerClick(view)
-                            onNextClick()
-                        },
-                        modifier = Modifier
-                            .size(38.dp)
-                            .testTag("mini_player_next")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.SkipNext,
-                            contentDescription = "Next",
-                            tint = colors.secondaryText,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                            .fillMaxWidth()
+                            .height(2.5.dp),
+                        color = colors.primaryAccent,
+                        trackColor = colors.divider
+                    )
                 }
-
-                // Fine progress bar
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(2.5.dp),
-                    color = colors.primaryAccent,
-                    trackColor = colors.divider
-                )
             }
         }
     }
