@@ -34,6 +34,24 @@ object EqualizerPresets {
             description = "Pristine 8K Ultra studio acoustic mastering with crystal highs, punchy sub-bass, and wide 3D binaural soundstage.",
             iconEmoji = "💎"
         ),
+        "Dolby Atmos Spatial" to PresetDefinition(
+            name = "Dolby Atmos Spatial",
+            bandLevels = listOf(7, 5, 2, 0, 1, 3, 5, 7, 9, 10),
+            bassBoost = 75,
+            virtualizer = 100,
+            recommendedGenres = listOf("Dolby Atmos", "Spatial Audio", "3D Audio", "Movie", "Cinematic", "Surround"),
+            description = "360° Dolby Atmos object-based binaural spatial audio with elevated virtual height, 3D surround width, and deep sub-bass.",
+            iconEmoji = "🌌"
+        ),
+        "Concert Hall Live" to PresetDefinition(
+            name = "Concert Hall Live",
+            bandLevels = listOf(5, 4, 3, 2, 1, 2, 4, 6, 8, 7),
+            bassBoost = 60,
+            virtualizer = 90,
+            recommendedGenres = listOf("Live", "Concert", "Stadium", "Acoustic", "Orchestral", "Rock Live"),
+            description = "Expansive live arena & concert stadium reverberation, acoustic staging, and natural reverberant room resonance.",
+            iconEmoji = "🏟️"
+        ),
         "Bass Heavy" to PresetDefinition(
             name = "Bass Heavy",
             bandLevels = listOf(9, 8, 6, 3, 1, -1, 0, 1, 2, 3),

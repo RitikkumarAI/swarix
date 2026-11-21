@@ -1415,6 +1415,8 @@ fun NowPlayingScreen(
                                 "128 kbps Data Saver" to "Low bandwidth • Zero latency",
                                 "320 kbps Studio HQ" to "Balanced studio bitstream",
                                 "24-bit 96kHz Lossless" to "Hi-Res Master • Studio dynamic range",
+                                "Dolby Atmos 3D Spatial" to "360° Object-based binaural soundstage",
+                                "Concert Live Arena DSP" to "Expansive reverberant stadium acoustic",
                                 "8K Ultra Studio DSP" to "Surround spatial immersion",
                                 "Direct DAC Pure Bypass" to "Unprocessed bit-perfect path"
                             )

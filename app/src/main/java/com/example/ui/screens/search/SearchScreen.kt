@@ -311,13 +311,13 @@ fun SearchScreen(
                         Surface(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
+                                .border(1.dp, colors.divider.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
                                 .clickable {
                                     searchQuery = query
                                     onSearch(query)
                                 },
                             color = colors.elevatedSurface,
-                            shape = RoundedCornerShape(20.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.divider.copy(alpha = 0.5f))
+                            shape = RoundedCornerShape(20.dp)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
